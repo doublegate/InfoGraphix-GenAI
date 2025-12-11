@@ -1,5 +1,46 @@
-# Logs
-logs
+# =============================================================================
+# InfoGraphix-GenAI .gitignore
+# React/Vite/TypeScript project with Google Gemini AI integration
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Build Output (CRITICAL: May contain embedded API keys in bundled code)
+# -----------------------------------------------------------------------------
+dist/
+dist-ssr/
+build/
+out/
+.output/
+*.bundle.js
+*.bundle.js.map
+
+# -----------------------------------------------------------------------------
+# Environment & Secrets (NEVER commit these)
+# -----------------------------------------------------------------------------
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.staging
+*.local
+*.secret
+*.key
+credentials.json
+service-account*.json
+
+# -----------------------------------------------------------------------------
+# Dependencies
+# -----------------------------------------------------------------------------
+node_modules/
+.pnp/
+.pnp.js
+.yarn/
+
+# -----------------------------------------------------------------------------
+# Logs & Debug
+# -----------------------------------------------------------------------------
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,18 +48,102 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# -----------------------------------------------------------------------------
+# TypeScript & Build Cache
+# -----------------------------------------------------------------------------
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+.tscache/
 
-# Editor directories and files
+# -----------------------------------------------------------------------------
+# Vite Cache
+# -----------------------------------------------------------------------------
+.vite/
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# -----------------------------------------------------------------------------
+# Testing & Coverage
+# -----------------------------------------------------------------------------
+coverage/
+.nyc_output/
+*.lcov
+test-results/
+playwright-report/
+.vitest/
+
+# -----------------------------------------------------------------------------
+# Editor & IDE
+# -----------------------------------------------------------------------------
+# VSCode
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# JetBrains (WebStorm, IntelliJ)
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Vim/Neovim
 *.sw?
+*.swp
+*.swo
+*~
+.nvimrc.lua
+.exrc
+
+# Emacs
+*~
+\#*\#
+.#*
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# -----------------------------------------------------------------------------
+# OS Generated Files
+# -----------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# -----------------------------------------------------------------------------
+# Temporary & Misc
+# -----------------------------------------------------------------------------
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.orig
+.cache/
+
+# -----------------------------------------------------------------------------
+# Claude Code (local session data)
+# -----------------------------------------------------------------------------
+.claude/settings.local.json
+
+# -----------------------------------------------------------------------------
+# Google AI Studio specific
+# -----------------------------------------------------------------------------
+.aistudio/
+*.aistudio
+
+# -----------------------------------------------------------------------------
+# Optional: Development artifacts
+# -----------------------------------------------------------------------------
+# Uncomment if needed:
+# *.map
+# stats.html
+# bundle-report.html
