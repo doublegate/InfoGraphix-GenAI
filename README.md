@@ -13,10 +13,17 @@
 
 ## Overview
 
-InfoGraphix AI is a web application that generates high-quality infographic images from topics, URLs, or GitHub repositories. Powered by Google's Gemini AI, it uses a sophisticated two-phase pipeline:
+InfoGraphix AI is a powerful web application that generates high-quality infographic images from topics, URLs, or GitHub repositories. Powered by Google's Gemini AI, it combines sophisticated AI analysis with extensive customization options and productivity features.
 
+**Core Pipeline:**
 1. **Analysis Phase** - Gemini 3 Pro with thinking mode deeply researches your topic using Google Search grounding
 2. **Generation Phase** - Nano Banana Pro creates stunning visual infographics in up to 4K resolution
+
+**Productivity Features:**
+- Batch process up to 50 topics in a single queue
+- Save and reuse custom style templates
+- Export in multiple formats (PNG, PDF, SVG, ZIP)
+- Advanced version history with search and filtering
 
 ---
 
@@ -110,6 +117,19 @@ This application is designed to run in [Google AI Studio](https://ai.google.dev/
 **Markdown Upload:**
 Upload a `.md` file to use as the primary source material. The AI will analyze your content instead of performing web searches.
 
+**Batch Generation:**
+Create up to 50 infographics in a single queue. Enter multiple topics (one per line), configure shared settings, and let the system process them sequentially with progress tracking.
+
+**Template Management:**
+Save your favorite style configurations as reusable templates. The system includes 10 default templates, and you can create custom templates with names, descriptions, and tags.
+
+**Export Options:**
+Download generated infographics in multiple formats:
+- PNG (default, lossless)
+- PDF (with metadata)
+- SVG (vector format)
+- Multi-resolution ZIP (1K, 2K, 4K in one archive)
+
 ---
 
 ## Configuration
@@ -138,7 +158,10 @@ InfoGraphix-GenAI/
 ├── index.tsx                    # React entry point
 ├── types.ts                     # TypeScript enums and interfaces
 ├── services/
-│   └── geminiService.ts         # Gemini API integration
+│   ├── geminiService.ts         # Gemini API integration
+│   ├── batchService.ts          # Batch generation queue management
+│   ├── templateService.ts       # Template CRUD operations
+│   └── storageService.ts        # LocalStorage abstraction
 ├── components/
 │   ├── AboutModal.tsx           # Application information modal
 │   ├── ApiKeySelector.tsx       # AI Studio key management
@@ -149,7 +172,20 @@ InfoGraphix-GenAI/
 │   ├── ProcessingState.tsx      # Loading indicators
 │   ├── RichSelect.tsx           # Custom dropdown component
 │   ├── VersionComparison.tsx    # Version comparison view
-│   └── VersionHistory.tsx       # Saved generations browser
+│   ├── VersionHistory.tsx       # Saved generations browser
+│   ├── BatchGeneration/         # Batch processing components
+│   │   ├── BatchManager.tsx     # Main batch management modal
+│   │   ├── BatchQueueCreator.tsx# Queue creation interface
+│   │   ├── BatchQueueList.tsx   # List of all batch queues
+│   │   ├── BatchQueueCard.tsx   # Individual queue display
+│   │   └── BatchItemCard.tsx    # Batch item status card
+│   └── TemplateManager/         # Template management components
+│       ├── TemplateBrowser.tsx  # Template selection modal
+│       ├── TemplateGrid.tsx     # Grid view of templates
+│       ├── TemplateCard.tsx     # Individual template card
+│       └── TemplateEditor.tsx   # Template creation/editing
+├── utils/
+│   └── exportUtils.ts           # Export format utilities (PNG/PDF/SVG/ZIP)
 ├── docs/                        # Technical documentation
 └── to-dos/                      # Development roadmaps
 ```
@@ -212,7 +248,7 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 | Version | Theme | Target | Key Features |
 |---------|-------|--------|--------------|
 | v1.3.0 | Foundation | 2025-12-11 | Core generation, 22 styles, 10 palettes, version history |
-| v1.4.0 | Productivity Enhancement | Current | Batch generation, custom templates, SVG/PDF export |
+| v1.4.0 | Productivity Enhancement | 2025-12-11 (Current) | Batch generation, custom templates, SVG/PDF export |
 | v1.5.0 | Collaboration & Sharing | Q2 2026 | User accounts, cloud sync, team workspaces |
 | v1.6.0 | AI Intelligence & Creativity | Q3 2026 | AI suggestions, template library, animations |
 | v1.7.0 | Platform & API | Q4 2026 | REST API, Python/JS SDKs, webhooks |
@@ -222,12 +258,15 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 
 ### Recent Updates
 
-**v1.4.0 - Productivity Enhancement (Current):**
+**v1.4.0 - Productivity Enhancement (2025-12-11):**
 - Batch generation mode with queue management (up to 50 topics per batch)
-- Custom template system with save/load/import/export
+- Custom template system with save/load/import/export (10 default templates)
 - Enhanced version history with advanced filtering and pagination
 - Export to PNG, PDF, SVG, and multi-resolution ZIP formats
 - Multi-URL analysis for comparative infographics
+- New components: BatchManager, TemplateBrowser, and supporting modules
+- New services: batchService.ts, templateService.ts, storageService.ts
+- New utilities: exportUtils.ts for format conversion
 
 ### Upcoming Features by Theme
 
@@ -295,8 +334,10 @@ See [FEATURE-ROADMAP.md](to-dos/FEATURE-ROADMAP.md) for complete details and [ve
 | [TypeScript](https://www.typescriptlang.org/) | 5.9 | Type safety |
 | [Vite](https://vitejs.dev/) | 7.2 | Build tool and dev server |
 | [TailwindCSS](https://tailwindcss.com/) | v4.1 (build-time) | Utility-first styling |
-| [Lucide React](https://lucide.dev/) | 0.554 | Icon library |
+| [Lucide React](https://lucide.dev/) | 0.560 | Icon library |
 | [@google/genai](https://www.npmjs.com/package/@google/genai) | 1.30 | Gemini API SDK |
+| [jsPDF](https://www.npmjs.com/package/jspdf) | 3.0 | PDF generation |
+| [JSZip](https://www.npmjs.com/package/jszip) | 3.10 | ZIP archive creation |
 
 ---
 
@@ -342,6 +383,8 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
 - [Vite](https://vitejs.dev/) - Build tooling
 - [TailwindCSS](https://tailwindcss.com/) - Styling framework
 - [Lucide](https://lucide.dev/) - Icon library
+- [jsPDF](https://github.com/parallax/jsPDF) - PDF generation library
+- [JSZip](https://stuk.github.io/jszip/) - ZIP file creation
 
 ---
 
