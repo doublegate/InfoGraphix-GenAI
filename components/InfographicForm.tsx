@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { Search, Monitor, Image as ImageIcon, FileText, Cpu, ChevronDown, ChevronUp, Filter, Palette, Paintbrush, RefreshCw, Upload, X, Sparkles, List } from 'lucide-react';
 import { ImageSize, AspectRatio, GithubFilters, InfographicStyle, ColorPalette, TemplateConfig } from '../types';
 import RichSelect, { RichOption } from './RichSelect';
@@ -592,13 +593,16 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
         </button>
       </form>
 
-      {/* Template Browser Modal */}
-      <TemplateBrowser
-        isOpen={showTemplateBrowser}
-        onClose={() => setShowTemplateBrowser(false)}
-        mode="select"
-        onApplyTemplate={handleTemplateSelect}
-      />
+      {/* Template Browser Modal - Rendered via Portal to escape parent constraints */}
+      {showTemplateBrowser && ReactDOM.createPortal(
+        <TemplateBrowser
+          isOpen={showTemplateBrowser}
+          onClose={() => setShowTemplateBrowser(false)}
+          mode="select"
+          onApplyTemplate={handleTemplateSelect}
+        />,
+        document.body
+      )}
     </div>
   );
 };
