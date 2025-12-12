@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Download, Info, CheckCircle2, Link as LinkIcon, Save, Loader2, FileImage, FileText, FileStack } from 'lucide-react';
 import { GeneratedInfographic, Feedback, ExportFormat, ImageSize, AspectRatio } from '../types';
-import { exportInfographic } from '../utils/exportUtils';
 import FeedbackForm from './FeedbackForm';
 
 interface InfographicResultProps {
@@ -41,6 +40,9 @@ const InfographicResult: React.FC<InfographicResultProps> = ({
         setIsExporting(false);
         return;
       }
+
+      // Dynamic import to only load export libraries when needed
+      const { exportInfographic } = await import('../utils/exportUtils');
 
       await exportInfographic(
         exportFormat,

@@ -48,12 +48,12 @@ const TemplateBrowser: React.FC<TemplateBrowserProps> = ({
   const [editingTemplate, setEditingTemplate] = useState<TemplateConfig | undefined>();
   const [editorMode, setEditorMode] = useState<'create' | 'edit'>('create');
 
-  if (!isOpen) return null;
-
   // Load templates on mount
   useEffect(() => {
-    refreshTemplates();
-  }, []);
+    if (isOpen) {
+      refreshTemplates();
+    }
+  }, [isOpen]);
 
   // Filter templates based on search
   useEffect(() => {
@@ -157,6 +157,8 @@ const TemplateBrowser: React.FC<TemplateBrowserProps> = ({
       refreshTemplates();
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 overflow-y-auto">

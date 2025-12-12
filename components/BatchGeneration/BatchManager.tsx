@@ -20,7 +20,6 @@ import {
   deleteQueue,
   pauseQueue
 } from '../../services/batchService';
-import { exportBatchAsZip } from '../../utils/exportUtils';
 import BatchQueueCreator from './BatchQueueCreator';
 import BatchQueueList from './BatchQueueList';
 import BatchItemCard from './BatchItemCard';
@@ -38,11 +37,11 @@ const BatchManager: React.FC<BatchManagerProps> = ({ isOpen, onClose, onStartQue
   const [selectedQueue, setSelectedQueue] = useState<BatchQueue | null>(null);
   const [runningQueueId, setRunningQueueId] = useState<string | null>(null);
 
-  if (!isOpen) return null;
-
   useEffect(() => {
-    refreshQueues();
-  }, []);
+    if (isOpen) {
+      refreshQueues();
+    }
+  }, [isOpen]);
 
   const refreshQueues = () => {
     const loaded = loadQueues();
@@ -100,7 +99,7 @@ const BatchManager: React.FC<BatchManagerProps> = ({ isOpen, onClose, onStartQue
     setSelectedQueue(queue);
   };
 
-  const handleExportCompleted = (queue: BatchQueue) => {
+  const handleExportCompleted = async (queue: BatchQueue) => {
     const completed = queue.items.filter((item) => item.result);
     if (completed.length === 0) {
       alert('No completed items to export');
@@ -112,8 +111,12 @@ const BatchManager: React.FC<BatchManagerProps> = ({ isOpen, onClose, onStartQue
       dataURL: item.result!.imageUrl
     }));
 
+    // Dynamic import to only load export libraries when needed
+    const { exportBatchAsZip } = await import('../../utils/exportUtils');
     exportBatchAsZip(items, queue.name.replace(/[^a-z0-9_\-]/gi, '_'));
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 overflow-y-auto">

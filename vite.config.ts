@@ -20,15 +20,18 @@ export default defineConfig(({ mode }) => {
         }
       },
       build: {
+        chunkSizeWarningLimit: 700, // Export libs chunk is large but lazy-loaded on demand
         rollupOptions: {
           output: {
-            manualChunks: {
-              // React core - stable, rarely changes
-              'react-vendor': ['react', 'react-dom'],
-              // Google Gemini SDK - largest dependency
-              'gemini-sdk': ['@google/genai'],
-              // Icons - large but compressible
-              'icons': ['lucide-react'],
+            manualChunks: (id) => {
+              // Only split export libraries (truly lazy-loaded via dynamic import)
+              // This ensures React and its dependents (lucide-react) are bundled together correctly
+              // while still optimizing initial load by lazy-loading export functionality
+              if (id.includes('jspdf') || id.includes('jszip') || id.includes('html2canvas')) {
+                return 'export-libs';
+              }
+              // Let Vite handle everything else optimally with proper dependency ordering
+              return undefined;
             },
           },
         },

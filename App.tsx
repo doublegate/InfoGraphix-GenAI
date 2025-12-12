@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Layers, Github, Globe, History as HistoryIcon, Info, List as ListIcon, BookTemplate } from 'lucide-react';
 import ApiKeySelector from './components/ApiKeySelector';
 import InfographicForm from './components/InfographicForm';
 import ProcessingState from './components/ProcessingState';
 import InfographicResult from './components/InfographicResult';
-import VersionHistory from './components/VersionHistory';
 import AboutModal from './components/AboutModal';
-import BatchManager from './components/BatchGeneration/BatchManager';
-import TemplateBrowser from './components/TemplateManager/TemplateBrowser';
+import { TemplateBrowser } from './components/TemplateManager';
 import { analyzeTopic, generateInfographicImage } from './services/geminiService';
 import { AspectRatio, GeneratedInfographic, ImageSize, GithubFilters, SavedVersion, Feedback, InfographicStyle, ColorPalette, TemplateConfig } from './types';
+
+// Lazy load heavy modal components for better code splitting
+// Note: TemplateBrowser is statically imported (used by InfographicForm)
+const VersionHistory = lazy(() => import('./components/VersionHistory'));
+const BatchManager = lazy(() => import('./components/BatchGeneration/BatchManager'));
 
 function App() {
   const [isApiKeyReady, setIsApiKeyReady] = useState(false);
@@ -306,28 +309,32 @@ function App() {
         </footer>
       </div>
 
-      {/* Overlays */}
-      <VersionHistory
-        isOpen={showHistory}
-        onClose={() => setShowHistory(false)}
-        versions={savedVersions}
-        onLoadVersion={handleLoadVersion}
-        onDeleteVersion={handleDeleteVersion}
-        onClearHistory={handleClearHistory}
-      />
+      {/* Overlays - wrapped in Suspense for lazy loading */}
+      <Suspense fallback={null}>
+        <VersionHistory
+          isOpen={showHistory}
+          onClose={() => setShowHistory(false)}
+          versions={savedVersions}
+          onLoadVersion={handleLoadVersion}
+          onDeleteVersion={handleDeleteVersion}
+          onClearHistory={handleClearHistory}
+        />
+      </Suspense>
 
       <AboutModal
         isOpen={showAbout}
         onClose={() => setShowAbout(false)}
       />
 
-      <BatchManager
-        isOpen={showBatchManager}
-        onClose={() => {
-          setShowBatchManager(false);
-          setActiveMode('single');
-        }}
-      />
+      <Suspense fallback={null}>
+        <BatchManager
+          isOpen={showBatchManager}
+          onClose={() => {
+            setShowBatchManager(false);
+            setActiveMode('single');
+          }}
+        />
+      </Suspense>
 
       <TemplateBrowser
         isOpen={showTemplateManager}

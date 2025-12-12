@@ -44,29 +44,6 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
   const [itemsPerPage, setItemsPerPage] = useState(25);
   const [currentPage, setCurrentPage] = useState(1);
 
-  if (!isOpen) return null;
-
-  const toggleSelection = (id: string) => {
-    if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter(sid => sid !== id));
-    } else {
-      if (selectedIds.length < 2) {
-        setSelectedIds([...selectedIds, id]);
-      }
-    }
-  };
-
-  const handleCompare = () => {
-    if (selectedIds.length === 2) {
-      setShowComparison(true);
-    }
-  };
-
-  const clearFilters = () => {
-    setFilters({});
-    setSearchQuery('');
-  };
-
   // Enhanced filtering with advanced filters
   const filteredVersions = useMemo(() => {
     let result = versions.filter(v => {
@@ -147,6 +124,30 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
 
   const v1 = versions.find(v => v.id === selectedIds[0]);
   const v2 = versions.find(v => v.id === selectedIds[1]);
+
+  // Early return after all hooks
+  if (!isOpen) return null;
+
+  const toggleSelection = (id: string) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter(sid => sid !== id));
+    } else {
+      if (selectedIds.length < 2) {
+        setSelectedIds([...selectedIds, id]);
+      }
+    }
+  };
+
+  const handleCompare = () => {
+    if (selectedIds.length === 2) {
+      setShowComparison(true);
+    }
+  };
+
+  const clearFilters = () => {
+    setFilters({});
+    setSearchQuery('');
+  };
 
   return (
     <>
