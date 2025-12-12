@@ -1,0 +1,257 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g., v1.3.1)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+# Prevent concurrent releases
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # Job 1: Build for release (optimized with caching)
+  build:
+    name: Build Release Artifacts
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for changelog generation
+
+      - name: Extract version from tag
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+          GITHUB_REF: ${{ github.ref }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            VERSION="$INPUT_TAG"
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Releasing version: ${VERSION}"
+
+      - name: Setup Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-release-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            node-modules-release-${{ runner.os }}-
+            node-modules-${{ runner.os }}-
+
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm ci --prefer-offline --no-audit
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+
+      - name: Build production bundle
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Create distribution archive
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          cd dist
+          tar -czf "../infographix-genai-${VERSION}.tar.gz" .
+          zip -r "../infographix-genai-${VERSION}.zip" .
+          cd ..
+
+      - name: Generate checksums
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          sha256sum "infographix-genai-${VERSION}.tar.gz" > checksums.txt
+          sha256sum "infographix-genai-${VERSION}.zip" >> checksums.txt
+          cat checksums.txt
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-assets-${{ github.sha }}
+          path: |
+            infographix-genai-${{ steps.version.outputs.version }}.tar.gz
+            infographix-genai-${{ steps.version.outputs.version }}.zip
+            checksums.txt
+          retention-days: 30
+          compression-level: 0 # Already compressed
+
+  # Job 2: Create GitHub Release
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-assets-${{ github.sha }}
+          path: ./release-assets
+
+      - name: Generate release notes
+        id: release-notes
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          # Get previous tag safely
+          PREV_TAG=$(git describe --tags --abbrev=0 "${VERSION}^" 2>/dev/null || echo "")
+
+          echo "## What's Changed" > release_notes.md
+          echo "" >> release_notes.md
+
+          if [ -n "$PREV_TAG" ]; then
+            echo "### Commits since ${PREV_TAG}" >> release_notes.md
+            echo "" >> release_notes.md
+            # Use git log with safe format (no user-controlled data in shell)
+            git log "${PREV_TAG}..${VERSION}" --pretty=format:"- %s (%h)" --no-merges >> release_notes.md || true
+          else
+            echo "### All Commits" >> release_notes.md
+            echo "" >> release_notes.md
+            git log "${VERSION}" --pretty=format:"- %s (%h)" --no-merges >> release_notes.md || true
+          fi
+
+          echo "" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "## Checksums" >> release_notes.md
+          echo "" >> release_notes.md
+          echo '```' >> release_notes.md
+          cat release-assets/checksums.txt >> release_notes.md
+          echo '```' >> release_notes.md
+
+          cat release_notes.md
+
+      - name: Check if release exists
+        id: check-release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          if gh release view "$VERSION" > /dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Release $VERSION already exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Release $VERSION does not exist"
+          fi
+
+      - name: Create GitHub Release
+        if: steps.check-release.outputs.exists != 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.build.outputs.version }}
+          name: Release ${{ needs.build.outputs.version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ contains(needs.build.outputs.version, 'beta') || contains(needs.build.outputs.version, 'alpha') || contains(needs.build.outputs.version, 'rc') }}
+          files: |
+            release-assets/infographix-genai-${{ needs.build.outputs.version }}.tar.gz
+            release-assets/infographix-genai-${{ needs.build.outputs.version }}.zip
+            release-assets/checksums.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update existing release
+        if: steps.check-release.outputs.exists == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          echo "::notice::Release $VERSION already exists. Uploading new assets..."
+
+          # Upload new assets to existing release
+          gh release upload "$VERSION" \
+            "release-assets/infographix-genai-${VERSION}.tar.gz" \
+            "release-assets/infographix-genai-${VERSION}.zip" \
+            "release-assets/checksums.txt" \
+            --clobber
+
+  # Job 3: Post-release validation
+  validate:
+    name: Validate Release
+    needs: [build, release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify release exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          echo "Verifying release $VERSION..."
+          gh release view "$VERSION"
+
+          echo ""
+          echo "Release assets:"
+          gh release view "$VERSION" --json assets --jq '.assets[].name'
+
+          # Verify required assets exist
+          ASSETS=$(gh release view "$VERSION" --json assets --jq '.assets[].name')
+
+          if ! echo "$ASSETS" | grep -q "infographix-genai-${VERSION}.tar.gz"; then
+            echo "::error::Missing tar.gz asset"
+            exit 1
+          fi
+
+          if ! echo "$ASSETS" | grep -q "infographix-genai-${VERSION}.zip"; then
+            echo "::error::Missing zip asset"
+            exit 1
+          fi
+
+          if ! echo "$ASSETS" | grep -q "checksums.txt"; then
+            echo "::error::Missing checksums.txt"
+            exit 1
+          fi
+
+          echo "✓ All required assets present"
+
+      - name: Create release summary
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+          REPO: ${{ github.repository }}
+        run: |
+          echo "## Release $VERSION Created Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🎉 Release published to GitHub" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Release URL" >> $GITHUB_STEP_SUMMARY
+          echo "https://github.com/${REPO}/releases/tag/${VERSION}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Assets" >> $GITHUB_STEP_SUMMARY
+          echo "- \`infographix-genai-${VERSION}.tar.gz\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`infographix-genai-${VERSION}.zip\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`checksums.txt\`" >> $GITHUB_STEP_SUMMARY

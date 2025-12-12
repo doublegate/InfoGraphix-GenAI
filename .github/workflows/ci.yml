@@ -1,0 +1,209 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/FUNDING.yml'
+      - '.github/PULL_REQUEST_TEMPLATE.md'
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/FUNDING.yml'
+      - '.github/PULL_REQUEST_TEMPLATE.md'
+
+# Cancel in-progress runs on new pushes to same PR/branch
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Job 1: Install dependencies with aggressive caching
+  install:
+    name: Install Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            node-modules-${{ runner.os }}-
+
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Save node_modules cache
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+  # Job 2: TypeScript type checking (parallel with lint if added)
+  typecheck:
+    name: TypeScript Type Check
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Restore node_modules cache
+        uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          fail-on-cache-miss: true
+
+      - name: TypeScript Check
+        run: npx tsc --noEmit
+
+  # Job 3: Production build with Vite caching
+  build:
+    name: Build Production
+    needs: typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Restore node_modules cache
+        uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          fail-on-cache-miss: true
+
+      - name: Cache Vite build
+        uses: actions/cache@v4
+        with:
+          path: |
+            .vite
+            node_modules/.vite
+          key: vite-build-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**') }}
+          restore-keys: |
+            vite-build-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+            vite-build-${{ runner.os }}-
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist/
+          retention-days: 7
+          compression-level: 9
+
+  # Job 4: Bundle size analysis
+  size-check:
+    name: Bundle Size Analysis
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist/
+
+      - name: Analyze bundle size
+        run: |
+          echo "## Bundle Size Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| File | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+
+          # Find JS files and report sizes
+          find dist -name "*.js" -type f -exec sh -c '
+            size=$(du -h "$1" | cut -f1)
+            name=$(basename "$1")
+            echo "| \`$name\` | $size |"
+          ' sh {} \; >> $GITHUB_STEP_SUMMARY
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Total dist/ size:** $(du -sh dist/ | cut -f1)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Check for large bundles
+        run: |
+          # Warn if any JS file exceeds 500KB
+          large_files=$(find dist -name "*.js" -type f -size +500k)
+          if [ -n "$large_files" ]; then
+            echo "::warning::Large bundle files detected (>500KB):"
+            echo "$large_files" | while read file; do
+              size=$(du -h "$file" | cut -f1)
+              echo "::warning::  - $(basename $file): $size"
+            done
+          fi
+
+  # Job 5: Build verification
+  verify-build:
+    name: Verify Build Output
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist/
+
+      - name: Verify build artifacts
+        run: |
+          echo "Verifying build output..."
+
+          # Check for index.html
+          if [ ! -f "dist/index.html" ]; then
+            echo "::error::Missing dist/index.html"
+            exit 1
+          fi
+
+          # Check for assets directory
+          if [ ! -d "dist/assets" ]; then
+            echo "::error::Missing dist/assets directory"
+            exit 1
+          fi
+
+          # List all files
+          echo "Build output files:"
+          find dist -type f | sort
+
+          echo "✓ Build verification passed"

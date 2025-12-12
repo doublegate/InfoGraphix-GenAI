@@ -1,0 +1,72 @@
+name: Dependency Review
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: deps-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-review:
+    name: Review Dependencies
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+          deny-licenses: GPL-2.0, GPL-3.0
+          comment-summary-in-pr: on-failure
+
+  audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run npm audit
+        run: |
+          npm audit --audit-level=moderate || true
+          npm audit --audit-level=moderate --json > audit-results.json || true
+
+      - name: Comment audit results
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if [ -f audit-results.json ]; then
+            VULNERABILITIES=$(jq '.metadata.vulnerabilities' audit-results.json)
+            TOTAL=$(jq '.metadata.vulnerabilities | to_entries | map(.value) | add' audit-results.json)
+
+            if [ "$TOTAL" -gt 0 ]; then
+              echo "## Security Audit Results" > comment.md
+              echo "" >> comment.md
+              echo "Found $TOTAL vulnerabilities:" >> comment.md
+              echo "" >> comment.md
+              jq -r '.metadata.vulnerabilities | to_entries | .[] | "- **\(.key | ascii_upcase)**: \(.value)"' audit-results.json >> comment.md
+              echo "" >> comment.md
+              echo "Run \`npm audit fix\` to resolve fixable issues." >> comment.md
+
+              gh pr comment "$PR_NUMBER" --body-file comment.md
+            fi
+          fi
