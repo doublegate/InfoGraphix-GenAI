@@ -1,7 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { Upload, Palette, Loader2, AlertCircle, CheckCircle, Trash2, Save } from 'lucide-react';
-import { extractColorsFromImage, generateColorSchemes, isColorAccessible, getAccessibleTextColor, rgbToHex } from '../services/colorExtractionService';
-import { ColorScheme } from '../types';
+import {
+  extractColorsFromImage,
+  generateColorSchemes,
+  isColorAccessible,
+  getAccessibleTextColor,
+  ColorScheme,
+  ExtractedColor
+} from '../services/colorExtractionService';
 
 interface PaletteGeneratorProps {
   onPaletteGenerated?: (colors: string[]) => void;
@@ -25,7 +31,7 @@ export function PaletteGenerator({ onPaletteGenerated, disabled = false }: Palet
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [extractedColors, setExtractedColors] = useState<string[]>([]);
+  const [extractedColors, setExtractedColors] = useState<ExtractedColor[]>([]);
   const [colorSchemes, setColorSchemes] = useState<ColorScheme[]>([]);
   const [selectedScheme, setSelectedScheme] = useState<ColorScheme | null>(null);
   const [paletteName, setPaletteName] = useState('');
@@ -53,7 +59,7 @@ export function PaletteGenerator({ onPaletteGenerated, disabled = false }: Palet
     setSaveSuccess(false);
 
     try {
-      // Convert file to base64
+      // Convert file to base64 for preview
       const reader = new FileReader();
       const imageDataUrl = await new Promise<string>((resolve, reject) => {
         reader.onload = (e) => resolve(e.target?.result as string);
@@ -63,13 +69,13 @@ export function PaletteGenerator({ onPaletteGenerated, disabled = false }: Palet
 
       setUploadedImage(imageDataUrl);
 
-      // Extract colors
-      const colors = await extractColorsFromImage(imageDataUrl);
+      // Extract colors using the file directly
+      const colors = await extractColorsFromImage(file);
       setExtractedColors(colors);
 
       // Generate color schemes
       if (colors.length > 0) {
-        const schemes = generateColorSchemes(colors[0]); // Use dominant color as base
+        const schemes = generateColorSchemes(colors[0].hex); // Use dominant color hex as base
         setColorSchemes(schemes);
         setSelectedScheme(schemes[0]); // Select first scheme by default
       }
@@ -180,7 +186,7 @@ export function PaletteGenerator({ onPaletteGenerated, disabled = false }: Palet
     };
 
     const textColor = getAccessibleTextColor(color);
-    const isAccessible = isColorAccessible(color, '#000000');
+    const accessible = isColorAccessible(color);
 
     return (
       <div className="flex flex-col items-center gap-1">
@@ -189,7 +195,7 @@ export function PaletteGenerator({ onPaletteGenerated, disabled = false }: Palet
           style={{ backgroundColor: color }}
           title={color}
         >
-          {isAccessible && size !== 'sm' && (
+          {accessible && size !== 'sm' && (
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
               <CheckCircle className="w-4 h-4" style={{ color: textColor }} />
             </div>
@@ -280,7 +286,7 @@ export function PaletteGenerator({ onPaletteGenerated, disabled = false }: Palet
             <h4 className="text-sm font-semibold text-gray-900 mb-3">Extracted Colors</h4>
             <div className="flex flex-wrap gap-4">
               {extractedColors.map((color, index) => (
-                <ColorSwatch key={index} color={color} size="lg" />
+                <ColorSwatch key={index} color={color.hex} size="lg" />
               ))}
             </div>
           </div>

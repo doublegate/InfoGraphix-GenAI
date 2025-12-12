@@ -99,10 +99,12 @@ export function StyleSuggestions({
       {/* Suggestions Content */}
       {suggestions && !isLoading && (
         <div className="space-y-6">
-          {/* Analysis Summary */}
-          {suggestions.analysis && (
+          {/* Topic Category */}
+          {suggestions.topicCategory && (
             <div className="bg-white rounded-lg p-4 border border-gray-200">
-              <p className="text-sm text-gray-700 leading-relaxed">{suggestions.analysis}</p>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                <span className="font-medium">Topic Category:</span> {suggestions.topicCategory}
+              </p>
             </div>
           )}
 
@@ -113,7 +115,7 @@ export function StyleSuggestions({
               <h4 className="text-sm font-semibold text-gray-900">Recommended Styles</h4>
             </div>
             <div className="grid grid-cols-1 gap-3">
-              {suggestions.styles.map((item, index) => {
+              {suggestions.suggestedStyles.map((item, index) => {
                 const isSelected = selectedStyleIndex === index;
                 const isCurrent = currentStyle === item.style;
 
@@ -158,7 +160,7 @@ export function StyleSuggestions({
               <h4 className="text-sm font-semibold text-gray-900">Recommended Color Palettes</h4>
             </div>
             <div className="grid grid-cols-1 gap-3">
-              {suggestions.palettes.map((item, index) => {
+              {suggestions.suggestedPalettes.map((item, index) => {
                 const isSelected = selectedPaletteIndex === index;
                 const isCurrent = currentPalette === item.palette;
                 const confidenceColor = item.confidence >= 0.8 ? 'text-green-600' : item.confidence >= 0.6 ? 'text-yellow-600' : 'text-gray-600';

@@ -61,7 +61,7 @@ export function useStyleSuggestions(): UseStyleSuggestionsReturn {
     setSuggestions(null);
 
     try {
-      const result = await suggestStyleAndPalette(topic, url, context);
+      const result = await suggestStyleAndPalette(topic);
       setSuggestions(result);
       setError(null);
     } catch (err) {
@@ -90,18 +90,18 @@ export function useStyleSuggestions(): UseStyleSuggestionsReturn {
       return null;
     }
 
-    if (styleIndex < 0 || styleIndex >= suggestions.styles.length) {
+    if (styleIndex < 0 || styleIndex >= suggestions.suggestedStyles.length) {
       console.warn('Invalid style index:', styleIndex);
       return null;
     }
 
-    if (paletteIndex < 0 || paletteIndex >= suggestions.palettes.length) {
+    if (paletteIndex < 0 || paletteIndex >= suggestions.suggestedPalettes.length) {
       console.warn('Invalid palette index:', paletteIndex);
       return null;
     }
 
-    const selectedStyle = suggestions.styles[styleIndex].style;
-    const selectedPalette = suggestions.palettes[paletteIndex].palette;
+    const selectedStyle = suggestions.suggestedStyles[styleIndex].style;
+    const selectedPalette = suggestions.suggestedPalettes[paletteIndex].palette;
 
     return {
       style: selectedStyle,

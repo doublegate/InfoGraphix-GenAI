@@ -5,7 +5,7 @@
  * and WCAG contrast ratio checking - all client-side.
  */
 
-import Vibrant from 'node-vibrant';
+import { Vibrant } from 'node-vibrant/browser';
 
 /**
  * Represents an extracted color with metadata
@@ -50,6 +50,16 @@ export type ColorSchemeType =
   | 'analogous'
   | 'split-complementary'
   | 'tetradic';
+
+/**
+ * Generated color scheme with type and colors
+ */
+export interface ColorScheme {
+  /** Type of color scheme */
+  type: ColorSchemeType;
+  /** Array of hex color codes */
+  colors: string[];
+}
 
 /**
  * Extract dominant colors from an image file using Vibrant.js
@@ -317,7 +327,6 @@ export function meetsWCAG_AA(
  * @returns Array of ColorScheme objects for all scheme types
  */
 export function generateColorSchemes(baseColor: string): ColorScheme[] {
-  const schemes: ColorScheme[] = [];
   const schemeTypes: ColorSchemeType[] = [
     'complementary',
     'triadic',
@@ -326,11 +335,10 @@ export function generateColorSchemes(baseColor: string): ColorScheme[] {
     'tetradic'
   ];
 
-  for (const type of schemeTypes) {
-    schemes.push(generateColorScheme(baseColor, type));
-  }
-
-  return schemes;
+  return schemeTypes.map(type => ({
+    type,
+    colors: generateColorScheme(baseColor, type)
+  }));
 }
 
 /**
