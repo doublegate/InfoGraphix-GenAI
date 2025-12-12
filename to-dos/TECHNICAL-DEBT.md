@@ -1,13 +1,1299 @@
-# Technical Debt
+# Technical Debt Inventory
 
-Known issues, code quality improvements, and refactoring needs.
+**Version:** 1.6.0 (AI Intelligence & Creativity)
+**Last Updated:** 2025-12-12
+**Comprehensive Analysis Completed:** 2025-12-12
+
+Known issues, code quality improvements, and refactoring needs identified through systematic analysis of the entire codebase.
+
+---
+
+## Summary
+
+- **Total Active Items:** 37
+- **Critical:** 0
+- **High:** 2
+- **Medium:** 10
+- **Low:** 25
+
+**Health Score:** 73/100 (Good - Most critical issues resolved, focus on testing and optimization)
+
+---
+
+## Table of Contents
+
+1. [Critical Priority](#critical-priority)
+2. [High Priority](#high-priority)
+3. [Medium Priority](#medium-priority)
+4. [Low Priority](#low-priority)
+5. [Resolved Items](#resolved-items)
+6. [Prioritized Remediation Plan](#prioritized-remediation-plan)
+7. [Quick Wins](#quick-wins)
+8. [Metrics and Tracking](#metrics-and-tracking)
+
+---
+
+## Critical Priority
+
+(No critical items - all resolved)
+
+---
+
+## High Priority
+
+### TD-001: Missing Unit Test Infrastructure
+
+**Category:** Testing
+**Priority:** High
+**Location:** Project-wide (0 test files)
+**Lines:** N/A
+
+**Description:**
+Zero test files exist in the codebase. No testing framework is configured. This creates significant risk for regression bugs and makes refactoring dangerous.
+
+**Impact:**
+- Cannot safely refactor code
+- No regression protection
+- Difficult to validate complex logic
+- Increases bug introduction risk during development
+- Blocks CI/CD quality gates
+
+**Remediation:**
+1. Add Vitest as test framework (`npm install -D vitest @testing-library/react @testing-library/user-event jsdom`)
+2. Configure test environment in `vite.config.ts`
+3. Add `test` script to package.json
+4. Create `__tests__` directories in src/
+5. Write unit tests for priority areas:
+   - `services/geminiService.ts` (API integration logic)
+   - `services/storageService.ts` (IndexedDB operations)
+   - `hooks/useVersionHistory.ts`, `hooks/useGeneration.ts`
+   - `utils/exportUtils.ts`
+   - Component rendering tests
+
+**Effort:** XL (2-3 weeks for comprehensive coverage)
+**Dependencies:** None
+**Target Version:** v1.7.0 or v2.0.0
+
+---
+
+### TD-002: TypeScript Strict Mode Disabled
+
+**Category:** Configuration
+**Priority:** High
+**Location:** `tsconfig.json`
+**Lines:** 1-29
+
+**Description:**
+TypeScript strict mode is not enabled in `tsconfig.json`. This allows potential type safety issues to slip through, including `any` types (8 instances found), implicit any, and potential null reference errors.
+
+**Impact:**
+- Reduced type safety
+- Potential runtime null/undefined errors
+- Harder to catch type-related bugs at compile time
+- Inconsistent type checking
+
+**Remediation:**
+1. Add `"strict": true` to `tsconfig.json` `compilerOptions`
+2. Enable individual strict flags:
+   - `"noImplicitAny": true`
+   - `"strictNullChecks": true`
+   - `"strictFunctionTypes": true`
+   - `"strictBindCallApply": true`
+   - `"strictPropertyInitialization": true`
+   - `"noImplicitThis": true`
+   - `"alwaysStrict": true`
+3. Fix all type errors that surface (primarily in `geminiService.ts`, `App.tsx`, `TemplateBrowser.tsx`, `colorExtractionService.ts`)
+4. Replace `any` types with proper types
+
+**Effort:** M (4-6 hours)
+**Dependencies:** None
+**Target Version:** v1.7.0
+
+---
+
+## Medium Priority
+
+### TD-003: Mixed Storage Strategies
+
+**Category:** Architecture
+**Priority:** Medium
+**Location:** Multiple services
+**Lines:** Various
+
+**Description:**
+The application uses inconsistent storage strategies:
+- **IndexedDB:** Saved versions (`storageService.ts`)
+- **localStorage:** Templates (`templateService.ts`), batch queues (`batchService.ts`), form drafts (`useFormPersistence.ts`)
+
+This creates complexity and inconsistent behavior.
+
+**Impact:**
+- Confusing architecture for maintainers
+- Inconsistent quota handling
+- Different error handling patterns
+- Harder to implement storage migration
+- localStorage has 5MB limit (templates/batches could hit this)
+
+**Remediation:**
+1. Migrate all storage to IndexedDB
+2. Create unified `storageService.ts` with separate object stores:
+   - `versions` (already implemented)
+   - `templates`
+   - `batchQueues`
+   - `formDrafts`
+3. Update all service files to use unified service
+4. Provide migration utilities from localStorage
+
+**Effort:** L (8-12 hours)
+**Dependencies:** None
+**Target Version:** v1.8.0
+
+**Files Affected:**
+- `services/storageService.ts` (add new stores)
+- `services/templateService.ts` (refactor to IndexedDB)
+- `services/batchService.ts` (refactor to IndexedDB)
+- `hooks/useFormPersistence.ts` (refactor to IndexedDB)
+
+---
+
+### TD-004: Console Statements in Production Code
+
+**Category:** Code Quality
+**Priority:** Medium
+**Location:** 15 files with 48 total occurrences
+**Lines:** Various
+
+**Description:**
+48 console.log/error/warn statements exist throughout the codebase without environment-based filtering. ESLint is configured to warn about console.log (allowing warn/error), but many logs remain.
+
+**Files with console statements:**
+- `App.tsx` (2)
+- `index.tsx` (2)
+- `hooks/useStyleSuggestions.ts` (4)
+- `hooks/useFormPersistence.ts` (4)
+- `hooks/useGeneration.ts` (1)
+- `hooks/useVersionHistory.ts` (6)
+- `components/PaletteGenerator.tsx` (2)
+- `components/ErrorBoundary.tsx` (2)
+- `services/templateService.ts` (3)
+- `services/geminiService.ts` (3)
+- `components/ApiKeySelector.tsx` (1)
+- `services/batchService.ts` (5)
+- `components/InfographicForm.tsx` (3)
+- `services/storageService.ts` (9)
+- `components/InfographicResult.tsx` (1)
+
+**Impact:**
+- Debugging noise in production builds
+- Potential information disclosure
+- Performance overhead
+- Unprofessional user experience
+
+**Remediation:**
+1. Create `utils/logger.ts` with environment-based filtering:
+```typescript
+export const logger = {
+  debug: (...args: any[]) => {
+    if (import.meta.env.DEV) console.log(...args);
+  },
+  info: (...args: any[]) => {
+    if (import.meta.env.DEV) console.info(...args);
+  },
+  warn: (...args: any[]) => console.warn(...args),
+  error: (...args: any[]) => console.error(...args),
+};
+```
+2. Replace all `console.log` with `logger.debug`
+3. Replace `console.info` with `logger.info`
+4. Keep `console.warn` and `console.error` or migrate to logger
+5. Update ESLint rule to `"no-console": "error"`
+
+**Effort:** S (2-3 hours)
+**Dependencies:** None
+**Target Version:** v1.7.0
+
+---
+
+### TD-005: API Key Client-Side Exposure Documentation Gap
+
+**Category:** Documentation, Security
+**Priority:** Medium
+**Location:** Application-wide (AI Studio integration)
+**Lines:** N/A
+
+**Description:**
+API keys are handled client-side for AI Studio deployment, but the security model is not clearly documented. Users may not understand the security implications.
+
+**Impact:**
+- Security documentation gap
+- User confusion about API key handling
+- Potential misuse of API keys
+- Unclear security boundaries
+
+**Remediation:**
+1. Document security model in README.md
+2. Add security considerations section
+3. Clarify AI Studio vs. local development security
+4. Document API key best practices
+5. Add warnings about API key exposure in client-side code
+6. Consider adding environment variable validation
+
+**Effort:** XS (1-2 hours)
+**Dependencies:** None
+**Target Version:** v1.7.0
+
+---
+
+### TD-006: Component Prop Drilling
+
+**Category:** Architecture
+**Priority:** Medium
+**Location:** Multiple components
+**Lines:** Various
+
+**Description:**
+Props passed through multiple component layers unnecessarily, especially in:
+- `App → InfographicForm → RichSelect` (10+ props)
+- `App → VersionHistory → VersionCard`
+- `BatchManager → BatchQueueList → BatchQueueCard → BatchItemCard`
+
+**Impact:**
+- Harder to maintain and refactor
+- Difficult to add new features
+- Component coupling
+- Props drilling through intermediate components
+
+**Remediation:**
+1. Create React Context for shared application state:
+   - `GenerationContext` (current generation settings)
+   - `ThemeContext` (high contrast, language)
+   - `TemplateContext` (template management)
+2. Implement compound components pattern for complex UI
+3. Extract container components that manage data
+4. Use composition over prop drilling
+
+**Effort:** M (6-8 hours)
+**Dependencies:** None
+**Target Version:** v1.8.0
+
+---
+
+### TD-007: Large Component Files
+
+**Category:** Code Organization
+**Priority:** Medium
+**Location:** Multiple files
+**Lines:** Various
+
+**Description:**
+Several component files exceed recommended size limits:
+
+| File | Lines | Complexity |
+|------|-------|------------|
+| `services/templateService.ts` | 1,020 | High |
+| `InfographicForm.tsx` | 689 | High |
+| `VersionHistory.tsx` | 608 | Medium |
+| `geminiService.ts` | 481 | High |
+| `types.ts` | 463 | Low (enums/types) |
+| `App.tsx` | 439 | Medium |
+
+**Impact:**
+- Harder to understand and maintain
+- Difficult to test individual components
+- Merge conflicts more likely
+- Increased cognitive load
+
+**Remediation:**
+1. **`templateService.ts`**: Split into separate services:
+   - `templateService.ts` (CRUD operations)
+   - `defaultTemplates.ts` (default template definitions)
+   - `templateValidation.ts` (validation logic)
+
+2. **`InfographicForm.tsx`**: Extract sub-components:
+   - `TopicInput.tsx`
+   - `StylePaletteSelector.tsx`
+   - `AdvancedFilters.tsx`
+   - `AISuggestions.tsx`
+
+3. **`VersionHistory.tsx`**: Extract components:
+   - `VersionGrid.tsx`
+   - `VersionCard.tsx`
+   - `VersionFilters.tsx`
+
+4. **`geminiService.ts`**: Split by responsibility:
+   - `analysisService.ts` (topic analysis)
+   - `imageGenerationService.ts` (image generation)
+   - `suggestionService.ts` (AI suggestions)
+   - `geminiClient.ts` (API client initialization)
+
+**Effort:** L (12-16 hours)
+**Dependencies:** None
+**Target Version:** v1.8.0 or v2.0.0
+
+---
+
+### TD-008: Missing Loading States
+
+**Category:** Code Quality
+**Priority:** Medium
+**Location:** Various async operations
+**Lines:** Various
+
+**Description:**
+Some async operations lack proper loading indicators:
+- Version deletion in `VersionHistory.tsx`
+- File upload processing in `InfographicForm.tsx`
+- Initial data load in `App.tsx`
+- Template operations in `TemplateManager`
+- Batch queue operations in `BatchManager`
+
+**Impact:**
+- Poor user experience
+- No feedback during operations
+- Users may click multiple times
+- Unclear system state
+
+**Remediation:**
+1. Add loading states to all async operations
+2. Show spinners/skeleton loaders during data fetching
+3. Disable action buttons during processing
+4. Add optimistic UI updates where appropriate
+5. Use React Suspense for lazy-loaded components
+
+**Effort:** S (3-4 hours)
+**Dependencies:** None
+**Target Version:** v1.7.0
+
+---
+
+### TD-009: App.tsx State Management Complexity
+
+**Category:** Architecture
+**Priority:** Medium
+**Location:** `App.tsx`
+**Lines:** 24-440
+
+**Description:**
+Despite extracting some hooks, `App.tsx` still manages significant state directly:
+- 13+ useState declarations
+- Multiple modal visibility states
+- Form initial values management
+- Current request context
+- Saved/unsaved tracking
+
+**Impact:**
+- Complex component logic
+- Harder to test
+- State updates scattered throughout
+- Difficult to reason about state flow
+
+**Remediation:**
+1. Create `useAppState` hook to encapsulate all application-level state
+2. Move modal state to dedicated `useModals` hook
+3. Fully integrate `useGeneration` hook (App still calls analyzeTopic/generateInfographicImage directly)
+4. Extract `useFormState` for form management
+5. Consider using state machine for processing flow
+
+**Effort:** M (6-8 hours)
+**Dependencies:** TD-006 (Context implementation would help)
+**Target Version:** v1.8.0
+
+---
+
+### TD-010: Callback Function Parameters
+
+**Category:** Code Quality
+**Priority:** Medium
+**Location:** Multiple components
+**Lines:** Various
+
+**Description:**
+Callback functions pass multiple individual parameters instead of objects:
+
+```typescript
+// Current
+onGenerate(topic, size, aspectRatio, style, palette, filters, fileContent);
+
+// Better
+onGenerate({ topic, size, aspectRatio, style, palette, filters, fileContent });
+```
+
+**Impact:**
+- Hard to remember parameter order
+- Difficult to add optional parameters
+- Poor IDE autocomplete
+- Error-prone
+
+**Remediation:**
+1. Refactor all callbacks with 3+ parameters to use object parameters
+2. Update type definitions
+3. Update all call sites
+
+**Files to update:**
+- `App.tsx` (`handleGenerate`)
+- `InfographicForm.tsx` (`onSubmit` prop)
+- `VersionHistory.tsx` (event handlers)
+- `BatchManager.tsx` (queue callbacks)
+
+**Effort:** S (2-3 hours)
+**Dependencies:** None
+**Target Version:** v1.7.0
+
+---
+
+### TD-011: Error Tracking Service Integration
+
+**Category:** Monitoring
+**Priority:** Medium
+**Location:** `index.tsx`
+**Lines:** 21
+
+**Description:**
+TODO comment exists for integrating error tracking service (Sentry, LogRocket, etc.) in the ErrorBoundary callback. No error tracking is currently configured.
+
+**Impact:**
+- No visibility into production errors
+- Cannot track error frequency
+- No user session replay for debugging
+- Missing error analytics
+
+**Remediation:**
+1. Choose error tracking service (Sentry recommended)
+2. Add Sentry SDK dependency
+3. Configure Sentry in `index.tsx`
+4. Add error boundary callback to send errors
+5. Configure source maps for error stack traces
+6. Set up alerts for critical errors
+
+**Effort:** S (2-3 hours)
+**Dependencies:** Requires Sentry account/API key
+**Target Version:** v1.7.0 or v2.0.0
+
+---
+
+### TD-012: Missing CI/CD Configuration
+
+**Category:** Infrastructure
+**Priority:** Medium
+**Location:** Project root
+**Lines:** N/A
+
+**Description:**
+No CI/CD configuration files exist (no `.github/workflows/`, no `.gitlab-ci.yml`, etc.). This means:
+- No automated testing on commits
+- No automated builds
+- No deployment automation
+- Manual quality checks only
+
+**Impact:**
+- Inconsistent build quality
+- No automated quality gates
+- Manual deployment overhead
+- Higher risk of shipping bugs
+
+**Remediation:**
+1. Create `.github/workflows/ci.yml` for GitHub Actions:
+   - Lint check (`npm run lint`)
+   - Type check (`tsc --noEmit`)
+   - Build check (`npm run build`)
+   - Test run (once tests exist - TD-001)
+   - Security audit (`npm audit`)
+2. Create `.github/workflows/deploy.yml` for automated deployment
+3. Add status badges to README.md
+
+**Effort:** S (3-4 hours)
+**Dependencies:** TD-001 (tests) for complete CI
+**Target Version:** v1.7.0
+
+---
+
+## Low Priority
+
+### TD-013: TypeScript `any` Types
+
+**Category:** Code Quality
+**Priority:** Low
+**Location:** 4 files with 8 occurrences
+**Lines:** Various
+
+**Description:**
+8 instances of explicit `any` type usage found:
+
+**Files:**
+- `App.tsx` (1 occurrence)
+- `services/colorExtractionService.ts` (1 occurrence)
+- `services/geminiService.ts` (4 occurrences)
+- `components/TemplateManager/TemplateBrowser.tsx` (2 occurrences)
+
+**Impact:**
+- Bypasses type safety
+- Potential runtime errors
+- Harder to refactor
+- Reduced IntelliSense quality
+
+**Remediation:**
+1. Replace `any` with proper types
+2. Use `unknown` for truly unknown types
+3. Add proper type guards
+4. Enable `@typescript-eslint/no-explicit-any: error` in ESLint
+
+**Effort:** S (2-3 hours)
+**Dependencies:** TD-002 (Strict mode)
+**Target Version:** v1.7.0
+
+---
+
+### TD-014: Outdated Dependencies
+
+**Category:** Dependency
+**Priority:** Low
+**Location:** `package.json`
+**Lines:** Various
+
+**Description:**
+3 minor outdated packages detected:
+- `@types/node`: 25.0.0 → 25.0.1
+- `lucide-react`: 0.560.0 → 0.561.0
+- `react-i18next`: 16.4.1 → 16.5.0
+
+**Impact:**
+- Missing bug fixes
+- Missing minor features
+- Potential security patches
+
+**Remediation:**
+1. Run `npm update` to update to latest within semver ranges
+2. Test application after updates
+3. Set up Dependabot or Renovate for automated dependency updates
+
+**Effort:** XS (15 minutes)
+**Dependencies:** None
+**Target Version:** v1.7.0
+
+---
+
+### TD-015: Limited React Performance Optimizations
+
+**Category:** Performance
+**Priority:** Low
+**Location:** Multiple components
+**Lines:** Various
+
+**Description:**
+Only 34 uses of `React.memo`, `useMemo`, or `useCallback` across the entire codebase. Large components lack optimization:
+
+**Missing optimizations:**
+- `InfographicForm` (689 lines, no memoization)
+- `VersionHistory` (608 lines, minimal memoization)
+- `TemplateBrowser` (272 lines, no memoization)
+- Style/palette option arrays recreated on every render
+
+**Impact:**
+- Unnecessary re-renders
+- Slower performance with large datasets
+- Poor experience on low-end devices
+- Wasted CPU cycles
+
+**Remediation:**
+1. Add `React.memo` to pure components
+2. Memoize expensive computations with `useMemo`
+3. Memoize callbacks with `useCallback`
+4. Extract constant data outside components
+5. Consider virtualization for long lists (VersionHistory grid)
+
+**Priority areas:**
+- STYLE_OPTIONS and PALETTE_OPTIONS in `InfographicForm.tsx`
+- Version list rendering in `VersionHistory.tsx`
+- Template grid in `TemplateBrowser.tsx`
+
+**Effort:** M (4-6 hours)
+**Dependencies:** None
+**Target Version:** v1.8.0
+
+---
+
+### TD-016: localStorage Usage Despite IndexedDB Migration
+
+**Category:** Architecture
+**Priority:** Low
+**Location:** 9 files with 31 occurrences
+**Lines:** Various
+
+**Description:**
+31 localStorage calls still exist despite IndexedDB being available:
+
+**Files:**
+- `App.tsx` (4 calls - for versions, being migrated)
+- `services/templateService.ts` (2 calls)
+- `services/batchService.ts` (6 calls)
+- `components/InfographicForm.tsx` (6 calls - form drafts, recent topics)
+- `hooks/useFormPersistence.ts` (3 calls)
+- `hooks/useHighContrast.ts` (3 calls)
+- `services/storageService.ts` (2 calls - migration only)
+- `components/PaletteGenerator.tsx` (2 calls)
+- `services/colorExtractionService.ts` (3 calls)
+
+**Impact:**
+- Inconsistent storage strategy (see TD-003)
+- 5MB localStorage limit
+- Slower synchronous operations
+- Quota management complexity
+
+**Remediation:**
+- Part of TD-003 (Mixed Storage Strategies)
+- Migrate all to IndexedDB
+
+**Effort:** M (included in TD-003)
+**Dependencies:** TD-003
+**Target Version:** v1.8.0
+
+---
+
+### TD-017: Missing JSDoc Comments
+
+**Category:** Documentation
+**Priority:** Low
+**Location:** Multiple files
+**Lines:** Various
+
+**Description:**
+While `types.ts` has comprehensive JSDoc, many utility functions and components lack documentation:
+
+**Missing documentation:**
+- `utils/exportUtils.ts` (utility functions lack JSDoc)
+- `utils/keyboardShortcuts.ts` (helper functions)
+- `services/colorExtractionService.ts` (color extraction logic)
+- Component props interfaces (some lack descriptions)
+
+**Impact:**
+- Harder for new developers to understand
+- Reduced IDE IntelliSense quality
+- Unclear function purposes
+- Missing parameter documentation
+
+**Remediation:**
+1. Add JSDoc comments to all public functions
+2. Document function parameters and return types
+3. Add usage examples for complex functions
+4. Document component props interfaces
+
+**Effort:** S (3-4 hours)
+**Dependencies:** None
+**Target Version:** v2.0.0
+
+---
+
+### TD-018: Placeholder Style Previews
+
+**Category:** Code Quality
+**Priority:** Low
+**Location:** `components/InfographicForm.tsx`
+**Lines:** 27-68
+
+**Description:**
+Style previews use placeholder images from `placehold.co` instead of actual style examples. This is noted in code comment: "Using placeholder service to represent the static images that would be saved in the project".
+
+**Impact:**
+- Not production-ready
+- Inconsistent preview quality
+- External dependency on placeholder service
+- Not representative of actual styles
+
+**Remediation:**
+1. Generate actual preview images for each style
+2. Store as static assets in `public/previews/`
+3. Update STYLE_PREVIEWS to reference local images
+4. Optimize preview images (small file size)
+
+**Effort:** M (4-6 hours to generate and integrate)
+**Dependencies:** None
+**Target Version:** v1.9.0 or v2.0.0
+
+---
+
+### TD-019: ESLint Rules Could Be Stricter
+
+**Category:** Configuration
+**Priority:** Low
+**Location:** `.eslintrc.json`
+**Lines:** 1-58
+
+**Description:**
+ESLint configuration is good but could enable stricter rules:
+
+**Current warnings that could be errors:**
+- `@typescript-eslint/no-unused-vars`: warn → error
+- `react-hooks/exhaustive-deps`: warn → error
+- `no-console`: warn → error (after TD-004)
+
+**Missing recommended rules:**
+- `@typescript-eslint/no-floating-promises`
+- `@typescript-eslint/await-thenable`
+- `@typescript-eslint/no-misused-promises`
+- `complexity` rule (limit cyclomatic complexity)
+- `max-lines-per-function` (limit function size)
+
+**Impact:**
+- Potential bugs slip through
+- Inconsistent code quality
+- Missing best practices enforcement
+
+**Remediation:**
+1. Update ESLint configuration with stricter rules
+2. Fix all new errors that surface
+3. Add complexity limits
+4. Consider adding `eslint-plugin-unicorn` for additional rules
+
+**Effort:** S (2-3 hours)
+**Dependencies:** TD-004 (console statements), TD-013 (any types)
+**Target Version:** v1.8.0
+
+---
+
+### TD-020: Magic Numbers Throughout Codebase
+
+**Category:** Code Quality
+**Priority:** Low
+**Location:** Multiple files
+**Lines:** Various
+
+**Description:**
+Various magic numbers appear without named constants:
+
+**Examples:**
+- `50` (MAX_VERSIONS in storageService)
+- `0.8` (QUOTA_WARNING_THRESHOLD)
+- `1000` (DEBOUNCE_MS in useFormPersistence)
+- `2000` (delayBetweenItems in batchService)
+- `1920` (maxWidth in compressImage)
+- `0.8` (quality in compressImage)
+
+Some are already constants, but many inline numbers exist without explanation.
+
+**Impact:**
+- Harder to maintain
+- Unclear intent
+- Difficult to change consistently
+- Reduced code readability
+
+**Remediation:**
+1. Extract all magic numbers to named constants
+2. Group related constants in dedicated files:
+   - `constants/storage.ts`
+   - `constants/ui.ts`
+   - `constants/performance.ts`
+3. Add comments explaining why values were chosen
+
+**Effort:** S (2-3 hours)
+**Dependencies:** None
+**Target Version:** v2.0.0
+
+---
+
+### TD-021: Duplicate Code in Storage Services
+
+**Category:** Code Quality
+**Priority:** Low
+**Location:** `services/` directory
+**Lines:** Various
+
+**Description:**
+Similar patterns repeated across storage services:
+- localStorage getItem/setItem with try-catch
+- JSON.parse with fallback
+- Error logging patterns
+- CRUD operations structure
+
+**Impact:**
+- Code duplication (DRY violation)
+- Inconsistent error handling
+- Harder to maintain
+- More surface area for bugs
+
+**Remediation:**
+1. Create `utils/storageHelpers.ts` with:
+   - `safeParseJSON<T>(value: string, fallback: T): T`
+   - `safeLocalStorageGet<T>(key: string, fallback: T): T`
+   - `safeLocalStorageSet<T>(key: string, value: T): boolean`
+2. Refactor all storage services to use helpers
+3. Consolidate to unified IndexedDB service (TD-003)
+
+**Effort:** S (2-3 hours)
+**Dependencies:** TD-003 (unified storage)
+**Target Version:** v1.8.0
+
+---
+
+### TD-022: Missing Error Boundaries for Lazy Components
+
+**Category:** Code Quality
+**Priority:** Low
+**Location:** `App.tsx`
+**Lines:** 400-410
+
+**Description:**
+Lazy-loaded components (`VersionHistory`, `BatchManager`) wrapped in `Suspense` but no error boundaries around them. If these components fail to load, the entire app crashes.
+
+**Impact:**
+- Poor error handling for code splitting
+- Entire app crashes if chunk fails to load
+- No fallback UI for failed lazy loads
+
+**Remediation:**
+1. Wrap each `Suspense` block with `ErrorBoundary`
+2. Provide user-friendly fallback for failed loads
+3. Add retry mechanism for failed chunk loads
+
+**Effort:** XS (1 hour)
+**Dependencies:** None
+**Target Version:** v1.7.0
+
+---
+
+### TD-023: Commented Code Should Be Removed
+
+**Category:** Code Quality
+**Priority:** Low
+**Location:** Various files
+**Lines:** Various
+
+**Description:**
+While no large blocks of commented code were found, there are legacy comments that could be cleaned up. Version control (git) provides history, so commented code is unnecessary.
+
+**Impact:**
+- Code clutter
+- Confusion about what's active
+- Maintenance overhead
+
+**Remediation:**
+1. Search for commented-out code blocks
+2. Remove if no longer needed
+3. Document removal reason in commit message
+4. Add .editorconfig rule to prevent future commented code
+
+**Effort:** XS (1 hour)
+**Dependencies:** None
+**Target Version:** Ongoing
+
+---
+
+### TD-024: Missing PropTypes Validation (Runtime)
+
+**Category:** Code Quality
+**Priority:** Low
+**Location:** React components
+**Lines:** Various
+
+**Description:**
+While TypeScript provides compile-time type checking, no runtime prop validation exists. ESLint rule `react/prop-types` is disabled.
+
+**Impact:**
+- No runtime validation
+- Potential issues if data comes from external sources
+- Harder to debug in production
+
+**Remediation:**
+1. Consider adding runtime validation with:
+   - `zod` schema validation
+   - `prop-types` library (if needed)
+2. Add validation for props from external sources (API responses)
+3. Keep disabled for internal components (TypeScript is sufficient)
+
+**Effort:** S (conditional - only if needed)
+**Dependencies:** None
+**Target Version:** v2.0.0 (if needed)
+
+---
+
+### TD-025: No Keyboard Shortcut Documentation in UI
+
+**Category:** Documentation
+**Priority:** Low
+**Location:** `KeyboardShortcutsModal.tsx`
+**Lines:** Various
+
+**Description:**
+Keyboard shortcuts are implemented and documented in a modal, but no visible indicator exists in the UI (like "Press ? for shortcuts").
+
+**Impact:**
+- Users may not discover shortcuts
+- Reduced accessibility benefits
+- Hidden power-user features
+
+**Remediation:**
+1. Add subtle "?" button in app header
+2. Add tooltip "Press ? for keyboard shortcuts"
+3. Consider adding keyboard shortcut hints in hover tooltips
+
+**Effort:** XS (1 hour)
+**Dependencies:** None
+**Target Version:** v1.8.0
+
+---
+
+### TD-026: Hardcoded Color Values
+
+**Category:** Code Quality
+**Priority:** Low
+**Location:** Multiple components
+**Lines:** Various
+
+**Description:**
+Some components have hardcoded Tailwind color classes that could be theme variables:
+- Background colors (`bg-slate-800`, `bg-blue-600`)
+- Border colors (`border-slate-700`)
+- Text colors (`text-slate-300`)
+
+**Impact:**
+- Harder to implement theming
+- Inconsistent color usage
+- Difficult to update design system
+
+**Remediation:**
+1. Extract colors to Tailwind theme config
+2. Use semantic color names (e.g., `bg-surface`, `text-primary`)
+3. Create color system documentation
+4. Consider CSS variables for runtime theming
+
+**Effort:** M (4-6 hours)
+**Dependencies:** None
+**Target Version:** v2.0.0
+
+---
+
+### TD-027: Missing Accessibility Tests
+
+**Category:** Testing
+**Priority:** Low
+**Location:** N/A (no tests exist)
+**Lines:** N/A
+
+**Description:**
+While accessibility features are implemented (v1.5.0), no automated tests verify accessibility compliance (WCAG 2.1 AA).
+
+**Impact:**
+- No regression protection for a11y features
+- Manual testing only
+- May miss accessibility issues
+- Cannot verify ARIA attributes programmatically
+
+**Remediation:**
+1. Add `@axe-core/react` for runtime accessibility checks (dev only)
+2. Add `vitest-axe` for automated accessibility testing
+3. Add tests for:
+   - Keyboard navigation
+   - Screen reader labels
+   - Color contrast
+   - Focus management
+4. Consider Lighthouse CI for automated audits
+
+**Effort:** M (included in TD-001)
+**Dependencies:** TD-001 (test infrastructure)
+**Target Version:** v2.0.0
+
+---
+
+### TD-028: Component Style Mixing (Tailwind + Inline)
+
+**Category:** Code Quality
+**Priority:** Low
+**Location:** Multiple components
+**Lines:** Various
+
+**Description:**
+Some components mix Tailwind classes with inline styles (e.g., `style={{animationDuration: '10s'}}`).
+
+**Impact:**
+- Inconsistent styling approach
+- Harder to maintain
+- CSS-in-JS overhead for simple values
+
+**Remediation:**
+1. Prefer Tailwind custom classes for animations
+2. Extract complex animations to CSS classes
+3. Use Tailwind's `@apply` directive where needed
+4. Only use inline styles for truly dynamic values
+
+**Effort:** S (2-3 hours)
+**Dependencies:** None
+**Target Version:** v2.0.0
+
+---
+
+### TD-029: Missing Bundle Size Analysis
+
+**Category:** Performance
+**Priority:** Low
+**Location:** Build configuration
+**Lines:** N/A
+
+**Description:**
+No bundle size analysis or visualization is configured. The app has lazy loading for export libs, but no monitoring of bundle growth.
+
+**Impact:**
+- Cannot track bundle size over time
+- May miss large dependencies
+- Unclear what contributes to bundle size
+- No alerts for size regressions
+
+**Remediation:**
+1. Add `rollup-plugin-visualizer` to Vite config
+2. Add bundle size reporting to CI
+3. Set bundle size limits
+4. Add bundlewatch or similar tool
+
+**Effort:** S (2-3 hours)
+**Dependencies:** TD-012 (CI/CD)
+**Target Version:** v1.8.0
+
+---
+
+### TD-030: No Image Loading Error Handling
+
+**Category:** Code Quality
+**Priority:** Low
+**Location:** Image display components
+**Lines:** Various
+
+**Description:**
+Components that display images (generated infographics, template previews) don't handle image load errors gracefully.
+
+**Impact:**
+- Broken images show default browser icon
+- No retry mechanism
+- Poor user experience
+
+**Remediation:**
+1. Add `onError` handlers to all `<img>` tags
+2. Show fallback placeholder on error
+3. Add retry mechanism for failed loads
+4. Log image load errors
+
+**Effort:** S (2-3 hours)
+**Dependencies:** None
+**Target Version:** v1.8.0
+
+---
+
+### TD-031: Form Validation Inconsistency
+
+**Category:** Code Quality
+**Priority:** Low
+**Location:** Form components
+**Lines:** Various
+
+**Description:**
+Form validation is basic (mainly checking if topic is non-empty). No validation for:
+- URL format validation
+- GitHub repo format validation
+- File extension validation for GitHub filters
+- Date range validation
+
+**Impact:**
+- Users can submit invalid data
+- Backend errors instead of client-side validation
+- Poor UX
+
+**Remediation:**
+1. Add validation utilities in `utils/validation.ts`
+2. Add format validators:
+   - `isValidURL(url: string): boolean`
+   - `isValidGitHubRepo(repo: string): boolean`
+   - `isValidDateRange(start: string, end: string): boolean`
+3. Show validation errors in real-time
+4. Consider using validation library (zod, yup)
+
+**Effort:** S (3-4 hours)
+**Dependencies:** None
+**Target Version:** v1.8.0
+
+---
+
+### TD-032: Missing Rate Limiting UI Feedback
+
+**Category:** Code Quality
+**Priority:** Low
+**Location:** `services/geminiService.ts`
+**Lines:** 52-76
+
+**Description:**
+Rate limiting errors (429) are caught and displayed, but no proactive rate limiting or cooldown UI exists.
+
+**Impact:**
+- Users may spam API calls
+- Quota exhaustion
+- Poor error messages after rate limit hit
+
+**Remediation:**
+1. Implement client-side rate limiting
+2. Add cooldown timer after rate limit error
+3. Show remaining quota (if available from API)
+4. Disable generate button during cooldown
+
+**Effort:** S (3-4 hours)
+**Dependencies:** None
+**Target Version:** v1.9.0
+
+---
+
+### TD-033: Unused Imports Detection
+
+**Category:** Code Quality
+**Priority:** Low
+**Location:** Various files
+**Lines:** Various
+
+**Description:**
+No automated check for unused imports. While TypeScript warns about unused variables, imports can slip through.
+
+**Impact:**
+- Unused dependencies in bundle
+- Code clutter
+- Confusing for maintainers
+
+**Remediation:**
+1. Add ESLint rule `@typescript-eslint/no-unused-vars` with `varsIgnorePattern` for imports
+2. Run `eslint --fix` to auto-remove
+3. Add pre-commit hook to catch unused imports
+
+**Effort:** XS (1 hour)
+**Dependencies:** None
+**Target Version:** v1.7.0
+
+---
+
+### TD-034: Missing Environment Variable Validation
+
+**Category:** Configuration
+**Priority:** Low
+**Location:** `vite.config.ts`, `services/geminiService.ts`
+**Lines:** Various
+
+**Description:**
+Environment variables are accessed directly without validation on startup. If `GEMINI_API_KEY` is missing, error only appears when user tries to generate.
+
+**Impact:**
+- Late error discovery
+- Poor developer experience
+- Unclear configuration requirements
+
+**Remediation:**
+1. Create `utils/env.ts` with validation:
+```typescript
+export function validateEnv() {
+  const required = ['GEMINI_API_KEY'];
+  const missing = required.filter(key => !process.env[key]);
+  if (missing.length > 0) {
+    throw new Error(`Missing required env vars: ${missing.join(', ')}`);
+  }
+}
+```
+2. Call on app startup (dev mode only)
+3. Add `.env.example` file
+
+**Effort:** XS (1 hour)
+**Dependencies:** None
+**Target Version:** v1.7.0
+
+---
+
+### TD-035: No Offline Support
+
+**Category:** Feature Gap
+**Priority:** Low
+**Location:** Application-wide
+**Lines:** N/A
+
+**Description:**
+App has no offline support or service worker. IndexedDB provides local storage, but no offline-first approach.
+
+**Impact:**
+- Cannot use app offline
+- No caching of static assets
+- Network dependency for all features
+
+**Remediation:**
+1. Add Vite PWA plugin
+2. Configure service worker for offline support
+3. Cache static assets
+4. Show offline indicator
+5. Queue operations when offline
+
+**Effort:** L (8-12 hours)
+**Dependencies:** None
+**Target Version:** v2.0.0 (if needed)
+
+---
+
+### TD-036: Missing Internationalization Edge Cases
+
+**Category:** Code Quality
+**Priority:** Low
+**Location:** i18n implementation
+**Lines:** Various
+
+**Description:**
+i18n is implemented (v1.5.0) but some edge cases remain:
+- Number formatting (1,000 vs 1.000)
+- Date formatting (MM/DD/YYYY vs DD/MM/YYYY)
+- Pluralization rules
+- RTL language support
+
+**Impact:**
+- Inconsistent user experience across locales
+- Poor support for non-English locales
+- Potential layout issues with RTL
+
+**Remediation:**
+1. Use `Intl` API for number/date formatting
+2. Add pluralization rules to i18n config
+3. Test with RTL locale (Arabic)
+4. Add CSS for RTL support (`dir="rtl"`)
+
+**Effort:** M (4-6 hours)
+**Dependencies:** None
+**Target Version:** v2.0.0
+
+---
+
+### TD-037: Missing Security Headers
+
+**Category:** Security
+**Priority:** Low
+**Location:** Server configuration
+**Lines:** N/A
+
+**Description:**
+If deployed with custom server, no security headers are configured:
+- Content-Security-Policy
+- X-Frame-Options
+- X-Content-Type-Options
+- Strict-Transport-Security
+
+**Impact:**
+- XSS vulnerability exposure
+- Clickjacking risk
+- MIME-type sniffing
+
+**Remediation:**
+1. Configure security headers in deployment:
+   - Vercel: `vercel.json`
+   - Netlify: `_headers` file
+   - Nginx: nginx.conf
+2. Add CSP for inline scripts
+3. Enable HSTS for HTTPS
+
+**Effort:** S (2-3 hours)
+**Dependencies:** Deployment platform
+**Target Version:** Before production deployment
+
+---
 
 ## Resolved Items
 
 ### ~~State Management Complexity~~ (RESOLVED)
 
 **Location:** `App.tsx`
-
 **Resolution Date:** 2025-12-11
 
 **Solution Implemented:**
@@ -27,7 +1313,6 @@ Known issues, code quality improvements, and refactoring needs.
 ### ~~Base64 Image Storage~~ (RESOLVED)
 
 **Location:** localStorage persistence
-
 **Resolution Date:** 2025-12-11
 
 **Solution Implemented:**
@@ -38,14 +1323,13 @@ Known issues, code quality improvements, and refactoring needs.
 - Migration utility from localStorage
 
 **Files Created:**
-- `services/storageService.ts` (280+ lines)
+- `services/storageService.ts` (354 lines)
 
 ---
 
 ### ~~Error Boundary Missing~~ (RESOLVED)
 
 **Location:** Application-wide
-
 **Resolution Date:** 2025-12-11
 
 **Solution Implemented:**
@@ -60,38 +1344,11 @@ Known issues, code quality improvements, and refactoring needs.
 **Files Modified:**
 - `index.tsx` - Added ErrorBoundary wrapper
 
-## High Priority
-
-(No remaining high priority items)
-
-## Medium Priority
-
-### API Key Client-Side Exposure
-
-**Location:** Application-wide (AI Studio integration)
-
-**Issue:** API keys are handled client-side for AI Studio deployment model. While this is intentional for the target deployment environment, the security model is not clearly documented.
-
-**Code Review Finding:** v1.4.5 code review (2025-12-12)
-
-**Impact:** Security documentation gap - users may not understand the security implications of the client-side API key model.
-
-**Proposed Solution:**
-- Document security model in README.md
-- Add security considerations section to docs
-- Clarify AI Studio vs. local development security
-- Document API key best practices
-
-**Estimated Effort:** Low (documentation only)
-
-**Target Version:** v1.4.6 or v1.5.0
-
 ---
 
 ### ~~Type Safety Gaps~~ (RESOLVED)
 
 **Location:** Various
-
 **Resolution Date:** 2025-12-11
 
 **Solution Implemented:**
@@ -107,7 +1364,6 @@ Known issues, code quality improvements, and refactoring needs.
 ### ~~TailwindCSS CDN Usage~~ (RESOLVED)
 
 **Location:** `index.html`
-
 **Resolution Date:** 2025-12-11
 
 **Solution Implemented:**
@@ -127,168 +1383,9 @@ Known issues, code quality improvements, and refactoring needs.
 - `index.tsx` - Added CSS import
 
 **Dependencies Added:**
-- tailwindcss (dev)
-- postcss (dev)
-- autoprefixer (dev)
-
----
-
-### Component Prop Drilling
-
-**Location:** Multiple components
-
-**Issue:** Props passed through multiple component layers unnecessarily.
-
-**Example:**
-```
-App → InfographicForm → RichSelect
-     └─ passes 10+ props through
-```
-
-**Proposed Solution:**
-- Use React Context for shared state
-- Implement compound components pattern
-- Extract container components
-
-**Estimated Effort:** Medium
-
----
-
-### Missing Loading States
-
-**Location:** Various async operations
-
-**Issue:** Some operations lack proper loading indicators:
-- Version deletion
-- File upload processing
-- Initial localStorage load
-
-**Estimated Effort:** Low
-
-## Low Priority
-
-### Console Logging Not Filtered for Production
-
-**Location:** Application-wide
-
-**Issue:** 40+ console.log statements exist across the codebase without environment-based filtering. In production builds, these logs create unnecessary noise and may expose sensitive information.
-
-**Code Review Finding:** v1.4.5 code review (2025-12-12)
-
-**Impact:** Production debugging noise, potential information disclosure
-
-**Proposed Solution:**
-- Create logger utility with environment-based filtering
-- Replace all console.log calls with logger methods
-- Implement log levels (debug, info, warn, error)
-- Disable debug/info logs in production builds
-
-**Example:**
-```typescript
-// utils/logger.ts
-export const logger = {
-  debug: (...args: any[]) => {
-    if (import.meta.env.DEV) console.log(...args);
-  },
-  info: (...args: any[]) => {
-    if (import.meta.env.DEV) console.info(...args);
-  },
-  warn: (...args: any[]) => console.warn(...args),
-  error: (...args: any[]) => console.error(...args),
-};
-```
-
-**Estimated Effort:** Low (1-2 hours)
-
-**Target Version:** v1.5.0
-
----
-
-### Missing Unit Tests
-
-**Location:** Application-wide
-
-**Issue:** No unit test framework is currently configured. This creates risk for future maintainability and regression prevention.
-
-**Code Review Finding:** v1.4.5 code review (2025-12-12)
-
-**Impact:** Future maintainability, regression prevention
-
-**Proposed Solution:**
-- Add Vitest test framework
-- Configure test environment with React Testing Library
-- Write unit tests for utility functions and services
-- Add component tests for key UI components
-- Configure test coverage reporting
-- Add CI integration
-
-**Priority Areas:**
-1. `services/geminiService.ts` - API integration logic
-2. `services/storageService.ts` - IndexedDB operations
-3. Custom hooks (`hooks/`) - State management logic
-4. Utility functions
-5. Component rendering and interactions
-
-**Estimated Effort:** High (ongoing)
-
-**Target Version:** v2.0.0 (comprehensive suite as per v2.0.0 plan)
-
----
-
-### Callback Function Parameters
-
-**Location:** Multiple components
-
-**Issue:** Some callback functions pass multiple individual parameters where object destructuring would improve API clarity and extensibility.
-
-**Code Review Finding:** v1.4.5 code review (2025-12-12)
-
-**Impact:** Code readability, API design
-
-**Example:**
-```typescript
-// Current
-onGenerate(topic, inputType, size, aspectRatio, style, palette);
-
-// Proposed
-onGenerate({ topic, inputType, size, aspectRatio, style, palette });
-```
-
-**Benefits:**
-- Named parameters for clarity
-- Easier to add optional parameters
-- More flexible function signatures
-- Better IDE autocomplete
-
-**Estimated Effort:** Low (refactoring)
-
-**Target Version:** v1.5.0
-
----
-
-### Code Organization
-
-**Files to Consider Splitting:**
-
-| File | Lines | Suggested Split |
-|------|-------|-----------------|
-| `App.tsx` | 400+ | Extract hooks, handlers |
-| `types.ts` | 100+ | Separate by domain |
-| `geminiService.ts` | 200+ | Split analysis/generation |
-
----
-
-### Test Coverage
-
-**Current State:** No automated tests
-
-**Needed:**
-- Unit tests for utility functions
-- Component tests with Testing Library
-- Integration tests for generation flow
-- E2E tests for critical paths
-
-**Estimated Effort:** High (ongoing)
+- `tailwindcss` (dev)
+- `postcss` (dev)
+- `autoprefixer` (dev)
 
 ---
 
@@ -315,110 +1412,139 @@ onGenerate({ topic, inputType, size, aspectRatio, style, palette });
 - Added skip-to-content link in `App.tsx`
 - Added `aria-labels` to all icon buttons across components
 - Added `aria-hidden="true"` to decorative icons
-- Implemented full keyboard navigation in `RichSelect.tsx` (Arrow keys, Enter, Escape, Home, End)
-- Added proper ARIA attributes: `aria-haspopup`, `aria-expanded`, `aria-selected`, `role="listbox"`, `role="option"`
+- Implemented full keyboard navigation in `RichSelect.tsx`
+- Added proper ARIA attributes
 - Added `role="dialog"` and `aria-modal` to VersionHistory drawer
 - Added proper labels for search and sort inputs
 - Added focus ring styles for keyboard navigation
 
 **Files Modified:**
-- `App.tsx` - Skip-to-content link, nav landmarks
-- `components/RichSelect.tsx` - Full keyboard nav, ARIA attributes
-- `components/InfographicResult.tsx` - aria-labels, aria-hidden
-- `components/VersionHistory.tsx` - Dialog role, labels, aria-hidden
-
-**Remaining:**
-- Color contrast verification (automated testing recommended)
+- `App.tsx`
+- `components/RichSelect.tsx`
+- `components/InfographicResult.tsx`
+- `components/VersionHistory.tsx`
 
 ---
-
-### Performance Optimization
-
-**Potential Improvements:**
-- Memoize expensive computations
-- Lazy load version history images
-- Virtualize long lists
-- Debounce form auto-save
-
-**Estimated Effort:** Medium
-
-## Refactoring Candidates
 
 ### ~~Extract Custom Hooks~~ (RESOLVED)
 
 **Resolution Date:** 2025-12-11
 
 **Implemented Hooks:**
-```typescript
-// hooks/useFormPersistence.ts
-useFormPersistence()  // Auto-save form with debouncing and validation
+- `useFormPersistence()` - Auto-save form with debouncing and validation
+- `useVersionHistory()` - Manage saved versions with IndexedDB
+- `useGeneration()` - Handle two-phase AI generation workflow
 
-// hooks/useVersionHistory.ts
-useVersionHistory()   // Manage saved versions with IndexedDB
+---
 
-// hooks/useGeneration.ts
-useGeneration()       // Handle two-phase AI generation workflow
-```
+## Prioritized Remediation Plan
 
-**Remaining:**
-- `useApiKey()` - API key management (optional future extraction)
+### Sprint 1 (v1.7.0) - Foundation & Quick Wins
 
-### Consolidate API Error Handling
+**Effort:** 2-3 weeks
+**Focus:** High-impact, low-effort items + critical foundations
 
-**Current:** Error handling duplicated across service functions
+1. **TD-034** - Environment variable validation (XS - 1h)
+2. **TD-014** - Update outdated dependencies (XS - 15m)
+3. **TD-033** - Add unused imports detection (XS - 1h)
+4. **TD-022** - Error boundaries for lazy components (XS - 1h)
+5. **TD-002** - Enable TypeScript strict mode (M - 4-6h)
+6. **TD-013** - Fix `any` types (S - 2-3h)
+7. **TD-004** - Create logger utility (S - 2-3h)
+8. **TD-010** - Refactor callback parameters (S - 2-3h)
+9. **TD-005** - Document API security model (XS - 1-2h)
+10. **TD-008** - Add missing loading states (S - 3-4h)
+11. **TD-012** - Set up CI/CD (S - 3-4h)
+12. **TD-011** - Integrate error tracking (S - 2-3h)
 
-**Proposed:** Centralized error handler with consistent user messages
+**Total Effort:** ~25-35 hours
 
-```typescript
-// Proposed pattern
-const handleApiError = (error: unknown): UserFacingError => {
-  if (isGeminiError(error)) {
-    return mapGeminiError(error);
-  }
-  return genericError;
-};
-```
+---
 
-### Component Composition
+### Sprint 2 (v1.8.0) - Architecture Improvements
 
-**RichSelect:** Consider using Radix UI or Headless UI for better accessibility and behavior.
+**Effort:** 3-4 weeks
+**Focus:** Architecture refactoring and optimization
 
-**Modal Components:** Extract reusable Modal wrapper component.
+1. **TD-003** - Unified IndexedDB storage (L - 8-12h)
+2. **TD-006** - Implement React Context (M - 6-8h)
+3. **TD-009** - Refactor App.tsx state (M - 6-8h)
+4. **TD-015** - React performance optimizations (M - 4-6h)
+5. **TD-019** - Stricter ESLint rules (S - 2-3h)
+6. **TD-025** - Keyboard shortcut visibility (XS - 1h)
+7. **TD-029** - Bundle size analysis (S - 2-3h)
+8. **TD-030** - Image error handling (S - 2-3h)
+9. **TD-031** - Form validation (S - 3-4h)
 
-## Technical Debt Tracking
+**Total Effort:** ~35-50 hours
 
-### Adding New Debt
+---
 
-When adding technical debt:
-1. Document in this file
-2. Add TODO comment in code
-3. Create GitHub issue if significant
-4. Link related items
+### Sprint 3 (v1.9.0) - Code Quality & Polish
 
-### Addressing Debt
+**Effort:** 2-3 weeks
+**Focus:** Code organization and quality improvements
 
-When addressing debt:
-1. Create branch for refactoring
-2. Update this document
-3. Ensure tests pass (when available)
-4. Request review for significant changes
+1. **TD-007** - Split large components (L - 12-16h)
+2. **TD-021** - DRY storage services (S - 2-3h)
+3. **TD-020** - Extract magic numbers (S - 2-3h)
+4. **TD-017** - Add JSDoc comments (S - 3-4h)
+5. **TD-032** - Rate limiting UI (S - 3-4h)
+6. **TD-018** - Real style previews (M - 4-6h)
+7. **TD-028** - Consistent styling (S - 2-3h)
 
-## Metrics
+**Total Effort:** ~30-42 hours
 
-### Current Status (Updated 2025-12-12)
+---
 
-| Category | Total | Resolved | Remaining | Priority |
-|----------|-------|----------|-----------|----------|
-| High Priority | 3 | 3 | 0 | All resolved |
-| Medium Priority | 6 | 3 | 3 | Address within 2 releases |
-| Low Priority | 9 | 2 | 7 | Address as time permits |
-| Refactoring | 4 | 1 | 3 | As needed |
+### Sprint 4 (v2.0.0) - Testing & Advanced Features
 
-**Recent Additions (v1.4.5 Code Review - 2025-12-12):**
-- Medium: API Key Client-Side Exposure (documentation gap)
-- Low: Console Logging Not Filtered for Production
-- Low: Missing Unit Tests
-- Low: Callback Function Parameters
+**Effort:** 4-6 weeks
+**Focus:** Comprehensive testing and polish
+
+1. **TD-001** - Unit test infrastructure (XL - 80-120h)
+2. **TD-027** - Accessibility testing (M - included in TD-001)
+3. **TD-026** - Theme system (M - 4-6h)
+4. **TD-036** - i18n edge cases (M - 4-6h)
+5. **TD-035** - Offline support (L - 8-12h) - Optional
+6. **TD-024** - Runtime validation (S - conditional)
+
+**Total Effort:** ~96-144 hours
+
+---
+
+## Quick Wins
+
+High-impact items that can be completed quickly (< 2 hours each):
+
+1. **TD-034** - Environment variable validation (1h)
+2. **TD-014** - Update dependencies (15m)
+3. **TD-033** - Unused imports detection (1h)
+4. **TD-022** - Lazy load error boundaries (1h)
+5. **TD-025** - Keyboard shortcut help button (1h)
+6. **TD-005** - Security documentation (1-2h)
+
+**Total Quick Wins Effort:** ~5-6 hours
+**Impact:** Improved developer experience, better error handling, clearer documentation
+
+---
+
+## Metrics and Tracking
+
+### Current Status (v1.6.0 - 2025-12-12)
+
+| Category | Total | Critical | High | Medium | Low |
+|----------|-------|----------|------|--------|-----|
+| **Code Quality** | 15 | 0 | 1 | 4 | 10 |
+| **Architecture** | 6 | 0 | 0 | 4 | 2 |
+| **Testing** | 3 | 0 | 1 | 0 | 2 |
+| **Documentation** | 4 | 0 | 0 | 1 | 3 |
+| **Configuration** | 4 | 0 | 1 | 2 | 1 |
+| **Performance** | 3 | 0 | 0 | 0 | 3 |
+| **Security** | 2 | 0 | 0 | 1 | 1 |
+| **TOTAL** | **37** | **0** | **3** | **12** | **22** |
+
+---
 
 ### Resolution Summary
 
@@ -433,8 +1559,93 @@ When addressing debt:
 | Extract Custom Hooks | RESOLVED | 2025-12-11 |
 | Accessibility Audit | RESOLVED | 2025-12-11 |
 
+**Total Resolved:** 8 major items
+
+---
+
+### Debt Trend
+
+**v1.4.0:**
+- High Priority: 3
+- Medium Priority: 6
+- Low Priority: 9
+
+**v1.6.0 (Current):**
+- High Priority: 2
+- Medium Priority: 10
+- Low Priority: 25
+
+**Analysis:**
+High priority items decreased (3 → 2), but comprehensive analysis revealed more medium/low priority items. This is healthy - better visibility into technical debt. Focus should be on clearing high priority items first.
+
+---
+
+### Code Metrics
+
+| Metric | Value | Target | Status |
+|--------|-------|--------|--------|
+| Test Coverage | 0% | 80%+ | Critical |
+| TypeScript Strict | No | Yes | High Priority |
+| Console Statements | 48 | 0 (dev only) | Medium Priority |
+| Largest File | 1,020 lines | <500 lines | Medium Priority |
+| `any` Types | 8 | 0 | Low Priority |
+| Outdated Deps | 3 minor | 0 | Low Priority |
+| Security Vulnerabilities | 0 | 0 | Good |
+| ESLint Errors | 0 | 0 | Good |
+
+---
+
 ### Goals
 
-- ~~Reduce high priority items to 0~~ ACHIEVED
-- Maintain medium priority items < 5 (currently 3)
-- Review quarterly
+- ~~Reduce high priority items to 0~~ → **Target: v1.8.0**
+- ~~Maintain medium priority items < 5~~ → **Current: 10** (increased due to comprehensive analysis)
+- **New Goal:** Achieve 80%+ test coverage by v2.0.0
+- **New Goal:** Enable TypeScript strict mode by v1.7.0
+- **New Goal:** Unified storage architecture by v1.8.0
+- Review quarterly and update this document
+
+---
+
+## Notes
+
+### Adding New Technical Debt
+
+When identifying new technical debt:
+
+1. Add entry to this document with ID (TD-XXX)
+2. Categorize by type and priority
+3. Estimate effort (XS/S/M/L/XL)
+4. Identify dependencies
+5. Set target version
+6. Add code comment linking to this document if applicable
+
+### Addressing Technical Debt
+
+When addressing debt:
+
+1. Create feature branch
+2. Update this document (move to Resolved section)
+3. Ensure all related code is updated
+4. Add tests if applicable
+5. Request code review
+6. Update CHANGELOG.md
+
+### Priority Definitions
+
+- **Critical:** Blocks releases, security vulnerabilities, data loss risks
+- **High:** Significant impact on quality, maintainability, or user experience
+- **Medium:** Notable improvements, refactoring opportunities
+- **Low:** Nice-to-have, code polish, minor improvements
+
+### Effort Estimates
+
+- **XS:** < 2 hours
+- **S:** 2-4 hours
+- **M:** 4-8 hours
+- **L:** 8-16 hours
+- **XL:** 16+ hours
+
+---
+
+**Document Maintained By:** Technical Debt Analysis (Automated + Manual Review)
+**Next Review:** 2025-03-12 (Quarterly)
