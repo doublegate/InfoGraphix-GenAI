@@ -7,6 +7,153 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2027-09 (Planned)
+
+### Theme: Stable Release
+
+*Comprehensive performance optimization, UI/UX polish, and feature completeness. See `to-dos/version-plans/v2.0.0-PLAN.md` for details.*
+
+### Added
+- Comprehensive monitoring and observability stack
+- In-app help system and knowledge base
+- Visual regression testing suite
+- Automated accessibility testing
+
+### Changed
+- 50% improvement in generation speed
+- 70% reduction in API latency
+- Complete UI/UX overhaul with design system
+- Enhanced error handling with automatic recovery
+
+### Documentation
+- 50+ video tutorials
+- Complete API reference documentation
+- Interactive demos for key features
+- Multi-language documentation (5 languages)
+
+---
+
+## [1.9.0] - 2027-06 (Planned)
+
+### Theme: Enterprise & Advanced Features
+
+*Enterprise-grade authentication, analytics, and brand management. See `to-dos/version-plans/v1.9.0-PLAN.md` for details.*
+
+### Added
+- SSO/SAML 2.0 authentication support
+- Advanced RBAC with custom roles
+- Admin dashboard with organization analytics
+- Brand guidelines enforcement system
+- Template governance with approval workflows
+- Go SDK (github.com/infographix/infographix-go)
+- Ruby SDK (infographix gem)
+- Batch API endpoints for bulk operations
+
+### Security
+- SCIM provisioning support
+- Audit logging for all administrative actions
+- Permission-based access control at API level
+
+---
+
+## [1.8.0] - 2027-03 (Planned)
+
+### Theme: Ecosystem Integrations
+
+*Deep integration with productivity tools and platforms. See `to-dos/version-plans/v1.8.0-PLAN.md` for details.*
+
+### Added
+- Google Workspace Add-on (Slides, Docs, Drive)
+- Notion integration with page export
+- Figma plugin for designers
+- Slack bot with slash commands
+- Discord bot for communities
+- Zapier integration with 20+ Zap templates
+- Make (Integromat) integration for advanced automation
+
+### Integrations
+- OAuth2 authentication for all integrations
+- Webhook support for real-time notifications
+- Marketplace listings for all platforms
+
+---
+
+## [1.7.0] - 2026-12 (Planned)
+
+### Theme: Platform & API
+
+*Comprehensive REST API and developer platform. See `to-dos/version-plans/v1.7.0-PLAN.md` for details.*
+
+### Added
+- REST API v1 with OpenAPI 3.0 specification
+- Webhook system with delivery tracking
+- JavaScript/TypeScript SDK (@infographix/sdk)
+- Python SDK (infographix on PyPI)
+- API Playground for interactive testing
+- Developer Portal with usage analytics
+- Rate limiting and quota management
+
+### API
+- Complete API coverage for all features
+- Authentication via API keys
+- Comprehensive error responses
+- CORS configuration for web apps
+
+---
+
+## [1.6.0] - 2026-09 (Planned)
+
+### Theme: AI Intelligence & Creativity
+
+*AI-powered suggestions, templates, and animation. See `to-dos/version-plans/v1.6.0-PLAN.md` for details.*
+
+### Added
+- AI-powered style and palette suggestions
+- Smart palette generator from images/logos
+- Comprehensive template library (100+ templates)
+- Animation support with GIF/MP4 export
+- Layout optimization engine
+- Data visualization templates with CSV import
+- Presentation mode for live presentations
+
+### AI Features
+- Topic categorization and analysis
+- Automatic color palette matching
+- Layout optimization suggestions
+- Learning from user preferences
+
+---
+
+## [1.5.0] - 2026-06 (Planned)
+
+### Theme: Collaboration & Sharing
+
+*User accounts, cloud storage, and team collaboration. See `to-dos/version-plans/v1.5.0-PLAN.md` for details.*
+
+### Added
+- User accounts with email/OAuth2 authentication
+- Cloud storage with cross-device sync
+- Sharing via public links and embed codes
+- Team workspaces with role-based permissions
+- Post-generation canvas editor
+- Keyboard shortcuts for power users
+- Accessibility improvements (WCAG 2.1 AA compliance)
+- Internationalization support (5 languages)
+
+### Collaboration
+- Comment threads on infographics
+- Activity feed for team workspaces
+- Version control for collaborative edits
+- Invitation system for team members
+
+---
+
+## [1.4.0] - 2026-03 (Planned)
+
+### Theme: Productivity Enhancement
+
+*Batch processing, templates, and enhanced workflows. See `to-dos/version-plans/v1.4.0-PLAN.md` for details.*
+
 ### Added
 - Comprehensive user guide (docs/USER-GUIDE.md) with step-by-step instructions for all features
 - FAQ document (docs/FAQ.md) covering 60+ common questions across 10 categories
@@ -34,14 +181,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - README.md documentation section now includes User Guide and FAQ links
 - CONTRIBUTING.md code style section expanded with TypeScript, React, and formatting examples
 
-### Planned
-- Batch generation mode for multiple infographics
-- Custom style template creation
-- Export to additional formats (SVG, PDF)
-- Generation history search and filtering
-- Collaborative sharing features
+- Batch generation mode (up to 50 topics)
+- Custom style template system (save, import, export)
+- Enhanced version history (search, filter, pagination)
+- Export format options (SVG, PDF, multi-resolution)
+- Improved GitHub repository analysis
+- Multi-page URL analysis and comparison
 
-## [0.1.0] - 2025-12-11
+### Features
+- Queue management with progress tracking
+- ZIP download for batch results
+- Template library with preview
+- Advanced filtering and sorting
+- GitHub GraphQL API integration
+- Sitemap parsing for websites
+
+---
+
+## [1.3.0] - 2025-12-11 (Current Release)
 
 ### Added
 - Two-phase AI pipeline for infographic generation
@@ -83,5 +240,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - @google/genai SDK for Gemini API integration
 - Component-based architecture with clear separation of concerns
 
-[Unreleased]: https://github.com/doublegate/InfoGraphix-GenAI/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v0.1.0
+[Unreleased]: https://github.com/doublegate/InfoGraphix-GenAI/compare/v1.3.0...HEAD
+[2.0.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v2.0.0
+[1.9.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.9.0
+[1.8.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.8.0
+[1.7.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.7.0
+[1.6.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.6.0
+[1.5.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.5.0
+[1.4.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.4.0
+[1.3.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.3.0

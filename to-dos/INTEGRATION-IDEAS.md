@@ -2,10 +2,34 @@
 
 Potential integrations and extensions for InfoGraphix AI.
 
+## Version Assignment Overview
+
+| Integration | Target Version | Priority | Status |
+|-------------|----------------|----------|--------|
+| REST API | v1.7.0 | High | Planned |
+| Webhooks | v1.7.0 | High | Planned |
+| JavaScript/TypeScript SDK | v1.7.0 | High | Planned |
+| Python SDK | v1.7.0 | High | Planned |
+| Google Workspace | v1.8.0 | High | Planned |
+| Notion | v1.8.0 | Medium | Planned |
+| Figma Plugin | v1.8.0 | Medium | Planned |
+| Slack Bot | v1.8.0 | Medium | Planned |
+| Discord Bot | v1.8.0 | Medium | Planned |
+| Zapier | v1.8.0 | Medium | Planned |
+| Make (Integromat) | v1.8.0 | Medium | Planned |
+| Go SDK | v1.9.0 | Medium | Planned |
+| Ruby SDK | v1.9.0 | Medium | Planned |
+| Embeddable Widget | v1.9.0 | Low | Planned |
+
+See `to-dos/version-plans/` for detailed implementation plans for each version.
+
+---
+
 ## Planned Integrations
 
 ### Google Workspace
 
+**Target Version:** v1.8.0 (Q1 2027)
 **Priority:** High
 
 **Services:**
@@ -27,6 +51,7 @@ Potential integrations and extensions for InfoGraphix AI.
 
 ### Notion
 
+**Target Version:** v1.8.0 (Q1 2027)
 **Priority:** Medium
 
 **Features:**
@@ -48,6 +73,7 @@ Potential integrations and extensions for InfoGraphix AI.
 
 ### Figma
 
+**Target Version:** v1.8.0 (Q1 2027)
 **Priority:** Medium
 
 **Features:**
@@ -154,6 +180,8 @@ Potential integrations and extensions for InfoGraphix AI.
 
 ### Communication Platforms
 
+**Target Version:** v1.8.0 (Q1 2027) for Slack/Discord, Future for Teams
+
 **Potential Integrations:**
 
 **Slack:**
@@ -174,6 +202,8 @@ Potential integrations and extensions for InfoGraphix AI.
 ---
 
 ## API-First Approach
+
+**Target Version:** v1.7.0 (Q4 2026)
 
 ### REST API Design
 
@@ -210,7 +240,15 @@ POST /api/v1/webhooks
 
 ### SDK Development
 
-**Languages:**
+**Phase 1 (v1.7.0):**
+- JavaScript/TypeScript (npm package)
+- Python (pip package)
+
+**Phase 2 (v1.9.0):**
+- Go (module)
+- Ruby (gem)
+
+**All Languages:**
 - JavaScript/TypeScript (npm package)
 - Python (pip package)
 - Go (module)
@@ -219,6 +257,8 @@ POST /api/v1/webhooks
 ---
 
 ## Embeddable Widget
+
+**Target Version:** v1.9.0 (Q2 2027)
 
 ### Features
 
@@ -249,6 +289,8 @@ POST /api/v1/webhooks
 ---
 
 ## Zapier/Make Integration
+
+**Target Version:** v1.8.0 (Q1 2027)
 
 ### Triggers
 
