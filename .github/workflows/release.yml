@@ -120,11 +120,68 @@ jobs:
           name: release-assets-${{ github.sha }}
           path: ./release-assets
 
-      - name: Generate release notes
-        id: release-notes
+      - name: Check for existing release notes
+        id: check-existing-notes
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          echo "Checking for existing release notes..."
+
+          # Check if release exists and has non-empty body
+          if gh release view "$VERSION" > /dev/null 2>&1; then
+            EXISTING_BODY=$(gh release view "$VERSION" --json body -q '.body // ""')
+            BODY_LENGTH=${#EXISTING_BODY}
+
+            if [ "$BODY_LENGTH" -gt 100 ]; then
+              echo "has_existing_notes=true" >> $GITHUB_OUTPUT
+              echo "Found existing release notes ($BODY_LENGTH chars)"
+              echo "$EXISTING_BODY" > release_notes.md
+              exit 0
+            fi
+          fi
+
+          echo "has_existing_notes=false" >> $GITHUB_OUTPUT
+
+      - name: Extract annotated tag message
+        id: tag-message
+        if: steps.check-existing-notes.outputs.has_existing_notes != 'true'
         env:
           VERSION: ${{ needs.build.outputs.version }}
         run: |
+          echo "Checking for annotated tag message..."
+
+          # Get annotated tag message (empty if lightweight tag)
+          TAG_MESSAGE=$(git tag -l --format='%(contents)' "$VERSION" || echo "")
+          MESSAGE_LENGTH=${#TAG_MESSAGE}
+
+          if [ "$MESSAGE_LENGTH" -gt 100 ]; then
+            echo "has_tag_message=true" >> $GITHUB_OUTPUT
+            echo "Found annotated tag message ($MESSAGE_LENGTH chars)"
+            echo "$TAG_MESSAGE" > release_notes.md
+
+            # Append checksums to tag message
+            echo "" >> release_notes.md
+            echo "" >> release_notes.md
+            echo "## Checksums" >> release_notes.md
+            echo "" >> release_notes.md
+            echo '```' >> release_notes.md
+            cat release-assets/checksums.txt >> release_notes.md
+            echo '```' >> release_notes.md
+          else
+            echo "has_tag_message=false" >> $GITHUB_OUTPUT
+            echo "No annotated tag message found"
+          fi
+
+      - name: Generate release notes from git log
+        id: release-notes
+        if: steps.check-existing-notes.outputs.has_existing_notes != 'true' && steps.tag-message.outputs.has_tag_message != 'true'
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          echo "Generating release notes from git log..."
+
           # Get previous tag safely
           PREV_TAG=$(git describe --tags --abbrev=0 "${VERSION}^" 2>/dev/null || echo "")
 
@@ -191,12 +248,14 @@ jobs:
         run: |
           echo "::notice::Release $VERSION already exists. Uploading new assets..."
 
-          # Upload new assets to existing release
+          # Upload new assets to existing release (preserve release notes)
           gh release upload "$VERSION" \
             "release-assets/infographix-genai-${VERSION}.tar.gz" \
             "release-assets/infographix-genai-${VERSION}.zip" \
             "release-assets/checksums.txt" \
             --clobber
+
+          echo "::notice::Existing release notes preserved. Assets updated only."
 
   # Job 3: Post-release validation
   validate:
