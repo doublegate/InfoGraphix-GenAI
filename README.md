@@ -11,6 +11,43 @@
 
 ---
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+  - [AI-Powered Generation](#ai-powered-generation)
+  - [Customization Options](#customization-options)
+  - [Input Flexibility](#input-flexibility)
+  - [Productivity Features](#productivity-features)
+  - [Accessibility & Internationalization](#accessibility--internationalization)
+- [Quick Start](#quick-start)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Google AI Studio Deployment](#google-ai-studio-deployment)
+- [Usage](#usage)
+  - [Basic Generation](#basic-generation)
+  - [Advanced Options](#advanced-options)
+- [Configuration](#configuration)
+  - [Environment Variables](#environment-variables)
+  - [API Key Requirements](#api-key-requirements)
+- [Architecture](#architecture)
+  - [Technical Implementation](#technical-implementation)
+  - [AI Pipeline](#ai-pipeline)
+- [Documentation](#documentation)
+- [Roadmap](#roadmap)
+  - [Version Timeline](#version-timeline)
+  - [Recent Updates](#recent-updates)
+  - [Upcoming Features by Theme](#upcoming-features-by-theme)
+- [Scripts](#scripts)
+- [Tech Stack](#tech-stack)
+- [Contributing](#contributing)
+- [Security](#security)
+- [License](#license)
+- [Changelog](#changelog)
+- [Acknowledgments](#acknowledgments)
+
+---
+
 ## Overview
 
 InfoGraphix AI is a powerful web application that generates high-quality infographic images from topics, URLs, or GitHub repositories. Powered by Google's Gemini AI, it combines sophisticated AI analysis with extensive customization options and productivity features.
@@ -42,14 +79,29 @@ InfoGraphix AI is a powerful web application that generates high-quality infogra
 - **Deep Topic Analysis** - Leverages Gemini 3 Pro with 32K thinking budget for comprehensive research
 - **Google Search Grounding** - Retrieves up-to-date information with source citations
 - **Intelligent Visual Planning** - Automatically designs optimal infographic layouts
+- **AI Design Suggestions** (v1.6.0) - Get 3 intelligent style and 3 palette recommendations based on your topic
 
 ### Customization Options
 
 - **22 Artistic Styles** - Modern, Cyberpunk, Bauhaus, Art Deco, Watercolor, Blueprint, and more
 - **10 Color Palettes** - Professional, Vibrant, Earth Tones, Ocean, Sunset, Monochrome, and others
-- **AI Design Suggestions** - Get 3 intelligent style and 3 palette recommendations based on your topic
-- **Custom Palette Generator** - Extract colors from images with 5 color scheme algorithms
-- **55 Professional Templates** - Organized into 10 categories for easy discovery
+- **Custom Palette Generator** (v1.6.0) - Extract colors from images with 5 color scheme algorithms
+  - Complementary (opposite hue)
+  - Triadic (120° spaced hues)
+  - Analogous (adjacent hues)
+  - Split-Complementary (base + 2 adjacent to complement)
+  - Tetradic (double complementary)
+- **55 Professional Templates** (v1.6.0) - Organized into 10 categories for easy discovery
+  - Business & Professional (8 templates)
+  - Technology & Innovation (7 templates)
+  - Education & Learning (5 templates)
+  - Creative & Artistic (7 templates)
+  - Data & Analytics (6 templates)
+  - Social Media (5 templates)
+  - Marketing & Branding (5 templates)
+  - Science & Research (4 templates)
+  - Health & Wellness (3 templates)
+  - Entertainment & Gaming (5 templates)
 - **Multiple Resolutions** - 1K, 2K, or 4K output quality
 - **Aspect Ratios** - Square (1:1), Landscape (16:9), Portrait (9:16), and standard formats
 
@@ -64,7 +116,7 @@ InfoGraphix AI is a powerful web application that generates high-quality infogra
 ### Productivity Features
 
 - **Batch Generation** - Create up to 50 infographics in a single queue with progress tracking
-- **Custom Templates** - Save and reuse your favorite style configurations
+- **Custom Templates** - Save and reuse your favorite style configurations (55 built-in templates)
 - **Enhanced Version History** - Advanced search, filters, and pagination for saved generations
 - **Export Formats** - Download as PNG, PDF, SVG, or multi-resolution ZIP
 - **Keyboard Shortcuts** - 10 power user shortcuts for all common actions
@@ -78,6 +130,7 @@ InfoGraphix AI is a powerful web application that generates high-quality infogra
 - **High Contrast Mode** - Enhanced visibility with system preference detection
 - **Screen Reader Announcements** - ARIA live regions for processing states
 - **Skip Navigation** - Jump to main content with keyboard shortcut
+- **WCAG Accessibility Checking** (v1.6.0) - Custom palettes automatically checked for AA/AAA contrast ratios
 
 ---
 
@@ -119,12 +172,28 @@ This application is designed to run in [Google AI Studio](https://ai.google.dev/
 ### Basic Generation
 
 1. Enter a topic, URL, or GitHub repository name
-2. Select your preferred artistic style
-3. Choose a color palette
-4. Set resolution and aspect ratio
-5. Click "Generate Infographic"
+2. (Optional) Click "Get AI Suggestions" for intelligent style and palette recommendations
+3. Select your preferred artistic style (or apply AI-suggested style)
+4. Choose a color palette (or use custom palette generator)
+5. Set resolution and aspect ratio
+6. Click "Generate Infographic"
 
 ### Advanced Options
+
+**AI Design Suggestions (v1.6.0):**
+Get intelligent recommendations based on your topic:
+- 3 style suggestions with detailed reasoning
+- 3 color palette suggestions with confidence scores
+- Topic-aware analysis using Google Search grounding
+- One-click application of suggestions
+
+**Custom Palette Generator (v1.6.0):**
+Create custom color schemes from images:
+- Upload an image to extract dominant colors
+- Choose from 5 color scheme algorithms
+- Automatic WCAG accessibility checking (AA and AAA standards)
+- Visual color swatches with hex codes
+- Save custom palettes for reuse
 
 **GitHub Repository Filters:**
 
@@ -142,12 +211,6 @@ Create up to 50 infographics in a single queue. Enter multiple topics (one per l
 
 **Template Management:**
 Save your favorite style configurations as reusable templates. The system includes 55 professional templates organized into 10 categories (Business, Technology, Education, Creative, Data, Social Media, Marketing, Science, Health, Entertainment), and you can create custom templates with names, descriptions, and tags.
-
-**AI Design Suggestions:**
-Get intelligent style and palette recommendations based on your topic. The AI analyzes your content and suggests 3 optimal styles with reasoning and 3 color palettes with confidence scores. One-click application makes it easy to apply suggestions.
-
-**Custom Palette Generator:**
-Upload an image to extract dominant colors and generate custom color schemes using 5 different algorithms (complementary, triadic, analogous, split-complementary, tetradic). The system automatically checks WCAG accessibility and provides contrast ratios.
 
 **Export Options:**
 Download generated infographics in multiple formats:
@@ -187,8 +250,9 @@ InfoGraphix-GenAI/
 │   ├── services/
 │   │   ├── geminiService.ts     # Gemini API integration
 │   │   ├── batchService.ts      # Batch generation queue management
-│   │   ├── templateService.ts   # Template CRUD operations (10 default templates)
-│   │   └── storageService.ts    # LocalStorage abstraction
+│   │   ├── templateService.ts   # Template CRUD operations (55 templates)
+│   │   ├── storageService.ts    # LocalStorage abstraction
+│   │   └── colorExtractionService.ts  # Color extraction and palette generation (445 lines)
 │   ├── components/
 │   │   ├── AboutModal.tsx       # Application information modal
 │   │   ├── ApiKeySelector.tsx   # AI Studio key management
@@ -200,6 +264,8 @@ InfoGraphix-GenAI/
 │   │   ├── RichSelect.tsx       # Custom dropdown component
 │   │   ├── VersionComparison.tsx# Version comparison view
 │   │   ├── VersionHistory.tsx   # Saved generations browser (lazy-loaded, 26KB)
+│   │   ├── StyleSuggestions.tsx # AI design suggestions UI (v1.6.0)
+│   │   ├── PaletteGenerator.tsx # Custom palette generator (v1.6.0)
 │   │   ├── BatchGeneration/     # Batch processing components
 │   │   │   ├── BatchManager.tsx # Main batch management modal (lazy-loaded, 22KB)
 │   │   │   ├── BatchQueueCreator.tsx # Queue creation interface
@@ -217,7 +283,11 @@ InfoGraphix-GenAI/
 │   ├── hooks/
 │   │   ├── useKeyboardShortcuts.ts # Keyboard shortcut event handling
 │   │   ├── useAnnouncer.ts      # Screen reader announcements
-│   │   └── useHighContrast.ts   # High contrast mode management
+│   │   ├── useHighContrast.ts   # High contrast mode management
+│   │   ├── useStyleSuggestions.ts  # AI suggestions state management (v1.6.0)
+│   │   ├── useGeneration.ts     # Generation workflow management
+│   │   ├── useFormPersistence.ts # Form draft auto-save
+│   │   └── useVersionHistory.ts # Version history state
 │   ├── i18n/
 │   │   ├── index.ts             # i18next configuration
 │   │   ├── en.json              # English translations
@@ -254,6 +324,12 @@ InfoGraphix-GenAI/
 - 700KB chunk size warning limit for export libraries
 - Proper dependency ordering for React and its dependents
 
+**Color Extraction (v1.6.0):**
+- Client-side color extraction using Vibrant.js (node-vibrant)
+- 5 color scheme algorithms with color theory
+- WCAG contrast ratio calculations for accessibility
+- Custom palette persistence in localStorage
+
 ### AI Pipeline
 
 ```
@@ -284,6 +360,26 @@ User Input (Topic/URL/GitHub/Markdown)
     │
     ▼
 Generated Infographic (PNG)
+```
+
+**Optional: AI Design Suggestions (v1.6.0)**
+```
+User Topic Input
+    │
+    ▼
+┌─────────────────────────────────────┐
+│   AI Suggestion Analysis (Optional) │
+│  ┌───────────────────────────────┐  │
+│  │  Gemini 3 Pro Preview         │  │
+│  │  - Topic categorization       │  │
+│  │  - Google Search grounding    │  │
+│  │  - 3 style suggestions        │  │
+│  │  - 3 palette suggestions      │  │
+│  └───────────────────────────────┘  │
+└─────────────────────────────────────┘
+    │
+    ▼
+User Applies Suggestions (one-click) or Chooses Manually
 ```
 
 ---
@@ -336,7 +432,7 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 - Client-side color extraction for privacy (no server uploads)
 - Custom palette persistence in localStorage
 - New components: StyleSuggestions, PaletteGenerator
-- New service: colorExtractionService.ts (565 lines of color theory algorithms)
+- New service: colorExtractionService.ts (445 lines of color theory algorithms)
 - New hook: useStyleSuggestions for AI suggestion state management
 - New dependency: node-vibrant@4.0.3 for color extraction
 
@@ -368,7 +464,7 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 
 **v1.4.0 - Productivity Enhancement (2025-12-11):**
 - Batch generation mode with queue management (up to 50 topics per batch)
-- Custom template system with save/load/import/export (10 default templates)
+- Custom template system with save/load/import/export (10 default templates, expanded to 55 in v1.6.0)
 - Enhanced version history with advanced filtering and pagination
 - Export to PNG, PDF, SVG, and multi-resolution ZIP formats
 - Multi-URL analysis for comparative infographics
@@ -377,12 +473,6 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 - New utilities: exportUtils.ts for format conversion
 
 ### Upcoming Features by Theme
-
-**v1.6.0 - Intelligence (Q3 2026):**
-- AI-powered style and palette suggestions
-- Template library with 100+ pre-built templates
-- Animation support with GIF/MP4 export
-- Data visualization templates with CSV import
 
 **v1.7.0 - Platform (Q4 2026):**
 - REST API v1 with OpenAPI specification
@@ -441,6 +531,7 @@ See [FEATURE-ROADMAP.md](to-dos/FEATURE-ROADMAP.md) for complete details and [ve
 | [react-i18next](https://react.i18next.com/) | 16.4.1 | React integration for i18next |
 | [i18next](https://www.i18next.com/) | 25.7.2 | Internationalization framework |
 | [i18next-browser-languagedetector](https://github.com/i18next/i18next-browser-languageDetector) | 8.2.0 | Browser language detection plugin |
+| [node-vibrant](https://www.npmjs.com/package/node-vibrant) | 4.0.3 | Color extraction from images (v1.6.0) |
 | [jsPDF](https://www.npmjs.com/package/jspdf) | 3.0.4 | PDF generation (lazy-loaded) |
 | [JSZip](https://www.npmjs.com/package/jszip) | 3.10.1 | ZIP archive creation (lazy-loaded) |
 
@@ -498,6 +589,7 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
 - [Lucide](https://lucide.dev/) - Icon library
 - [jsPDF](https://github.com/parallax/jsPDF) - PDF generation library
 - [JSZip](https://stuk.github.io/jszip/) - ZIP file creation
+- [node-vibrant](https://github.com/Vibrant-Colors/node-vibrant) - Color extraction library
 
 ---
 
