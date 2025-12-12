@@ -185,31 +185,131 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.5.0] - 2026-06 (Planned)
+## [1.5.0] - 2025-12-12
 
-### Theme: Collaboration & Sharing
+### Theme: Accessibility & Global Reach
 
-*User accounts, cloud storage, and team collaboration. See `to-dos/version-plans/v1.5.0-PLAN.md` for details.*
+*Comprehensive keyboard navigation, screen reader support, internationalization, and visual accessibility features.*
 
 ### Added
-- User accounts with email/OAuth2 authentication
-- Cloud storage with cross-device sync
-- Sharing via public links and embed codes
-- Team workspaces with role-based permissions
-- Post-generation canvas editor
-- Keyboard shortcuts for power users
-- Accessibility improvements (WCAG 2.1 AA compliance)
-- Internationalization support (5 languages)
+- **Keyboard Shortcuts System**
+  - 10 application-wide keyboard shortcuts for power users
+  - Cross-platform support (Mac ⌘ vs Windows Ctrl detection)
+  - Keyboard shortcuts modal (Shift+?) showing all available shortcuts
+  - Shortcuts: Generate (Ctrl+Enter), Save (Ctrl+S), Download (Ctrl+D), New (Ctrl+N)
+  - Navigation shortcuts: History (Ctrl+H), Templates (Ctrl+T), Batch (Ctrl+B)
+  - Accessibility shortcut: High Contrast (Ctrl+Shift+C)
+  - Help (Shift+?) and Escape to close modals
 
-### Collaboration
-- Comment threads on infographics
-- Activity feed for team workspaces
-- Version control for collaborative edits
-- Invitation system for team members
+- **Accessibility Improvements (WCAG 2.1 AA Compliance)**
+  - Skip-to-content link for keyboard navigation
+  - Screen reader announcement system with ARIA live regions
+  - Comprehensive ARIA labels on all interactive elements
+  - Focus management for modal dialogs
+  - Semantic HTML structure with proper landmarks
+  - Keyboard navigation support throughout application
+  - Screen reader announcements for processing states and actions
+
+- **Internationalization (i18n)**
+  - react-i18next integration with browser language detection
+  - English (en) and Spanish (es) translation support
+  - Language selector component in navigation bar
+  - 200+ UI strings translated across all components
+  - Persistent language preference in localStorage
+  - Fallback to English for unsupported languages
+
+- **High Contrast Mode**
+  - System preference detection (prefers-contrast media query)
+  - Manual toggle with keyboard shortcut (Ctrl+Shift+C)
+  - Enhanced border visibility and focus indicators
+  - Increased color contrast ratios for text and UI elements
+  - Persistent preference stored in localStorage
+  - Reduced motion support (prefers-reduced-motion media query)
+
+### Changed
+- App.tsx enhanced with accessibility hooks and keyboard event handling
+- All components updated with translation function (t()) calls
+- Navigation bar includes language selector and high contrast toggle
+- Processing state changes now announced to screen readers
+- Main CSS enhanced with accessibility utilities (sr-only, focus-ring)
+
+### Technical
+- Added react-i18next (v16.4.1) for internationalization
+- Added i18next (v25.7.2) and i18next-browser-languagedetector (v8.2.0)
+- New hooks: useKeyboardShortcuts, useAnnouncer, useHighContrast
+- New components: KeyboardShortcutsModal, SkipLink, LanguageSelector
+- New utilities: keyboardShortcuts.ts for shortcut registry
+- New stylesheets: high-contrast.css for contrast mode
+- i18n configuration with language detection and fallback
+
+### Documentation
+- Version references updated to v1.5.0 across all files
+- CHANGELOG.md updated with comprehensive v1.5.0 release notes
 
 ---
 
-## [1.4.0] - 2025-12-11 (Current Release)
+## [1.4.6] - 2025-12-12
+
+### Added
+- **SECURITY.md** - Comprehensive security documentation
+  - API key security model documentation (client-side design for AI Studio)
+  - Client-side architecture explanation and rationale
+  - Data handling and privacy information (localStorage usage)
+  - Production deployment considerations and backend proxy recommendations
+  - Vulnerability reporting guidelines and response timeline
+  - Security best practices for users and developers
+
+### Changed
+- **README.md** - Enhanced security section with links to comprehensive documentation
+- **Project Structure Documentation** - Updated version references to v1.4.6
+  - package.json
+  - src/metadata.json
+  - src/components/AboutModal.tsx
+  - src/utils/exportUtils.ts
+
+### Technical
+- Security policy aligned with client-side architecture design
+- Documented intentional design choices for Google AI Studio deployment
+- Added production deployment security guidelines
+
+---
+
+## [1.4.5] - 2025-12-12
+
+### Fixed
+- **React Hooks Violations**
+  - BatchManager.tsx: Moved early return after useEffect hook
+  - TemplateBrowser.tsx: Moved early return after useEffect hook
+  - VersionHistory.tsx: Moved early return after useMemo/useEffect hooks
+  - Root cause: Components returned early before all hooks were called, violating React Rules of Hooks
+
+- **Production Build Runtime Errors**
+  - Fixed "forwardRef of undefined" error caused by aggressive chunk splitting
+  - Simplified Vite manualChunks configuration to only split export-libs
+  - Let Vite handle React/icons dependencies naturally for proper load order
+
+- **TemplateBrowser Modal Rendering**
+  - Modal now renders via `ReactDOM.createPortal()` at document.body level
+  - Fixed modal being trapped inside InfographicForm's CSS constraints
+  - Both header and form "Browse Templates" buttons now behave identically
+
+### Changed
+- **Build Optimization**
+  - Main chunk: 533.72 kB (gzip: 137.17 kB)
+  - Export libs: 686.49 kB (lazy-loaded on demand)
+  - BatchManager: 22.09 kB (lazy-loaded)
+  - VersionHistory: 26.10 kB (lazy-loaded)
+  - Increased chunk size warning limit to 700KB for export libraries
+
+### Technical
+- Added ReactDOM import to InfographicForm for portal usage
+- Refined lazy loading strategy: only BatchManager and VersionHistory are lazy-loaded
+- TemplateBrowser changed to static import (used by InfographicForm)
+- Dynamic imports for export utilities to reduce initial load time
+
+---
+
+## [1.4.0] - 2025-12-11
 
 ### Theme: Productivity Enhancement
 

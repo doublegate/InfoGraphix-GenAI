@@ -2,7 +2,7 @@
 
 > Transform any topic into stunning, AI-generated infographics using Google Gemini
 
-[![Version](https://img.shields.io/badge/version-1.4.6-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.5.0-blue.svg)](CHANGELOG.md)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -25,11 +25,12 @@ InfoGraphix AI is a powerful web application that generates high-quality infogra
 - Export in multiple formats (PNG, PDF, SVG, ZIP)
 - Advanced version history with search and filtering
 
-**Latest Updates (v1.4.6):**
-- Comprehensive security documentation (SECURITY.md) with API key security model
-- Project structure reorganization with all source in src/ directory
-- Path aliases configured for cleaner imports (@/ → src/)
-- Enhanced .gitignore with modern tooling patterns
+**Latest Updates (v1.5.0):**
+- Keyboard shortcuts system with 10 power user shortcuts (Ctrl+Enter, Ctrl+S, Shift+?, etc.)
+- WCAG 2.1 AA accessibility compliance with screen reader support and ARIA labels
+- Internationalization (i18n) with English and Spanish language support
+- High contrast mode with system preference detection and manual toggle
+- Screen reader announcements for all processing states and actions
 
 ---
 
@@ -62,8 +63,17 @@ InfoGraphix AI is a powerful web application that generates high-quality infogra
 - **Custom Templates** - Save and reuse your favorite style configurations
 - **Enhanced Version History** - Advanced search, filters, and pagination for saved generations
 - **Export Formats** - Download as PNG, PDF, SVG, or multi-resolution ZIP
+- **Keyboard Shortcuts** - 10 power user shortcuts for all common actions
 - **Auto-Save Drafts** - Never lose your form input
 - **Feedback System** - Rate and comment on generations
+
+### Accessibility & Internationalization
+
+- **WCAG 2.1 AA Compliance** - Full keyboard navigation and screen reader support
+- **Multi-Language Support** - English and Spanish with automatic browser detection
+- **High Contrast Mode** - Enhanced visibility with system preference detection
+- **Screen Reader Announcements** - ARIA live regions for processing states
+- **Skip Navigation** - Jump to main content with keyboard shortcut
 
 ---
 
@@ -192,10 +202,19 @@ InfoGraphix-GenAI/
 │   │       ├── TemplateCard.tsx      # Individual template card
 │   │       └── TemplateEditor.tsx    # Template creation/editing
 │   ├── utils/
-│   │   └── exportUtils.ts       # Export format utilities (lazy-loaded, 686KB)
+│   │   ├── exportUtils.ts       # Export format utilities (lazy-loaded, 686KB)
+│   │   └── keyboardShortcuts.ts # Keyboard shortcut registry and utilities
 │   ├── hooks/
+│   │   ├── useKeyboardShortcuts.ts # Keyboard shortcut event handling
+│   │   ├── useAnnouncer.ts      # Screen reader announcements
+│   │   └── useHighContrast.ts   # High contrast mode management
+│   ├── i18n/
+│   │   ├── index.ts             # i18next configuration
+│   │   ├── en.json              # English translations
+│   │   └── es.json              # Spanish translations
 │   └── styles/
-│       └── main.css             # Global styles
+│       ├── main.css             # Global styles with accessibility utilities
+│       └── high-contrast.css    # High contrast mode styles
 ├── vite.config.ts               # Build configuration with code splitting
 ├── docs/                        # Technical documentation
 └── to-dos/                      # Development roadmaps
@@ -283,8 +302,8 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 | Version | Theme | Target | Key Features |
 |---------|-------|--------|--------------|
 | v1.3.0 | Foundation | 2025-12-11 | Core generation, 22 styles, 10 palettes, version history |
-| v1.4.5 | Productivity Enhancement | 2025-12-11 (Current) | Batch generation, custom templates, SVG/PDF export, optimized build |
-| v1.5.0 | Collaboration & Sharing | Q2 2026 | User accounts, cloud sync, team workspaces |
+| v1.4.0 | Productivity Enhancement | 2025-12-11 | Batch generation, custom templates, SVG/PDF export |
+| v1.5.0 | Accessibility & Global Reach | 2025-12-12 (Current) | Keyboard shortcuts, i18n (EN/ES), WCAG 2.1 AA, high contrast |
 | v1.6.0 | AI Intelligence & Creativity | Q3 2026 | AI suggestions, template library, animations |
 | v1.7.0 | Platform & API | Q4 2026 | REST API, Python/JS SDKs, webhooks |
 | v1.8.0 | Ecosystem Integrations | Q1 2027 | Google Workspace, Notion, Figma, Slack |
@@ -292,6 +311,23 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 | v2.0.0 | Stable Release | Q3 2027 | Performance optimization, UI/UX polish |
 
 ### Recent Updates
+
+**v1.5.0 - Accessibility & Global Reach (2025-12-12):**
+- Keyboard shortcuts system with 10 power user shortcuts (Ctrl+Enter to generate, Ctrl+S to save, Shift+? for help)
+- Cross-platform keyboard support (Mac ⌘ vs Windows Ctrl detection)
+- WCAG 2.1 AA accessibility compliance with comprehensive screen reader support
+- Skip-to-content navigation link for keyboard users
+- ARIA labels and live regions on all interactive elements
+- Internationalization (i18n) with react-i18next integration
+- English and Spanish language support with browser language detection
+- Language selector component in navigation bar
+- High contrast mode with system preference detection (prefers-contrast media query)
+- Manual high contrast toggle with keyboard shortcut (Ctrl+Shift+C)
+- Reduced motion support (prefers-reduced-motion media query)
+- 200+ UI strings translated across all components
+- New hooks: useKeyboardShortcuts, useAnnouncer, useHighContrast
+- New components: KeyboardShortcutsModal, SkipLink, LanguageSelector
+- Enhanced accessibility utilities in CSS (sr-only, focus-ring)
 
 **v1.4.5 - Build Optimization & Bug Fixes (2025-12-11):**
 - Fixed React Hooks violations in BatchManager, TemplateBrowser, and VersionHistory components
@@ -313,12 +349,6 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 - New utilities: exportUtils.ts for format conversion
 
 ### Upcoming Features by Theme
-
-**v1.5.0 - Collaboration (Q2 2026):**
-- User accounts with OAuth2 authentication
-- Cloud storage and cross-device sync
-- Team workspaces with role-based permissions
-- Post-generation canvas editor
 
 **v1.6.0 - Intelligence (Q3 2026):**
 - AI-powered style and palette suggestions
@@ -380,6 +410,9 @@ See [FEATURE-ROADMAP.md](to-dos/FEATURE-ROADMAP.md) for complete details and [ve
 | [TailwindCSS](https://tailwindcss.com/) | 4.1.18 (build-time) | Utility-first styling framework |
 | [Lucide React](https://lucide.dev/) | 0.560.0 | Icon library |
 | [@google/genai](https://www.npmjs.com/package/@google/genai) | 1.30.0 | Gemini API SDK for AI integration |
+| [react-i18next](https://react.i18next.com/) | 16.4.1 | React integration for i18next |
+| [i18next](https://www.i18next.com/) | 25.7.2 | Internationalization framework |
+| [i18next-browser-languagedetector](https://github.com/i18next/i18next-browser-languageDetector) | 8.2.0 | Browser language detection plugin |
 | [jsPDF](https://www.npmjs.com/package/jspdf) | 3.0.4 | PDF generation (lazy-loaded) |
 | [JSZip](https://www.npmjs.com/package/jszip) | 3.10.1 | ZIP archive creation (lazy-loaded) |
 

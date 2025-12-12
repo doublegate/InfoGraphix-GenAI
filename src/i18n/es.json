@@ -1,0 +1,120 @@
+{
+  "app": {
+    "title": "InfoGraphix AI",
+    "tagline": "Genera infografías increíbles con IA"
+  },
+  "nav": {
+    "templates": "Plantillas",
+    "batch": "Lote",
+    "history": "Historial",
+    "about": "Acerca de"
+  },
+  "form": {
+    "topic": "Tema",
+    "topicPlaceholder": "Ingresa tu tema, pega una URL, repositorio de GitHub o sube un archivo...",
+    "style": "Estilo",
+    "palette": "Paleta de Colores",
+    "size": "Tamaño",
+    "aspectRatio": "Relación de Aspecto",
+    "generate": "Generar Infografía",
+    "newGeneration": "Nueva Generación",
+    "filters": "Filtros",
+    "browseTemplates": "Explorar Plantillas",
+    "githubFilters": {
+      "language": "Idioma",
+      "extensions": "Extensiones",
+      "dateRange": "Rango de Fechas"
+    }
+  },
+  "processing": {
+    "analyzing": "Analizando...",
+    "analyzingDesc": "Análisis profundo con modo de pensamiento y búsqueda de Google",
+    "generating": "Generando...",
+    "generatingDesc": "Creando tu infografía con Gemini 3 Pro Image"
+  },
+  "result": {
+    "title": "Infografía Generada",
+    "analysis": "Análisis",
+    "keyPoints": "Puntos Clave",
+    "sources": "Fuentes",
+    "download": "Descargar",
+    "save": "Guardar en Historial",
+    "saved": "Guardado",
+    "exportFormat": "Formato de Exportación"
+  },
+  "history": {
+    "title": "Historial de Versiones",
+    "search": "Buscar temas...",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "perPage": "Por página",
+    "total": "Total",
+    "generations": "generaciones",
+    "noResults": "No se encontraron versiones",
+    "load": "Cargar",
+    "delete": "Eliminar",
+    "export": "Exportar Todo",
+    "clear": "Limpiar Todo"
+  },
+  "batch": {
+    "title": "Generación por Lotes",
+    "newQueue": "Nueva Cola",
+    "topics": "Temas",
+    "status": "Estado",
+    "progress": "Progreso"
+  },
+  "templates": {
+    "title": "Explorador de Plantillas",
+    "search": "Buscar plantillas...",
+    "apply": "Aplicar",
+    "save": "Guardar como Plantilla",
+    "import": "Importar",
+    "export": "Exportar"
+  },
+  "feedback": {
+    "title": "¿Cómo estuvo esta infografía?",
+    "rating": "Calificación",
+    "comments": "Comentarios",
+    "submit": "Enviar Comentarios"
+  },
+  "about": {
+    "title": "Acerca de InfoGraphix AI",
+    "version": "Versión",
+    "description": "Genera hermosas infografías usando Gemini AI de Google",
+    "close": "Cerrar"
+  },
+  "shortcuts": {
+    "title": "Atajos de Teclado",
+    "generate": "Generar infografía",
+    "save": "Guardar en historial",
+    "download": "Descargar imagen",
+    "new": "Nuevo/limpiar formulario",
+    "history": "Alternar historial",
+    "templates": "Alternar plantillas",
+    "batch": "Alternar gestor de lotes",
+    "escape": "Cerrar modales",
+    "help": "Mostrar esta ayuda"
+  },
+  "accessibility": {
+    "skipToMain": "Saltar al contenido principal",
+    "highContrast": "Alto Contraste",
+    "toggleHighContrast": "Alternar modo de alto contraste",
+    "languageSelector": "Seleccionar idioma"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "yes": "Sí",
+    "no": "No",
+    "close": "Cerrar"
+  },
+  "errors": {
+    "apiKey": "Clave API no configurada",
+    "generation": "Error en la generación",
+    "network": "Error de red",
+    "unknown": "Ocurrió un error inesperado"
+  }
+}

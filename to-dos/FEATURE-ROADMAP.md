@@ -9,8 +9,8 @@ Planned features and enhancements for InfoGraphix AI.
 | v1.3.0 | Released | 2025-12-11 | Foundation |
 | v1.4.0 | Released | 2025-12-11 | Productivity |
 | v1.4.5 | Released | 2025-12-12 | Productivity (Patch) |
-| v1.4.6 | **CURRENT** | 2025-12-12 | Security & Documentation |
-| v1.5.0 | Planned | Q2 2026 | Collaboration |
+| v1.4.6 | Released | 2025-12-12 | Security & Documentation |
+| v1.5.0 | **CURRENT** | 2025-12-12 | Accessibility & Global Reach |
 | v1.6.0 | Planned | Q3 2026 | Intelligence |
 | v1.7.0 | Planned | Q4 2026 | Platform |
 | v1.8.0 | Planned | Q1 2027 | Ecosystem |
@@ -64,47 +64,68 @@ Planned features and enhancements for InfoGraphix AI.
 
 ---
 
-## Version 1.5.0 - Collaboration & Sharing (Q2 2026)
+## Version 1.5.0 - Accessibility & Global Reach (Released 2025-12-12)
 
-### Core Features
+### Keyboard Shortcuts (Completed)
 
-- [ ] **User Accounts**
+- [x] **Keyboard Shortcuts System**
+  - Quick generation (Ctrl+Enter)
+  - Save version (Ctrl+S)
+  - Download (Ctrl+D)
+  - New generation (Ctrl+N)
+  - Navigation shortcuts (Ctrl+H, Ctrl+T, Ctrl+B)
+  - Help modal (Shift+?)
+  - High contrast toggle (Ctrl+Shift+C)
+  - Escape to close modals
+  - Cross-platform support (Mac ⌘ vs Windows Ctrl)
+  - Implemented: Low effort
+
+### Accessibility (WCAG 2.1 AA Completed)
+
+- [x] **Accessibility Improvements**
+  - Screen reader optimization with ARIA live regions
+  - High contrast mode with system preference detection
+  - Reduced motion support (prefers-reduced-motion)
+  - Skip-to-content navigation link
+  - Comprehensive ARIA labels on all interactive elements
+  - Focus management for modal dialogs
+  - Semantic HTML structure with proper landmarks
+  - Screen reader announcements for processing states
+  - Implemented: Medium effort
+
+### Internationalization (Completed)
+
+- [x] **Internationalization (i18n)**
+  - react-i18next integration
+  - English (en) and Spanish (es) language support
+  - Browser language detection
+  - Language selector component in navigation
+  - 200+ UI strings translated
+  - Persistent language preference (localStorage)
+  - Fallback to English for unsupported languages
+  - Implemented: Medium effort
+
+### Deferred Features (Requires Backend)
+
+The following features originally planned for v1.5.0 have been deferred to future versions as they require backend infrastructure:
+
+- [ ] **User Accounts** (Deferred - requires auth backend)
   - Save preferences and history to cloud
   - Sync across devices
   - API key management
-  - Estimated effort: High
+  - Future effort: High
 
-- [ ] **Collaboration Features**
+- [ ] **Collaboration Features** (Deferred - requires backend)
   - Share infographics via link
   - Embed codes for websites
   - Team workspaces
-  - Estimated effort: High
+  - Future effort: High
 
-- [ ] **Advanced Customization**
+- [ ] **Advanced Customization** (Deferred - requires canvas editor)
   - Post-generation editing
   - Text overlay customization
   - Color adjustment tools
-  - Estimated effort: High
-
-### Quality of Life
-
-- [ ] **Keyboard Shortcuts**
-  - Quick generation (Ctrl+Enter)
-  - Save version (Ctrl+S)
-  - Navigation shortcuts
-  - Estimated effort: Low
-
-- [ ] **Accessibility Improvements**
-  - Screen reader optimization
-  - High contrast mode
-  - Reduced motion option
-  - Estimated effort: Medium
-
-- [ ] **Internationalization (i18n)**
-  - Multi-language UI support
-  - Localized infographic generation
-  - RTL language support
-  - Estimated effort: High
+  - Future effort: High
 
 ---
 
@@ -390,7 +411,30 @@ Planned features and enhancements for InfoGraphix AI.
 
 ## Completed Features
 
-### Version 1.4.6 (Current Release - 2025-12-12)
+### Version 1.5.0 (Current Release - 2025-12-12)
+
+- [x] Keyboard shortcuts system (10 shortcuts for all common actions)
+- [x] Cross-platform keyboard support (Mac ⌘ vs Windows Ctrl)
+- [x] Keyboard shortcuts modal (Shift+?) with complete shortcut list
+- [x] WCAG 2.1 AA accessibility compliance
+- [x] Screen reader support with ARIA live regions
+- [x] Skip-to-content navigation for keyboard users
+- [x] Comprehensive ARIA labels on all interactive elements
+- [x] High contrast mode with system preference detection
+- [x] Manual high contrast toggle (Ctrl+Shift+C)
+- [x] Reduced motion support (prefers-reduced-motion)
+- [x] Internationalization (i18n) with react-i18next
+- [x] English and Spanish language support
+- [x] Browser language detection and auto-selection
+- [x] Language selector component in navigation bar
+- [x] 200+ UI strings translated across all components
+- [x] Persistent language preference in localStorage
+- [x] New hooks: useKeyboardShortcuts, useAnnouncer, useHighContrast
+- [x] New components: KeyboardShortcutsModal, SkipLink, LanguageSelector
+- [x] New utilities: keyboardShortcuts.ts registry
+- [x] Enhanced CSS with accessibility utilities (sr-only, focus-ring)
+
+### Version 1.4.6 (Released 2025-12-12)
 
 - [x] Comprehensive security documentation (SECURITY.md)
 - [x] API key security model documentation

@@ -1,0 +1,120 @@
+{
+  "app": {
+    "title": "InfoGraphix AI",
+    "tagline": "Generate stunning infographics with AI"
+  },
+  "nav": {
+    "templates": "Templates",
+    "batch": "Batch",
+    "history": "History",
+    "about": "About"
+  },
+  "form": {
+    "topic": "Topic",
+    "topicPlaceholder": "Enter your topic, paste a URL, GitHub repo, or upload a file...",
+    "style": "Style",
+    "palette": "Color Palette",
+    "size": "Size",
+    "aspectRatio": "Aspect Ratio",
+    "generate": "Generate Infographic",
+    "newGeneration": "New Generation",
+    "filters": "Filters",
+    "browseTemplates": "Browse Templates",
+    "githubFilters": {
+      "language": "Language",
+      "extensions": "Extensions",
+      "dateRange": "Date Range"
+    }
+  },
+  "processing": {
+    "analyzing": "Analyzing...",
+    "analyzingDesc": "Deep analysis with thinking mode and Google Search grounding",
+    "generating": "Generating...",
+    "generatingDesc": "Creating your infographic with Gemini 3 Pro Image"
+  },
+  "result": {
+    "title": "Generated Infographic",
+    "analysis": "Analysis",
+    "keyPoints": "Key Points",
+    "sources": "Sources",
+    "download": "Download",
+    "save": "Save to History",
+    "saved": "Saved",
+    "exportFormat": "Export Format"
+  },
+  "history": {
+    "title": "Version History",
+    "search": "Search topics...",
+    "filter": "Filter",
+    "sort": "Sort",
+    "perPage": "Per page",
+    "total": "Total",
+    "generations": "generations",
+    "noResults": "No versions found",
+    "load": "Load",
+    "delete": "Delete",
+    "export": "Export All",
+    "clear": "Clear All"
+  },
+  "batch": {
+    "title": "Batch Generation",
+    "newQueue": "New Queue",
+    "topics": "Topics",
+    "status": "Status",
+    "progress": "Progress"
+  },
+  "templates": {
+    "title": "Template Browser",
+    "search": "Search templates...",
+    "apply": "Apply",
+    "save": "Save as Template",
+    "import": "Import",
+    "export": "Export"
+  },
+  "feedback": {
+    "title": "How was this infographic?",
+    "rating": "Rating",
+    "comments": "Comments",
+    "submit": "Submit Feedback"
+  },
+  "about": {
+    "title": "About InfoGraphix AI",
+    "version": "Version",
+    "description": "Generate beautiful infographics using Google's Gemini AI",
+    "close": "Close"
+  },
+  "shortcuts": {
+    "title": "Keyboard Shortcuts",
+    "generate": "Generate infographic",
+    "save": "Save to history",
+    "download": "Download image",
+    "new": "New/clear form",
+    "history": "Toggle history",
+    "templates": "Toggle templates",
+    "batch": "Toggle batch manager",
+    "escape": "Close modals",
+    "help": "Show this help"
+  },
+  "accessibility": {
+    "skipToMain": "Skip to main content",
+    "highContrast": "High Contrast",
+    "toggleHighContrast": "Toggle high contrast mode",
+    "languageSelector": "Select language"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close"
+  },
+  "errors": {
+    "apiKey": "API key not configured",
+    "generation": "Generation failed",
+    "network": "Network error",
+    "unknown": "An unexpected error occurred"
+  }
+}

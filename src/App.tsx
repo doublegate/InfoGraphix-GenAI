@@ -1,13 +1,20 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { Layers, Github, Globe, History as HistoryIcon, Info, List as ListIcon, BookTemplate } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Layers, Github, Globe, History as HistoryIcon, Info, List as ListIcon, BookTemplate, Contrast } from 'lucide-react';
 import ApiKeySelector from './components/ApiKeySelector';
 import InfographicForm from './components/InfographicForm';
 import ProcessingState from './components/ProcessingState';
 import InfographicResult from './components/InfographicResult';
 import AboutModal from './components/AboutModal';
+import SkipLink from './components/SkipLink';
+import LanguageSelector from './components/LanguageSelector';
+import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
 import { TemplateBrowser } from './components/TemplateManager';
 import { analyzeTopic, generateInfographicImage } from './services/geminiService';
 import { AspectRatio, GeneratedInfographic, ImageSize, GithubFilters, SavedVersion, Feedback, InfographicStyle, ColorPalette, TemplateConfig } from './types';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { useAnnouncer } from './hooks/useAnnouncer';
+import { useHighContrast } from './hooks/useHighContrast';
 
 // Lazy load heavy modal components for better code splitting
 // Note: TemplateBrowser is statically imported (used by InfographicForm)
@@ -15,6 +22,10 @@ const VersionHistory = lazy(() => import('./components/VersionHistory'));
 const BatchManager = lazy(() => import('./components/BatchGeneration/BatchManager'));
 
 function App() {
+  const { t } = useTranslation();
+  const { announce } = useAnnouncer();
+  const { isHighContrast, toggle: toggleHighContrast } = useHighContrast();
+
   const [isApiKeyReady, setIsApiKeyReady] = useState(false);
   const [processingStep, setProcessingStep] = useState<'idle' | 'analyzing' | 'generating' | 'complete'>('idle');
   const [result, setResult] = useState<GeneratedInfographic | null>(null);
@@ -27,7 +38,7 @@ function App() {
   const [currentStyle, setCurrentStyle] = useState<InfographicStyle>(InfographicStyle.Modern);
   const [currentPalette, setCurrentPalette] = useState<ColorPalette>(ColorPalette.BlueWhite);
   const [currentFilters, setCurrentFilters] = useState<GithubFilters | undefined>(undefined);
-  
+
   // Used for reloading form state
   const [formInitialValues, setFormInitialValues] = useState<any>(undefined);
 
@@ -37,6 +48,7 @@ function App() {
   const [showAbout, setShowAbout] = useState(false);
   const [showBatchManager, setShowBatchManager] = useState(false);
   const [showTemplateManager, setShowTemplateManager] = useState(false);
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
   const [isCurrentResultSaved, setIsCurrentResultSaved] = useState(false);
 
   // Feedback for current session view
@@ -199,15 +211,81 @@ function App() {
     }
   };
 
+  // Handle keyboard shortcut to trigger new generation
+  const handleKeyboardGenerate = () => {
+    // Trigger form submission if not processing
+    if (processingStep === 'idle' || processingStep === 'complete') {
+      const form = document.querySelector('form');
+      if (form) {
+        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
+    }
+  };
+
+  // Close any open modals
+  const handleEscape = () => {
+    if (showHistory) setShowHistory(false);
+    else if (showAbout) setShowAbout(false);
+    else if (showBatchManager) setShowBatchManager(false);
+    else if (showTemplateManager) setShowTemplateManager(false);
+    else if (showKeyboardShortcuts) setShowKeyboardShortcuts(false);
+  };
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onGenerate: handleKeyboardGenerate,
+    onSave: result && !isCurrentResultSaved ? handleSaveVersion : undefined,
+    onDownload: result ? () => {
+      const link = document.createElement('a');
+      link.download = `infographic-${Date.now()}.png`;
+      link.href = result.imageUrl;
+      link.click();
+    } : undefined,
+    onNew: () => {
+      setResult(null);
+      setError(null);
+      setProcessingStep('idle');
+      setFormInitialValues(undefined);
+      setIsCurrentResultSaved(false);
+      announce(t('form.newGeneration'));
+    },
+    onToggleHistory: () => {
+      setShowHistory(prev => !prev);
+      announce(showHistory ? 'History closed' : 'History opened');
+    },
+    onToggleTemplates: () => {
+      setShowTemplateManager(prev => !prev);
+      announce(showTemplateManager ? 'Templates closed' : 'Templates opened');
+    },
+    onToggleBatch: () => {
+      setShowBatchManager(prev => !prev);
+      announce(showBatchManager ? 'Batch manager closed' : 'Batch manager opened');
+    },
+    onShowHelp: () => {
+      setShowKeyboardShortcuts(true);
+      announce('Keyboard shortcuts help opened');
+    },
+    onEscape: handleEscape,
+    onToggleHighContrast: () => {
+      toggleHighContrast();
+      announce(isHighContrast ? 'High contrast disabled' : 'High contrast enabled');
+    }
+  });
+
+  // Announce processing state changes
+  useEffect(() => {
+    if (processingStep === 'analyzing') {
+      announce(t('processing.analyzing'));
+    } else if (processingStep === 'generating') {
+      announce(t('processing.generating'));
+    } else if (processingStep === 'complete' && result) {
+      announce(t('result.title'));
+    }
+  }, [processingStep, result, announce, t]);
+
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-200 selection:bg-blue-500/30 font-sans">
-      {/* Skip to main content link for keyboard users */}
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-      >
-        Skip to main content
-      </a>
+      <SkipLink />
 
       <ApiKeySelector onReady={() => setIsApiKeyReady(true)} />
 
@@ -235,38 +313,47 @@ function App() {
             </p>
           </div>
           
-          <nav className="flex gap-3 flex-wrap justify-center md:justify-end" aria-label="Main navigation">
+          <nav className="flex gap-3 flex-wrap justify-center md:justify-end items-center" aria-label="Main navigation">
             <button
               onClick={() => setShowTemplateManager(true)}
               className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-all text-slate-300 shadow-sm hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label="Manage templates"
+              aria-label={t('nav.templates')}
             >
               <BookTemplate className="w-5 h-5" aria-hidden="true" />
-              Templates
+              {t('nav.templates')}
             </button>
             <button
               onClick={() => handleSwitchMode('batch')}
               className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-all text-slate-300 shadow-sm hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label="Batch generation mode"
+              aria-label={t('nav.batch')}
             >
               <ListIcon className="w-5 h-5" aria-hidden="true" />
-              Batch
+              {t('nav.batch')}
             </button>
             <button
               onClick={() => setShowHistory(true)}
               className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-all text-slate-300 shadow-sm hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label={`View version history${savedVersions.length > 0 ? `, ${savedVersions.length} saved versions` : ''}`}
+              aria-label={`${t('nav.history')}${savedVersions.length > 0 ? `, ${savedVersions.length} saved versions` : ''}`}
             >
               <HistoryIcon className="w-5 h-5" aria-hidden="true" />
-              History {savedVersions.length > 0 && <span className="bg-blue-600 text-white text-xs px-1.5 rounded-full" aria-hidden="true">{savedVersions.length}</span>}
+              {t('nav.history')} {savedVersions.length > 0 && <span className="bg-blue-600 text-white text-xs px-1.5 rounded-full" aria-hidden="true">{savedVersions.length}</span>}
             </button>
+            <button
+              onClick={toggleHighContrast}
+              className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
+              aria-label={t('accessibility.toggleHighContrast')}
+              title={t('accessibility.highContrast')}
+            >
+              <Contrast className="w-5 h-5 text-slate-400" aria-hidden="true" />
+            </button>
+            <LanguageSelector />
             <button
               onClick={() => setShowAbout(true)}
               className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-all text-slate-300 shadow-sm hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label="About InfoGraphix AI"
+              aria-label={t('nav.about')}
             >
               <Info className="w-5 h-5" aria-hidden="true" />
-              About
+              {t('nav.about')}
             </button>
           </nav>
         </header>
@@ -340,6 +427,11 @@ function App() {
         isOpen={showTemplateManager}
         onClose={() => setShowTemplateManager(false)}
         onApplyTemplate={handleApplyTemplate}
+      />
+
+      <KeyboardShortcutsModal
+        isOpen={showKeyboardShortcuts}
+        onClose={() => setShowKeyboardShortcuts(false)}
       />
     </div>
   );
