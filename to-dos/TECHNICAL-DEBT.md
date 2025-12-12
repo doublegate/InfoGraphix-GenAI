@@ -1647,5 +1647,772 @@ When addressing debt:
 
 ---
 
+## Deferred Features & Incomplete Implementations
+
+**Gap Analysis Completed:** 2025-12-12
+**Analysis Scope:** v1.4.0 through v1.6.0 version plans
+
+This section tracks features that were planned in version release plans but were NOT implemented, partially implemented, or explicitly deferred. This provides visibility into the backlog of planned functionality and helps prioritize future development.
+
+### Summary
+
+| Version Range | Total Planned | Implemented | Partially Implemented | Deferred | Not Started | Abandoned |
+|---------------|---------------|-------------|----------------------|----------|-------------|-----------|
+| v1.4.0 | 6 features | 4 (67%) | 0 (0%) | 0 (0%) | 2 (33%) | 0 (0%) |
+| v1.5.0 | 7 features | 3 (43%) | 0 (0%) | 4 (57%) | 0 (0%) | 0 (0%) |
+| v1.6.0 | 7 features | 3 (43%) | 2 (29%) | 1 (14%) | 1 (14%) | 0 (0%) |
+| **v1.7.0+** | 50+ features | 0 (0%) | 0 (0%) | 0 (0%) | 50+ (100%) | 0 (0%) |
+| **TOTAL (v1.4-1.6)** | **20 features** | **10 (50%)** | **2 (10%)** | **5 (25%)** | **3 (15%)** | **0 (0%)** |
+
+**Health Score:** 60/100 (Fair - Half of planned features shipped, but significant backend-dependent features deferred)
+
+---
+
+### Deferred Feature: User Accounts & Authentication
+
+**ID:** DF-001
+**Version Planned:** v1.5.0
+**Current Status:** Deferred
+**Category:** Backend Infrastructure
+**Priority:** High (for future backend-based features)
+
+| Attribute | Details |
+|-----------|---------|
+| **Original Plan** | v1.5.0 - Accessibility & Global Reach |
+| **Reason for Deferral** | Requires backend infrastructure (authentication server, user database) |
+| **Architecture Constraint** | InfoGraphix is client-side React app deployed to Google AI Studio (no backend) |
+| **Impact** | Blocks cloud sync, sharing, collaboration, multi-device support |
+| **Dependencies** | Backend server, database, authentication provider (OAuth/Firebase) |
+| **Effort if Implemented** | XL (40-60 hours for full auth system) |
+| **Target Version** | v2.0.0 or later (requires architectural change to support backend) |
+| **Workaround** | localStorage for single-device persistence, manual export/import |
+
+**Planned Features (from v1.5.0-PLAN.md):**
+- User registration and login (email/password, OAuth)
+- Profile management
+- Account security (password reset, 2FA)
+- Session management
+- Role-based access control (future enterprise feature)
+
+**Blockers:**
+- No backend infrastructure exists
+- Google AI Studio deployment is client-side only
+- Requires hosting backend (Node.js/Python server + database)
+
+**Potential Solutions:**
+1. **Firebase Authentication** - Easiest path, serverless authentication
+2. **Supabase** - Open-source Firebase alternative with PostgreSQL
+3. **Custom Backend** - Full control but highest effort (Node.js + PostgreSQL/MongoDB)
+4. **Hybrid Approach** - Keep client-side for AI Studio, add backend for web deployment
+
+---
+
+### Deferred Feature: Cloud Storage & Sync
+
+**ID:** DF-002
+**Version Planned:** v1.5.0
+**Current Status:** Deferred
+**Category:** Backend Infrastructure
+**Priority:** Medium
+
+| Attribute | Details |
+|-----------|---------|
+| **Original Plan** | v1.5.0 - Accessibility & Global Reach |
+| **Reason for Deferral** | Requires backend infrastructure (cloud storage, sync service) |
+| **Architecture Constraint** | InfoGraphix is client-side React app (IndexedDB is device-local only) |
+| **Impact** | No multi-device sync, no cloud backup, limited storage quota |
+| **Dependencies** | DF-001 (User Accounts), cloud storage service, sync engine |
+| **Effort if Implemented** | XL (30-50 hours) |
+| **Target Version** | v2.0.0 or later |
+| **Workaround** | Manual export/import of saved versions, browser sync via IndexedDB |
+
+**Planned Features (from v1.5.0-PLAN.md):**
+- Cloud backup of saved infographics
+- Multi-device synchronization
+- Unlimited cloud storage (vs. browser quota limits)
+- Conflict resolution for offline edits
+- Version history with cloud timestamps
+
+**Blockers:**
+- No backend server
+- No user authentication (DF-001)
+- No cloud storage integration
+
+**Potential Solutions:**
+1. **Firebase Storage** - Easiest, integrates with Firebase Auth
+2. **Supabase Storage** - Open-source, PostgreSQL-backed
+3. **AWS S3** - Scalable but requires more infrastructure
+4. **Google Cloud Storage** - Natural fit for Google AI integration
+
+---
+
+### Deferred Feature: Sharing & Collaboration
+
+**ID:** DF-003
+**Version Planned:** v1.5.0
+**Current Status:** Deferred
+**Category:** Backend Infrastructure, Social Features
+**Priority:** Medium
+
+| Attribute | Details |
+|-----------|---------|
+| **Original Plan** | v1.5.0 - Accessibility & Global Reach |
+| **Reason for Deferral** | Requires backend infrastructure (sharing service, permissions system) |
+| **Architecture Constraint** | Client-side architecture cannot handle multi-user collaboration |
+| **Impact** | No team collaboration, no public sharing links, no template sharing |
+| **Dependencies** | DF-001 (User Accounts), DF-002 (Cloud Storage), backend API |
+| **Effort if Implemented** | L (20-30 hours) |
+| **Target Version** | v2.0.0+ |
+| **Workaround** | Manual export/import, screenshot sharing, email distribution |
+
+**Planned Features (from v1.5.0-PLAN.md):**
+- Public sharing links with configurable permissions
+- Team collaboration (view/edit permissions)
+- Template sharing (Community Template Library)
+- Embed codes for websites
+- Social media sharing integrations
+
+**Blockers:**
+- No user accounts (DF-001)
+- No cloud storage (DF-002)
+- No backend API for permissions
+- No database for sharing metadata
+
+---
+
+### Deferred Feature: Advanced Post-Generation Editing
+
+**ID:** DF-004
+**Version Planned:** v1.5.0
+**Current Status:** Deferred
+**Category:** Feature Enhancement
+**Priority:** Low
+
+| Attribute | Details |
+|-----------|---------|
+| **Original Plan** | v1.5.0 - Accessibility & Global Reach |
+| **Reason for Deferral** | Requires canvas-based image editor (complex feature) |
+| **Architecture Constraint** | Current workflow is generate-only, no post-processing |
+| **Impact** | Cannot make minor edits without full regeneration |
+| **Dependencies** | Canvas editor library (Fabric.js, Konva, or custom) |
+| **Effort if Implemented** | XL (50-80 hours for full editor) |
+| **Target Version** | v2.0.0+ |
+| **Workaround** | Regenerate with adjusted parameters, external image editors |
+
+**Planned Features (from v1.5.0-PLAN.md):**
+- In-app image editor with canvas manipulation
+- Text editing and repositioning
+- Color adjustments and filters
+- Element deletion/addition
+- Export edited versions
+
+**Blockers:**
+- No canvas editor infrastructure
+- Gemini generates raster images (not vector/editable layers)
+- Complex UI/UX requirements
+
+**Potential Solutions:**
+1. **Fabric.js** - Powerful canvas library, MIT license
+2. **Konva.js** - Canvas framework with React bindings
+3. **Custom Canvas Editor** - Full control but highest effort
+4. **Hybrid Approach** - Basic edits only (crop, resize, filters)
+
+---
+
+### Deferred Feature: Animation Support
+
+**ID:** DF-005
+**Version Planned:** v1.6.0
+**Current Status:** Deferred
+**Category:** AI Model Limitation
+**Priority:** Low
+
+| Attribute | Details |
+|-----------|---------|
+| **Original Plan** | v1.6.0 - AI Intelligence & Creativity |
+| **Reason for Deferral** | Gemini Image API only produces static PNG images (no video/animation API) |
+| **Architecture Constraint** | Gemini `gemini-3-pro-image-preview` model limitation |
+| **Impact** | No animated infographics, no video exports |
+| **Dependencies** | Gemini video generation API (doesn't exist yet) OR backend video encoding |
+| **Effort if Implemented** | XL (60+ hours with backend video encoding) |
+| **Target Version** | v1.7.0+ (pending Gemini API capability) |
+| **Workaround** | Static infographics only, external animation tools |
+
+**Planned Features (from v1.6.0-PLAN.md):**
+- Animated transitions between elements
+- GIF/MP4 video export
+- Timeline-based animation editor
+- Preset animation styles
+
+**Blockers:**
+- Gemini API only generates static images
+- No Gemini video generation API available
+- Client-side video encoding impractical (slow, large files)
+- Backend video encoding requires FFmpeg server infrastructure
+
+**Potential Solutions:**
+1. **Wait for Gemini Video API** - Google may release animation capability
+2. **Backend Video Encoding** - FFmpeg server to stitch static frames
+3. **CSS Animation Overlays** - Limited capability, static base + CSS animations
+4. **Third-Party Video APIs** - Runway ML, Pika Labs (costly)
+
+---
+
+### Partially Implemented: Layout Optimization Engine
+
+**ID:** DF-006
+**Version Planned:** v1.6.0
+**Current Status:** Partially Implemented
+**Category:** AI Feature
+**Priority:** Medium
+
+| Attribute | Details |
+|-----------|---------|
+| **Original Plan** | v1.6.0 - AI Intelligence & Creativity |
+| **Reason for Partial** | Types and service methods exist, but UI for variant selection not implemented |
+| **Architecture Constraint** | None - client-side implementation feasible |
+| **Impact** | Users cannot select between multiple layout options |
+| **Dependencies** | None |
+| **Effort to Complete** | S (3-5 hours for UI component) |
+| **Target Version** | v1.7.0 |
+| **Current State** | Backend ready, frontend UI missing |
+
+**Implemented:**
+- `AnalysisResult` type includes `layoutVariants` field (types.ts)
+- `analyzeTopic()` can generate multiple layout options
+- Layout types defined: 'balanced', 'text-heavy', 'visual-heavy'
+
+**Not Implemented:**
+- `LayoutVariantSelector.tsx` component
+- UI to preview layout descriptions
+- Layout selection flow in generation pipeline
+
+**Completion Tasks:**
+1. Create `components/LayoutVariantSelector.tsx`
+2. Display 2-3 layout variant cards with descriptions
+3. Allow user to select preferred layout
+4. Pass selected layout to `generateInfographicImage()`
+5. Add layout selection step to `InfographicForm.tsx`
+
+---
+
+### Partially Implemented: Data Visualization Templates
+
+**ID:** DF-007
+**Version Planned:** v1.6.0
+**Current Status:** Partially Implemented
+**Category:** Feature Enhancement
+**Priority:** Medium
+
+| Attribute | Details |
+|-----------|---------|
+| **Original Plan** | v1.6.0 - AI Intelligence & Creativity |
+| **Reason for Partial** | Data viz templates exist in library, but CSV import not implemented |
+| **Architecture Constraint** | CSV parsing is client-side feasible, just not prioritized |
+| **Impact** | Cannot upload CSV files for data-driven infographics |
+| **Dependencies** | CSV parser (native or PapaParse library) |
+| **Effort to Complete** | M (6-10 hours for full CSV import + preview) |
+| **Target Version** | v1.7.0 |
+| **Current State** | Templates exist, CSV import UI missing |
+
+**Implemented:**
+- 10+ data visualization templates in template library
+- Templates designed for chart types (bar, line, pie, timeline)
+- `analyzeTopicWithData()` service method signature exists
+
+**Not Implemented:**
+- CSV file upload component
+- CSV parsing logic (PapaParse or native)
+- Data preview table UI
+- Data structure detection
+- Data-aware Gemini prompts
+- Integration with `InfographicForm.tsx`
+
+**Completion Tasks:**
+1. Add CSV file input to `InfographicForm.tsx`
+2. Implement CSV parser (recommend PapaParse library - 47KB gzipped)
+3. Create `components/DataImport.tsx` for preview
+4. Add data structure detection logic
+5. Build data-aware prompts for `analyzeTopic()`
+6. Test with sample datasets
+
+---
+
+### Not Started: Improved GitHub Analysis
+
+**ID:** DF-008
+**Version Planned:** v1.4.0
+**Current Status:** Not Started
+**Category:** Feature Enhancement
+**Priority:** Low
+
+| Attribute | Details |
+|-----------|---------|
+| **Original Plan** | v1.4.0 - Productivity Enhancement |
+| **Reason for Non-Implementation** | Deprioritized in favor of batch generation and templates |
+| **Architecture Constraint** | None - GitHub GraphQL API is accessible client-side |
+| **Impact** | Basic GitHub analysis only, no advanced visualizations |
+| **Dependencies** | GitHub GraphQL API client, caching system |
+| **Effort to Implement** | L (15-25 hours) |
+| **Target Version** | v1.8.0 or v1.9.0 |
+| **Current State** | Basic GitHub analysis via text extraction only |
+
+**Planned Features (from v1.4.0-PLAN.md):**
+- Repository structure visualization (tree/directory diagram)
+- Dependency graph generation
+- Contributor statistics (commits, additions, deletions)
+- Language breakdown visualization
+- Issue and PR statistics
+- Star/fork/watch history trends
+- GitHub GraphQL API integration for efficiency
+- Data caching to reduce API calls
+
+**Why Not Implemented:**
+- v1.4.0 prioritized batch generation and custom templates (higher impact)
+- GitHub analysis works adequately with current text-based approach
+- GraphQL integration adds complexity without critical need
+
+**Potential Implementation:**
+1. Create GitHub GraphQL client service
+2. Implement repository structure parser
+3. Add contributor statistics aggregator
+4. Build visualization prompt templates
+5. Add caching layer for API responses
+
+---
+
+### Not Started: URL Analysis Enhancements
+
+**ID:** DF-009
+**Version Planned:** v1.4.0
+**Current Status:** Not Started
+**Category:** Feature Enhancement
+**Priority:** Low
+
+| Attribute | Details |
+|-----------|---------|
+| **Original Plan** | v1.4.0 - Productivity Enhancement |
+| **Reason for Non-Implementation** | Deprioritized, basic URL analysis sufficient |
+| **Architecture Constraint** | Client-side crawling limited by CORS, robots.txt compliance |
+| **Impact** | Single-page URL analysis only, no multi-page comparison |
+| **Dependencies** | Sitemap parser, robots.txt checker, crawling logic |
+| **Effort to Implement** | M (10-15 hours) |
+| **Target Version** | v1.8.0+ |
+| **Current State** | Single URL analysis via Gemini grounding works well |
+
+**Planned Features (from v1.4.0-PLAN.md):**
+- Multi-page analysis (up to 10 pages per generation)
+- Sitemap.xml parsing and automatic page discovery
+- Content comparison mode for 2-5 URLs
+- Robots.txt compliance checking
+- Configurable crawl depth
+- Duplicate content detection
+- Summary aggregation across multiple pages
+
+**Why Not Implemented:**
+- Single-page analysis meets most use cases
+- Multi-page crawling adds complexity
+- CORS restrictions limit client-side crawling
+- Gemini grounding provides web search results already
+
+---
+
+### Not Started: Presentation Mode
+
+**ID:** DF-010
+**Version Planned:** v1.6.0
+**Current Status:** Not Started
+**Category:** Optional Feature
+**Priority:** Low
+
+| Attribute | Details |
+|-----------|---------|
+| **Original Plan** | v1.6.0 - AI Intelligence & Creativity (OPTIONAL) |
+| **Reason for Non-Implementation** | Low priority, marked as optional in plan |
+| **Architecture Constraint** | None - browser Fullscreen API is available |
+| **Impact** | No fullscreen presentation view for infographics |
+| **Dependencies** | Browser Fullscreen API |
+| **Effort to Implement** | S (4-6 hours) |
+| **Target Version** | v1.9.0 or v2.0.0 (if requested by users) |
+| **Current State** | Users can view full-size infographics in modal |
+
+**Planned Features (from v1.6.0-PLAN.md):**
+- Full-screen presentation view
+- Keyboard navigation (arrow keys, Escape)
+- Slide counter (for batch presentations)
+- Basic transitions
+
+**Why Not Implemented:**
+- Marked as optional in v1.6.0 plan
+- Core features prioritized (AI suggestions, templates, palettes)
+- Users can achieve similar effect with browser fullscreen (F11)
+
+**Potential Implementation:**
+1. Create `components/PresentationMode.tsx`
+2. Use browser Fullscreen API
+3. Add keyboard event handlers (ArrowLeft, ArrowRight, Escape)
+4. Create minimal UI overlay (slide counter, navigation hints)
+5. Test cross-browser compatibility
+
+---
+
+### Deferred: Community Template Sharing
+
+**ID:** DF-011
+**Version Planned:** v1.6.0
+**Current Status:** Deferred
+**Category:** Backend Infrastructure, Social Features
+**Priority:** Medium
+
+| Attribute | Details |
+|-----------|---------|
+| **Original Plan** | v1.6.0 - AI Intelligence & Creativity (mentioned in v1.4.0-PLAN.md) |
+| **Reason for Deferral** | Requires backend database for template storage |
+| **Architecture Constraint** | Client-side architecture cannot support multi-user template sharing |
+| **Impact** | Users cannot share custom templates with community |
+| **Dependencies** | DF-001 (User Accounts), backend database, API endpoints |
+| **Effort to Implement** | M (8-12 hours after backend exists) |
+| **Target Version** | v2.0.0+ |
+| **Workaround** | Manual template export/import as JSON files |
+
+**Planned Features:**
+- Community template library (browse, search, filter)
+- Template upload and publishing
+- Template rating and reviews
+- Popular templates showcase
+- Template categories and tags
+
+**Blockers:**
+- No backend database
+- No user accounts (DF-001)
+- No API for template CRUD operations
+
+---
+
+### Deferred: Template Rating System
+
+**ID:** DF-012
+**Version Planned:** v1.6.0
+**Current Status:** Deferred
+**Category:** Backend Infrastructure
+**Priority:** Low
+
+| Attribute | Details |
+|-----------|---------|
+| **Original Plan** | v1.6.0 - AI Intelligence & Creativity (mentioned in plan) |
+| **Reason for Deferral** | Requires backend database for ratings storage |
+| **Architecture Constraint** | Client-side cannot persist multi-user ratings |
+| **Impact** | No community feedback on template quality |
+| **Dependencies** | DF-001 (User Accounts), DF-011 (Template Sharing), backend database |
+| **Effort to Implement** | S (3-5 hours after backend exists) |
+| **Target Version** | v2.0.0+ |
+| **Workaround** | None - feature requires backend |
+
+**Planned Features:**
+- 5-star rating system for templates
+- Template reviews and comments
+- Sort by rating/popularity
+- User voting on templates
+
+---
+
+## Feature Gap by Version
+
+### v1.4.0 - Productivity Enhancement
+
+| Feature | Planned | Implemented | Status | Notes |
+|---------|---------|-------------|--------|-------|
+| Batch Generation Mode | ✅ | ✅ | **Complete** | Fully implemented with queue management |
+| Custom Style Templates | ✅ | ✅ | **Complete** | 55+ templates in v1.6.0 library |
+| Enhanced Version History | ✅ | ✅ | **Complete** | Search, filter, pagination implemented |
+| Export Format Options | ✅ | ✅ | **Complete** | PNG, SVG, PDF, multi-resolution downloads |
+| Improved GitHub Analysis | ✅ | ❌ | **Not Started** | DF-008 - Deprioritized |
+| URL Analysis Enhancements | ✅ | ❌ | **Not Started** | DF-009 - Deprioritized |
+
+**v1.4.0 Completion:** 67% (4 of 6 features)
+
+---
+
+### v1.5.0 - Accessibility & Global Reach
+
+| Feature | Planned | Implemented | Status | Notes |
+|---------|---------|-------------|--------|-------|
+| User Accounts & Authentication | ✅ | ❌ | **Deferred** | DF-001 - Requires backend |
+| Cloud Storage & Sync | ✅ | ❌ | **Deferred** | DF-002 - Requires backend |
+| Sharing & Collaboration | ✅ | ❌ | **Deferred** | DF-003 - Requires backend |
+| Advanced Post-Generation Editing | ✅ | ❌ | **Deferred** | DF-004 - Requires canvas editor |
+| Keyboard Shortcuts | ✅ | ✅ | **Complete** | 15+ shortcuts implemented |
+| Accessibility Improvements | ✅ | ✅ | **Complete** | WCAG 2.1 AA compliance |
+| Internationalization | ✅ | ✅ | **Complete** | English, Spanish supported |
+
+**v1.5.0 Completion:** 43% (3 of 7 features)
+
+---
+
+### v1.6.0 - AI Intelligence & Creativity
+
+| Feature | Planned | Implemented | Status | Notes |
+|---------|---------|-------------|--------|-------|
+| AI-Powered Style Suggestions | ✅ | ✅ | **Complete** | Gemini-powered topic analysis |
+| Smart Palette Generator | ✅ | ✅ | **Complete** | Image color extraction with Vibrant.js |
+| Enhanced Template Library | ✅ | ✅ | **Complete** | 55 templates across 10 categories |
+| Layout Optimization Engine | ✅ | ⚠️ | **Partial** | DF-006 - Backend ready, UI missing |
+| Data Visualization Templates | ✅ | ⚠️ | **Partial** | DF-007 - Templates exist, CSV import missing |
+| Animation Support | ✅ | ❌ | **Deferred** | DF-005 - Gemini API limitation |
+| Presentation Mode | ✅ | ❌ | **Not Started** | DF-010 - Optional, deprioritized |
+
+**v1.6.0 Completion:** 43% shipped + 29% partial = 72% (with partials)
+
+---
+
+### Future Versions (v1.7.0+)
+
+**v1.7.0 - Platform & API** (Not Started)
+- REST API v1
+- Webhook System
+- JavaScript/TypeScript SDK
+- Python SDK
+- API Playground
+- Developer Portal
+- Rate Limiting & Quotas
+
+**v1.8.0 - Integrations** (Not Started)
+- Google Workspace Integration
+- Notion Integration
+- Figma Plugin
+- Slack Bot
+- Discord Bot
+- Zapier Integration
+- Make Integration
+
+**v1.9.0 - Enterprise Features** (Not Started)
+- SSO/SAML Authentication
+- Role-Based Access Control
+- Admin Dashboard
+- Usage Analytics & Reporting
+- Brand Guidelines System
+- Template Governance
+- Go SDK, Ruby SDK
+- Batch API Enhancements
+
+**v2.0.0 - Platform Maturity** (Not Started)
+- Performance Optimization
+- UI/UX Refinement
+- Documentation Overhaul
+- Advanced Error Handling
+- Support Infrastructure
+- Comprehensive Testing Suite
+- Monitoring & Alerting
+
+---
+
+## Prioritized Backlog
+
+### Tier 1: Quick Wins (High Impact, Low Effort)
+
+Complete these first - deliver value quickly:
+
+1. **DF-006** - Layout Variant Selector UI (S - 3-5 hours)
+   - Backend ready, just needs UI component
+   - Enables users to choose between layout options
+   - No dependencies
+
+2. **DF-007** - CSV Import for Data Viz (M - 6-10 hours)
+   - Templates already exist
+   - Add PapaParse library + preview UI
+   - High value for data-driven users
+
+3. **DF-010** - Presentation Mode (S - 4-6 hours)
+   - Simple browser Fullscreen API integration
+   - Nice-to-have for presentations
+   - No dependencies
+
+**Total Tier 1 Effort:** ~15-20 hours
+
+---
+
+### Tier 2: Backend-Dependent Features
+
+Requires architectural decision to add backend infrastructure:
+
+1. **DF-001** - User Accounts & Authentication (XL - 40-60 hours)
+   - **Blocker for:** DF-002, DF-003, DF-011, DF-012
+   - Firebase Auth easiest path
+   - Enables multi-device, cloud features
+
+2. **DF-002** - Cloud Storage & Sync (XL - 30-50 hours)
+   - **Depends on:** DF-001
+   - Firebase Storage or Supabase
+   - Removes browser storage quota limits
+
+3. **DF-003** - Sharing & Collaboration (L - 20-30 hours)
+   - **Depends on:** DF-001, DF-002
+   - Enables team use cases
+   - Public sharing links
+
+4. **DF-011** - Community Template Sharing (M - 8-12 hours)
+   - **Depends on:** DF-001, backend database
+   - Social feature with high engagement potential
+
+5. **DF-012** - Template Rating System (S - 3-5 hours)
+   - **Depends on:** DF-001, DF-011
+   - Low effort after template sharing exists
+
+**Total Tier 2 Effort:** ~100-160 hours (requires backend infrastructure decision)
+
+---
+
+### Tier 3: Complex Features
+
+Higher effort, lower priority:
+
+1. **DF-004** - Advanced Post-Generation Editing (XL - 50-80 hours)
+   - Requires full canvas editor (Fabric.js or custom)
+   - Complex UI/UX
+   - Nice-to-have but not essential
+
+2. **DF-008** - Improved GitHub Analysis (L - 15-25 hours)
+   - GitHub GraphQL integration
+   - Dependency graphs, contributor stats
+   - Current implementation adequate
+
+3. **DF-009** - URL Analysis Enhancements (M - 10-15 hours)
+   - Multi-page crawling
+   - CORS limitations on client-side
+   - Current single-page analysis sufficient
+
+**Total Tier 3 Effort:** ~75-120 hours
+
+---
+
+### Tier 4: Blocked by External Dependencies
+
+Cannot implement until external factors change:
+
+1. **DF-005** - Animation Support (XL - 60+ hours IF backend video encoding)
+   - **Blocker:** Gemini API only generates static images
+   - **Options:**
+     - Wait for Gemini video generation API (no ETA)
+     - Backend FFmpeg server for frame stitching (requires infrastructure)
+     - Third-party video APIs (costly)
+   - **Recommendation:** Wait for Gemini video API or defer to v2.0.0+
+
+---
+
+## Recommended Implementation Strategy
+
+### Phase 1: Complete v1.6.0 Partial Features (v1.7.0)
+**Effort:** 15-20 hours
+**Target:** v1.7.0 release
+
+- DF-006: Layout Variant Selector UI
+- DF-007: CSV Import for Data Viz
+- DF-010: Presentation Mode (optional)
+
+**Rationale:** Low-hanging fruit that completes v1.6.0 vision
+
+---
+
+### Phase 2: Backend Infrastructure Decision (v1.8.0 - v2.0.0)
+**Effort:** Strategic planning + 100-160 hours implementation
+**Target:** v1.8.0 or v2.0.0
+
+**Decision Point:** Should InfoGraphix add backend infrastructure?
+
+**Option A: Firebase/Supabase (Recommended)**
+- Pros: Fastest path to backend features, serverless, managed
+- Cons: Vendor lock-in, costs scale with usage
+- Enables: DF-001, DF-002, DF-003, DF-011, DF-012
+- Effort: 100-120 hours
+
+**Option B: Custom Backend**
+- Pros: Full control, customizable, self-hosted option
+- Cons: Highest effort, maintenance burden
+- Enables: Same as Option A
+- Effort: 150-200 hours
+
+**Option C: Stay Client-Side**
+- Pros: Maintains current simplicity, no hosting costs
+- Cons: Blocks all multi-user, cloud, and social features
+- Impact: DF-001 through DF-012 remain deferred indefinitely
+
+**Recommendation:** Firebase Authentication + Storage for v2.0.0
+
+---
+
+### Phase 3: Enhanced Analysis Features (v1.9.0+)
+**Effort:** 25-40 hours
+**Target:** v1.9.0
+
+- DF-008: Improved GitHub Analysis
+- DF-009: URL Analysis Enhancements
+
+**Rationale:** Nice-to-have enhancements after core features complete
+
+---
+
+### Phase 4: Advanced Features (v2.0.0+)
+**Effort:** 50-80+ hours
+**Target:** v2.0.0 or later
+
+- DF-004: Advanced Post-Generation Editing
+- DF-005: Animation Support (pending Gemini API or backend)
+
+**Rationale:** Complex features requiring significant investment
+
+---
+
+## Integration with Technical Debt
+
+These deferred features interact with technical debt items:
+
+- **DF-001 (User Accounts)** enables **TD-011** (Error Tracking) with user context
+- **DF-002 (Cloud Storage)** addresses **TD-003** (Mixed Storage Strategies) long-term
+- **DF-007 (CSV Import)** requires **TD-031** (Form Validation) for file uploads
+- **Backend Infrastructure** enables proper **CI/CD** (**TD-012**) with staging/production environments
+
+---
+
+## Documentation Gaps
+
+Related pending documentation tasks (from DOCUMENTATION-TASKS.md):
+
+1. **Video Tutorials** - Deferred (requires screen recording tools)
+2. **API Key Security Model** - Pending (DF-001 context needed)
+3. **Inline Code Documentation** - Low priority, ongoing
+
+---
+
+## Notes
+
+### Version Plan Files Analyzed
+
+- ✅ `v1.4.0-PLAN.md` - Productivity Enhancement
+- ✅ `v1.5.0-PLAN.md` - Accessibility & Global Reach
+- ✅ `v1.6.0-PLAN.md` - AI Intelligence & Creativity
+- ✅ `v1.7.0-PLAN.md` - Platform & API (future)
+- ✅ `v1.8.0-PLAN.md` - Integrations (future)
+- ✅ `v1.9.0-PLAN.md` - Enterprise Features (future)
+- ✅ `v2.0.0-PLAN.md` - Platform Maturity (future)
+
+**Note:** v1.0.0-v1.3.0 version plans do not exist (pre-planning era)
+
+### CHANGELOG.md Cross-Reference
+
+All implementation claims verified against CHANGELOG.md release notes:
+- v1.3.0 - Foundation release
+- v1.4.0 - Batch Generation, Templates, Export Formats
+- v1.4.5 - Bug fixes
+- v1.4.6 - Security & Documentation
+- v1.5.0 - Keyboard shortcuts, Accessibility, i18n
+- v1.6.0 - AI Suggestions, Palette Generator, Enhanced Templates
+
+---
+
+**Gap Analysis Completed:** 2025-12-12
+**Next Review:** 2025-03-12 (Quarterly, aligned with Technical Debt review)
+
+---
+
 **Document Maintained By:** Technical Debt Analysis (Automated + Manual Review)
 **Next Review:** 2025-03-12 (Quarterly)
