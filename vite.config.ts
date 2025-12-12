@@ -18,6 +18,20 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
-      }
+      },
+      build: {
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              // React core - stable, rarely changes
+              'react-vendor': ['react', 'react-dom'],
+              // Google Gemini SDK - largest dependency
+              'gemini-sdk': ['@google/genai'],
+              // Icons - large but compressible
+              'icons': ['lucide-react'],
+            },
+          },
+        },
+      },
     };
 });

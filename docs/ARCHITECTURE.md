@@ -6,35 +6,67 @@ This document describes the technical architecture of InfoGraphix AI.
 
 InfoGraphix AI is a client-side React application that interfaces with Google's Gemini AI APIs to generate infographic images. The application runs entirely in the browser with no backend server required.
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Browser Client                           │
-├─────────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐  │
-│  │   App.tsx   │  │  Components │  │    Services             │  │
-│  │   (State)   │──│   (UI)      │──│  (geminiService.ts)     │  │
-│  └─────────────┘  └─────────────┘  └───────────┬─────────────┘  │
-│                                                 │               │
-│  ┌─────────────────────────────────────────────┴─────────────┐  │
-│  │                    localStorage                           │  │
-│  │  • infographix_versions (saved generations)               │  │
-│  │  • infographix_form_draft (form auto-save)                │  │
-│  └───────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    Google Gemini AI APIs                        │
-├─────────────────────────────────────────────────────────────────┤
-│  ┌─────────────────────────┐  ┌──────────────────────────────┐  │
-│  │  Gemini 3 Pro Preview   │  │  Gemini 3 Pro Image Preview  │  │
-│  │  (gemini-3-pro-preview) │  │  (gemini-3-pro-image-preview)│  │
-│  │                         │  │                              │  │
-│  │  • Topic Analysis       │  │  • Image Generation          │  │
-│  │  • Thinking Mode (32K)  │  │  • 1K/2K/4K Resolution       │  │
-│  │  • Google Search Ground │  │  • Multiple Aspect Ratios    │  │
-│  └─────────────────────────┘  └──────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
+### High-Level System Architecture
+
+```mermaid
+graph TB
+    subgraph Browser["Browser Environment"]
+        subgraph UI["User Interface Layer"]
+            App[App.tsx<br/>Main Orchestrator]
+            Form[InfographicForm<br/>Input Controls]
+            Result[InfographicResult<br/>Display & Actions]
+            History[VersionHistory<br/>Saved Generations]
+            Processing[ProcessingState<br/>Loading Indicators]
+        end
+
+        subgraph Services["Service Layer"]
+            GeminiService[geminiService.ts<br/>API Integration]
+        end
+
+        subgraph Storage["Browser Storage"]
+            LocalStorage[(localStorage<br/>versions & drafts)]
+        end
+
+        subgraph Types["Type System"]
+            TypeDefs[types.ts<br/>TypeScript Definitions]
+        end
+    end
+
+    subgraph External["External Services"]
+        subgraph Gemini["Google Gemini AI"]
+            GeminiPro[Gemini 3 Pro Preview<br/>Analysis + Thinking]
+            GeminiImage[Gemini 3 Pro Image<br/>Image Generation]
+            GoogleSearch[Google Search<br/>Grounding]
+        end
+
+        AIStudio[Google AI Studio<br/>API Key Management]
+    end
+
+    App --> Form
+    App --> Result
+    App --> History
+    App --> Processing
+
+    App --> GeminiService
+    App --> LocalStorage
+
+    Form --> TypeDefs
+    Result --> TypeDefs
+    History --> LocalStorage
+
+    GeminiService --> GeminiPro
+    GeminiService --> GeminiImage
+    GeminiService --> TypeDefs
+
+    GeminiPro --> GoogleSearch
+
+    App -.API Key.-> AIStudio
+
+    style Browser fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#e2e8f0
+    style External fill:#1e293b,stroke:#8b5cf6,stroke-width:2px,color:#e2e8f0
+    style GeminiPro fill:#3b82f6,color:#fff
+    style GeminiImage fill:#8b5cf6,color:#fff
+    style GoogleSearch fill:#10b981,color:#fff
 ```
 
 ## Two-Phase AI Pipeline
@@ -93,37 +125,211 @@ The generation phase uses `gemini-3-pro-image-preview` (Nano Banana Pro).
 
 All application state is managed in `App.tsx` using React hooks. No external state management library is used.
 
-### Primary State Variables
+### State Architecture
 
-```typescript
-// Generation flow
-const [processingStep, setProcessingStep] = useState<ProcessingStep>('idle');
-const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
-const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+```mermaid
+graph LR
+    subgraph AppState["App.tsx State"]
+        subgraph GenerationFlow["Generation Flow State"]
+            Step[processingStep<br/>idle→analyzing→generating→complete]
+            Analysis[analysisResult<br/>AnalysisResult | null]
+            Image[generatedImage<br/>string | null]
+            Error[error<br/>string | null]
+        end
 
-// Form state
-const [topic, setTopic] = useState<string>('');
-const [inputType, setInputType] = useState<InputType>('topic');
-const [selectedStyle, setSelectedStyle] = useState<InfographicStyle>();
-const [selectedPalette, setSelectedPalette] = useState<ColorPalette>();
-const [imageSize, setImageSize] = useState<ImageSize>();
-const [aspectRatio, setAspectRatio] = useState<AspectRatio>();
+        subgraph FormState["Form Input State"]
+            Topic[topic: string]
+            InputType[inputType: InputType]
+            Style[selectedStyle: InfographicStyle]
+            Palette[selectedPalette: ColorPalette]
+            Size[imageSize: ImageSize]
+            Ratio[aspectRatio: AspectRatio]
+            Filters[githubFilters?: GithubFilters]
+            FileContent[uploadedFileContent?: string]
+        end
 
-// Persistence
-const [savedVersions, setSavedVersions] = useState<SavedVersion[]>([]);
+        subgraph PersistenceState["Persistence State"]
+            Versions[savedVersions: SavedVersion<br>]
+            CurrentFeedback[currentFeedback?: Feedback]
+        end
+
+        subgraph UIState["UI Control State"]
+            ApiKeyReady[isApiKeyReady: boolean]
+            Saved[isCurrentResultSaved: boolean]
+            ShowHistory[showHistory: boolean]
+            ShowAbout[showAbout: boolean]
+            ShowFeedback[showFeedback: boolean]
+        end
+    end
+
+    subgraph ExternalState["External State"]
+        LocalStorage[(localStorage)]
+        SessionState[Form Drafts<br/>Auto-save]
+    end
+
+    Versions <--> LocalStorage
+    FormState <--> SessionState
+    SessionState <--> LocalStorage
+
+    classDef generation fill:#3b82f6,color:#fff
+    classDef form fill:#8b5cf6,color:#fff
+    classDef persistence fill:#10b981,color:#fff
+    classDef ui fill:#f59e0b,color:#fff
+    classDef external fill:#ef4444,color:#fff
+
+    class GenerationFlow generation
+    class FormState form
+    class PersistenceState persistence
+    class UIState ui
+    class ExternalState external
 ```
 
-### Processing Steps
+### Processing Step State Machine
 
-```
-idle → analyzing → generating → complete
-  ↑                              │
-  └──────────────────────────────┘
+```mermaid
+stateDiagram-v2
+    [*] --> Idle
+
+    Idle --> Analyzing: User clicks Generate
+    Analyzing --> Generating: Analysis complete
+    Analyzing --> Idle: Error in analysis
+
+    Generating --> Complete: Image generated
+    Generating --> Idle: Error in generation
+
+    Complete --> Idle: New generation
+    Complete --> Analyzing: Regenerate
+
+    note right of Analyzing
+        Gemini 3 Pro Preview
+        Thinking mode (32K)
+        Google Search grounding
+    end note
+
+    note right of Generating
+        Gemini 3 Pro Image
+        PNG generation
+        Base64 encoding
+    end note
+
+    note right of Complete
+        Display image
+        Enable save/download
+        Show analysis details
+    end note
 ```
 
 ## Data Flow
 
-### Generation Flow
+### Complete Data Flow Diagram
+
+```mermaid
+flowchart TD
+    Start([User Starts Generation])
+
+    subgraph Input["Input Processing"]
+        InputSelect{Input Type?}
+        TopicInput[Topic Text]
+        URLInput[URL String]
+        GitHubInput[GitHub URL<br/>+ Filters]
+        FileInput[Markdown File<br/>Content]
+    end
+
+    subgraph FormData["Form Data Collection"]
+        Style[InfographicStyle]
+        Palette[ColorPalette]
+        Size[ImageSize]
+        Ratio[AspectRatio]
+        Combine[Combine All<br/>Parameters]
+    end
+
+    subgraph Analysis["Analysis Phase"]
+        BuildPrompt[Build Analysis<br/>Prompt]
+        Gemini3Pro[Gemini 3 Pro API<br/>Thinking Mode<br/>Google Search]
+        ParseJSON[Parse JSON<br/>Response]
+        AnalysisData{Valid<br/>Response?}
+        ExtractPlan[Extract<br/>visualPlan]
+    end
+
+    subgraph Generation["Image Generation Phase"]
+        BuildImagePrompt[Combine visualPlan<br/>+ style + palette]
+        Gemini3Image[Gemini 3 Pro Image API<br/>PNG Generation]
+        Base64Convert[Convert to<br/>Base64 Data URL]
+        ImageValid{Valid<br/>Image?}
+    end
+
+    subgraph Output["Output Handling"]
+        Display[Display in<br/>InfographicResult]
+        ShowDetails[Show Analysis<br/>Details]
+        EnableActions[Enable Download<br/>+ Save Actions]
+    end
+
+    subgraph Persistence["Data Persistence"]
+        SaveDecision{User Saves?}
+        CreateVersion[Create SavedVersion<br/>Object]
+        StoreLocal[Save to<br/>localStorage]
+        UpdateHistory[Update<br/>VersionHistory UI]
+    end
+
+    subgraph ErrorHandling["Error Handling"]
+        Error[Error Occurred]
+        MapError[Map Error to<br/>User Message]
+        DisplayError[Show Error<br/>in UI]
+        RetryOption{User<br/>Retries?}
+    end
+
+    Start --> InputSelect
+    InputSelect -->|Topic| TopicInput
+    InputSelect -->|URL| URLInput
+    InputSelect -->|GitHub| GitHubInput
+    InputSelect -->|File| FileInput
+
+    TopicInput & URLInput & GitHubInput & FileInput --> Combine
+    Style & Palette & Size & Ratio --> Combine
+
+    Combine --> BuildPrompt
+    BuildPrompt --> Gemini3Pro
+    Gemini3Pro --> ParseJSON
+    ParseJSON --> AnalysisData
+
+    AnalysisData -->|Yes| ExtractPlan
+    AnalysisData -->|No| Error
+
+    ExtractPlan --> BuildImagePrompt
+    BuildImagePrompt --> Gemini3Image
+    Gemini3Image --> Base64Convert
+    Base64Convert --> ImageValid
+
+    ImageValid -->|Yes| Display
+    ImageValid -->|No| Error
+
+    Display --> ShowDetails
+    ShowDetails --> EnableActions
+    EnableActions --> SaveDecision
+
+    SaveDecision -->|Yes| CreateVersion
+    SaveDecision -->|No| End([Generation Complete])
+
+    CreateVersion --> StoreLocal
+    StoreLocal --> UpdateHistory
+    UpdateHistory --> End
+
+    Error --> MapError
+    MapError --> DisplayError
+    DisplayError --> RetryOption
+    RetryOption -->|Yes| BuildPrompt
+    RetryOption -->|No| End
+
+    style Input fill:#3b82f6,color:#fff
+    style FormData fill:#8b5cf6,color:#fff
+    style Analysis fill:#10b981,color:#fff
+    style Generation fill:#f59e0b,color:#fff
+    style Output fill:#06b6d4,color:#fff
+    style Persistence fill:#8b5cf6,color:#fff
+    style ErrorHandling fill:#ef4444,color:#fff
+```
+
+### Generation Flow (Text-Based)
 
 ```
 1. User Input
@@ -173,37 +379,69 @@ Saved Versions ──► localStorage (infographix_versions)
 
 ## Component Architecture
 
+### Component Hierarchy
+
+```mermaid
+graph TD
+    App[App.tsx<br/>Main State Manager]
+
+    App --> ApiKey[ApiKeySelector<br/>API Key Management]
+    App --> Form[InfographicForm<br/>User Input]
+    App --> Processing[ProcessingState<br/>Loading UI]
+    App --> Result[InfographicResult<br/>Display Results]
+    App --> History[VersionHistory<br/>Saved Versions]
+    App --> Feedback[FeedbackForm<br/>User Ratings]
+    App --> About[AboutModal<br/>App Info]
+
+    Form --> RichSelect1[RichSelect<br/>Style Selector]
+    Form --> RichSelect2[RichSelect<br/>Palette Selector]
+
+    classDef mainApp fill:#3b82f6,stroke:#1e40af,color:#fff
+    classDef component fill:#8b5cf6,stroke:#6d28d9,color:#fff
+    classDef subcomponent fill:#10b981,stroke:#059669,color:#fff
+
+    class App mainApp
+    class ApiKey,Form,Processing,Result,History,Feedback,About component
+    class RichSelect1,RichSelect2 subcomponent
 ```
-App.tsx (Main Orchestrator)
-├── ApiKeySelector.tsx
-│   └── Modal for Google AI Studio API key selection
-│
-├── InfographicForm.tsx
-│   ├── Input type selector (topic/url/github/file)
-│   ├── Topic/URL input field
-│   ├── GitHub filters (when applicable)
-│   ├── RichSelect.tsx (style dropdown)
-│   ├── RichSelect.tsx (palette dropdown)
-│   ├── Resolution selector
-│   └── Aspect ratio selector
-│
-├── ProcessingState.tsx
-│   └── Loading indicators for analysis/generation phases
-│
-├── InfographicResult.tsx
-│   ├── Generated image display
-│   ├── Download button
-│   ├── Save to history button
-│   └── Analysis details (title, summary, key points)
-│
-├── VersionHistory.tsx
-│   └── List of saved generations with restore/delete
-│
-├── FeedbackForm.tsx
-│   └── User rating and feedback collection
-│
-└── AboutModal.tsx
-    └── Application information and credits
+
+### Component Interaction Flow
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant Form as InfographicForm
+    participant App as App.tsx
+    participant Processing as ProcessingState
+    participant Service as geminiService
+    participant Result as InfographicResult
+    participant History as VersionHistory
+
+    User->>Form: Enter topic + select style/palette
+    Form->>App: handleGenerate()
+    App->>App: setState('analyzing')
+    App->>Processing: Show "Analyzing..."
+
+    App->>Service: analyzeTopic()
+    Service-->>App: AnalysisResult
+
+    App->>App: setState('generating')
+    App->>Processing: Show "Generating..."
+
+    App->>Service: generateInfographicImage()
+    Service-->>App: imageDataUrl
+
+    App->>App: setState('complete')
+    App->>Result: Display infographic
+
+    User->>Result: Click "Save to History"
+    Result->>App: handleSaveVersion()
+    App->>History: Add to savedVersions
+    App->>App: Update localStorage
+
+    User->>History: Click saved version
+    History->>App: handleLoadVersion()
+    App->>Result: Restore saved state
 ```
 
 ## API Integration

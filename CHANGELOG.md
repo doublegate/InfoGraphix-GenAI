@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Comprehensive user guide (docs/USER-GUIDE.md) with step-by-step instructions for all features
+- FAQ document (docs/FAQ.md) covering 60+ common questions across 10 categories
+- Mermaid diagrams in ARCHITECTURE.md for system visualization
+  - High-level system architecture diagram
+  - Component hierarchy diagram
+  - Component interaction flow sequence diagram
+  - State architecture diagram
+  - Processing step state machine
+  - Complete data flow diagram
+- Enhanced API documentation (docs/API.md) with:
+  - Real-world examples for all API functions
+  - Detailed error response formats with recovery steps
+  - Four sequence diagrams (generation flow, authentication, error recovery, version history)
+  - Resolution and dimension reference table
+- Comprehensive CONTRIBUTING.md enhancements:
+  - Manual testing checklist for contributors
+  - Detailed code style guidelines with examples
+  - Commit message templates and examples
+  - PR review process documentation
+  - Testing requirements section
+
+### Changed
+- README.md updated with TailwindCSS v4 build-time reference (was incorrectly listed as CDN)
+- README.md documentation section now includes User Guide and FAQ links
+- CONTRIBUTING.md code style section expanded with TypeScript, React, and formatting examples
+
 ### Planned
 - Batch generation mode for multiple infographics
 - Custom style template creation

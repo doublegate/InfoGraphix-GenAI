@@ -186,6 +186,8 @@ Generated Infographic (PNG)
 
 | Document | Description |
 |----------|-------------|
+| [User Guide](docs/USER-GUIDE.md) | Complete step-by-step usage guide |
+| [FAQ](docs/FAQ.md) | Frequently asked questions and answers |
 | [Architecture](docs/ARCHITECTURE.md) | System design, data flow, state management |
 | [API Reference](docs/API.md) | Gemini integration, service interfaces |
 | [Components](docs/COMPONENTS.md) | React component documentation |
@@ -236,7 +238,7 @@ See also:
 | [React](https://react.dev/) | 19 | UI framework |
 | [TypeScript](https://www.typescriptlang.org/) | 5.8 | Type safety |
 | [Vite](https://vitejs.dev/) | 6 | Build tool and dev server |
-| [TailwindCSS](https://tailwindcss.com/) | CDN | Utility-first styling |
+| [TailwindCSS](https://tailwindcss.com/) | v4 (build-time) | Utility-first styling |
 | [Lucide React](https://lucide.dev/) | 0.554 | Icon library |
 | [@google/genai](https://www.npmjs.com/package/@google/genai) | 1.30 | Gemini API SDK |
 

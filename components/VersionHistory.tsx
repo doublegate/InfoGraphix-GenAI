@@ -66,57 +66,71 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex justify-end">
+      <div
+        className="fixed inset-0 z-50 flex justify-end"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="version-history-title"
+      >
         {/* Backdrop */}
-        <div 
+        <div
           className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-300"
           onClick={onClose}
+          aria-hidden="true"
         ></div>
 
         {/* Drawer */}
         <div className="relative w-full max-w-md bg-slate-900 h-full shadow-2xl border-l border-slate-700 flex flex-col animate-in slide-in-from-right duration-300">
           <div className="p-6 border-b border-slate-700 flex flex-col bg-slate-900/50 gap-4">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <History className="w-5 h-5 text-blue-400" />
+              <h2 id="version-history-title" className="text-xl font-bold text-white flex items-center gap-2">
+                <History className="w-5 h-5 text-blue-400" aria-hidden="true" />
                 Version History
               </h2>
               <div className="flex gap-2">
                  {versions.length > 0 && (
-                  <button 
+                  <button
                     onClick={onClearHistory}
-                    className="p-2 text-slate-400 hover:text-red-400 transition-colors rounded-lg hover:bg-red-900/20"
+                    className="p-2 text-slate-400 hover:text-red-400 transition-colors rounded-lg hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-red-500"
                     title="Clear All History"
+                    aria-label="Clear all version history"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4" aria-hidden="true" />
                   </button>
                  )}
-                <button 
+                <button
                   onClick={onClose}
-                  className="p-2 text-slate-400 hover:text-white transition-colors"
+                  className="p-2 text-slate-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg"
+                  aria-label="Close version history panel"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-5 h-5" aria-hidden="true" />
                 </button>
               </div>
             </div>
 
             {/* Toolbar: Search & Sort */}
-            <div className="flex gap-2">
+            <div className="flex gap-2" role="search">
               <div className="relative flex-grow">
+                <label htmlFor="version-search" className="sr-only">Search versions</label>
                 <input
+                  id="version-search"
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search..."
+                  aria-label="Search saved versions by topic or title"
                   className="w-full bg-slate-800 border border-slate-700 text-sm text-white rounded-lg pl-9 pr-3 py-2 outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-500"
                 />
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" aria-hidden="true" />
               </div>
-              
+
               <div className="relative">
+                <label htmlFor="version-sort" className="sr-only">Sort versions</label>
                 <select
+                  id="version-sort"
                   value={sortOrder}
                   onChange={(e) => setSortOrder(e.target.value as SortOrder)}
+                  aria-label="Sort versions by date or name"
                   className="appearance-none bg-slate-800 border border-slate-700 text-sm text-white rounded-lg pl-3 pr-8 py-2 outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer w-full"
                 >
                   <option value="newest">Newest</option>
@@ -124,7 +138,7 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
                   <option value="az">A-Z</option>
                   <option value="za">Z-A</option>
                 </select>
-                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" aria-hidden="true">
                    {sortOrder === 'newest' && <CalendarClock className="w-4 h-4" />}
                    {sortOrder === 'oldest' && <CalendarArrowDown className="w-4 h-4" />}
                    {sortOrder === 'az' && <ArrowDownAZ className="w-4 h-4" />}
@@ -181,7 +195,7 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
                     <div className="p-4">
                       {/* Selection Indicator */}
                       {isCompareMode && (
-                        <div className="absolute top-4 right-4 z-10">
+                        <div className="absolute top-4 right-4 z-10" aria-hidden="true">
                           {isSelected ? (
                              <CheckSquare className="w-5 h-5 text-blue-500 fill-blue-500/10" />
                           ) : (
@@ -195,17 +209,18 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
                           {version.data.analysis.title}
                         </h3>
                         {!isCompareMode && (
-                          <button 
+                          <button
                             onClick={(e) => {
                               e.stopPropagation();
                               if (window.confirm("Delete this version?")) {
                                 onDeleteVersion(version.id);
                               }
                             }}
-                            className="text-slate-500 hover:text-red-400 transition-opacity absolute top-4 right-4"
+                            className="text-slate-500 hover:text-red-400 transition-opacity absolute top-4 right-4 focus:outline-none focus:ring-2 focus:ring-red-500 rounded"
                             title="Delete Version"
+                            aria-label={`Delete version: ${version.data.analysis.title}`}
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4" aria-hidden="true" />
                           </button>
                         )}
                       </div>
@@ -251,7 +266,7 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
 
                       <div className="flex gap-3">
                         <div className="w-16 h-16 bg-slate-900 rounded-lg overflow-hidden shrink-0 border border-slate-700">
-                          <img src={version.data.imageUrl} alt="thumbnail" className="w-full h-full object-cover" />
+                          <img src={version.data.imageUrl} alt={`Thumbnail of ${version.data.analysis.title}`} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 flex flex-col justify-center">
                             <p className="text-xs text-slate-500 line-clamp-2 mb-2">{version.data.analysis.summary}</p>

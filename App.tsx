@@ -173,10 +173,18 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-200 selection:bg-blue-500/30 font-sans">
+      {/* Skip to main content link for keyboard users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+      >
+        Skip to main content
+      </a>
+
       <ApiKeySelector onReady={() => setIsApiKeyReady(true)} />
-      
+
       {/* Background Decor */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[100px] -translate-y-1/2 animate-pulse" style={{animationDuration: '10s'}}></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-[100px] translate-y-1/2 animate-pulse" style={{animationDuration: '12s'}}></div>
       </div>
@@ -199,26 +207,28 @@ function App() {
             </p>
           </div>
           
-          <div className="flex gap-3">
-             <button 
+          <nav className="flex gap-3" aria-label="Main navigation">
+             <button
               onClick={() => setShowAbout(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-all text-slate-300 shadow-sm hover:text-white"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-all text-slate-300 shadow-sm hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="About InfoGraphix AI"
             >
-              <Info className="w-5 h-5" />
+              <Info className="w-5 h-5" aria-hidden="true" />
               About
             </button>
-            <button 
+            <button
               onClick={() => setShowHistory(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-all text-slate-300 shadow-sm hover:text-white"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-all text-slate-300 shadow-sm hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label={`View version history${savedVersions.length > 0 ? `, ${savedVersions.length} saved versions` : ''}`}
             >
-              <HistoryIcon className="w-5 h-5" />
-              History {savedVersions.length > 0 && <span className="bg-blue-600 text-white text-xs px-1.5 rounded-full">{savedVersions.length}</span>}
+              <HistoryIcon className="w-5 h-5" aria-hidden="true" />
+              History {savedVersions.length > 0 && <span className="bg-blue-600 text-white text-xs px-1.5 rounded-full" aria-hidden="true">{savedVersions.length}</span>}
             </button>
-          </div>
+          </nav>
         </header>
 
         {/* Main Interface */}
-        <main className="flex-grow">
+        <main id="main-content" className="flex-grow" role="main">
           {isApiKeyReady ? (
             <>
               <InfographicForm 

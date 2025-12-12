@@ -90,12 +90,12 @@ const InfographicResult: React.FC<InfographicResultProps> = ({
 
             <div className="space-y-4 mb-6">
               <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wider flex items-center gap-2">
-                <Info className="w-4 h-4" /> Key Insights
+                <Info className="w-4 h-4" aria-hidden="true" /> Key Insights
               </h3>
-              <ul className="space-y-3">
+              <ul className="space-y-3" role="list" aria-label="Key insights about the topic">
                 {data.analysis.keyPoints.map((point, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-slate-300">
-                    <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0 mt-0.5" aria-hidden="true" />
                     <span>{point}</span>
                   </li>
                 ))}
@@ -104,25 +104,26 @@ const InfographicResult: React.FC<InfographicResultProps> = ({
             
             {/* Sources Section */}
             {data.analysis.webSources && data.analysis.webSources.length > 0 && (
-              <div className="space-y-3 pt-6 border-t border-slate-700/50">
+              <nav className="space-y-3 pt-6 border-t border-slate-700/50" aria-label="Reference sources">
                  <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                  <LinkIcon className="w-3 h-3" /> Sources
+                  <LinkIcon className="w-3 h-3" aria-hidden="true" /> Sources
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {data.analysis.webSources.map((source, i) => (
-                    <a 
-                      key={i} 
-                      href={source.uri} 
-                      target="_blank" 
+                    <a
+                      key={i}
+                      href={source.uri}
+                      target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-blue-400 hover:text-blue-300 hover:underline truncate max-w-[200px]"
+                      className="text-xs text-blue-400 hover:text-blue-300 hover:underline truncate max-w-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-slate-800 rounded"
                       title={source.title}
+                      aria-label={`Source: ${source.title || 'External link'} (opens in new tab)`}
                     >
                       {source.title || 'Source'}
                     </a>
                   ))}
                 </div>
-              </div>
+              </nav>
             )}
 
             <div className="mt-auto pt-6 border-t border-slate-700/50">
@@ -159,12 +160,13 @@ const InfographicResult: React.FC<InfographicResultProps> = ({
                   <p className="text-sm font-medium opacity-80">Generated with Nano Banana Pro</p>
                 </div>
                 <div className="flex gap-2">
-                  <button 
+                  <button
                     onClick={handleDownload}
-                    className="p-2 bg-white text-slate-900 rounded-lg hover:bg-blue-50 transition-colors shadow-lg"
+                    className="p-2 bg-white text-slate-900 rounded-lg hover:bg-blue-50 transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900"
                     title="Download High-Res"
+                    aria-label="Download high-resolution infographic"
                   >
-                    <Download className="w-5 h-5" />
+                    <Download className="w-5 h-5" aria-hidden="true" />
                   </button>
                 </div>
              </div>
