@@ -6,8 +6,9 @@ Planned features and enhancements for InfoGraphix AI.
 
 | Version | Status | Release Target | Theme |
 |---------|--------|----------------|-------|
-| v1.3.0 | **CURRENT** | Released 2025-12-11 | Foundation |
-| v1.4.0 | Planned | Q1 2026 | Productivity |
+| v1.3.0 | Released | 2025-12-11 | Foundation |
+| v1.4.0 | Released | 2025-12-11 | Productivity |
+| v1.4.5 | **CURRENT** | 2025-12-12 | Productivity (Patch) |
 | v1.5.0 | Planned | Q2 2026 | Collaboration |
 | v1.6.0 | Planned | Q3 2026 | Intelligence |
 | v1.7.0 | Planned | Q4 2026 | Platform |
@@ -17,34 +18,35 @@ Planned features and enhancements for InfoGraphix AI.
 
 ---
 
-## Version 1.4.0 - Productivity Enhancement (Q1 2026)
+## Version 1.4.0 - Productivity Enhancement (Released 2025-12-11)
 
-### High Priority
+### High Priority (All Completed)
 
-- [ ] **Batch Generation Mode**
+- [x] **Batch Generation Mode**
   - Generate multiple infographics from a list of topics
   - Queue management with progress tracking
   - Bulk download as ZIP archive
   - Estimated effort: Medium
 
-- [ ] **Custom Style Templates**
+- [x] **Custom Style Templates**
   - Save custom style configurations
   - Import/export style presets
-  - Community style sharing
+  - 8 built-in template presets
   - Estimated effort: Medium
 
-- [ ] **Enhanced Version History**
+- [x] **Enhanced Version History**
   - Search and filter saved versions
   - Sort by date, topic, style
   - Pagination for large histories
   - Estimated effort: Low
 
-### Medium Priority
+### Medium Priority (All Completed)
 
-- [ ] **Export Format Options**
+- [x] **Export Format Options**
   - SVG export for vector graphics
-  - PDF export for print
+  - PDF export for print (jsPDF)
   - Multiple resolution download
+  - ZIP batch export (JSZip)
   - Estimated effort: Medium
 
 - [ ] **Improved GitHub Analysis**
@@ -387,7 +389,24 @@ Planned features and enhancements for InfoGraphix AI.
 
 ## Completed Features
 
-### Version 1.3.0 (Current Release - 2025-12-11)
+### Version 1.4.5 (Current Release - 2025-12-12)
+
+- [x] Fixed React Hooks violations in BatchManager, TemplateBrowser, VersionHistory
+- [x] Optimized production build with proper code splitting
+- [x] Fixed TemplateBrowser modal rendering with React Portal
+- [x] Enhanced lazy loading (BatchManager 22KB, VersionHistory 26KB)
+- [x] Main bundle optimized to 534KB (gzip: 138KB)
+
+### Version 1.4.0 (Released 2025-12-11)
+
+- [x] Batch Generation Mode with queue management
+- [x] Custom Style Templates (8 built-in presets)
+- [x] Enhanced Version History with search/filter/sort
+- [x] Export Format Options (PNG, PDF, SVG, ZIP)
+- [x] Form draft auto-save to localStorage
+- [x] Lazy loading for heavy components
+
+### Version 1.3.0 (Released 2025-12-11)
 
 - [x] Two-phase AI pipeline (analysis + generation)
 - [x] 22 infographic styles

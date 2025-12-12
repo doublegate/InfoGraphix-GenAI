@@ -2,7 +2,7 @@
 
 > Transform any topic into stunning, AI-generated infographics using Google Gemini
 
-[![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.4.5-blue.svg)](CHANGELOG.md)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -24,6 +24,12 @@ InfoGraphix AI is a powerful web application that generates high-quality infogra
 - Save and reuse custom style templates
 - Export in multiple formats (PNG, PDF, SVG, ZIP)
 - Advanced version history with search and filtering
+
+**Latest Updates (v1.4.5):**
+- Fixed React Hooks violations in BatchManager, TemplateBrowser, and VersionHistory
+- Optimized production build with proper code splitting (main: 534KB, export-libs: 686KB lazy-loaded)
+- Fixed TemplateBrowser modal rendering with React Portal for proper full-screen overlay
+- Enhanced lazy loading for BatchManager (22KB) and VersionHistory (26KB)
 
 ---
 
@@ -154,41 +160,66 @@ See [.env.local.example](.env.local.example) for detailed configuration instruct
 
 ```
 InfoGraphix-GenAI/
-├── App.tsx                      # Main application orchestrator
+├── App.tsx                      # Main application orchestrator (534KB main chunk)
 ├── index.tsx                    # React entry point
 ├── types.ts                     # TypeScript enums and interfaces
+├── vite.config.ts               # Build configuration with code splitting
 ├── services/
 │   ├── geminiService.ts         # Gemini API integration
 │   ├── batchService.ts          # Batch generation queue management
-│   ├── templateService.ts       # Template CRUD operations
+│   ├── templateService.ts       # Template CRUD operations (10 default templates)
 │   └── storageService.ts        # LocalStorage abstraction
 ├── components/
 │   ├── AboutModal.tsx           # Application information modal
 │   ├── ApiKeySelector.tsx       # AI Studio key management
 │   ├── ErrorBoundary.tsx        # Error handling wrapper
 │   ├── FeedbackForm.tsx         # User feedback collection
-│   ├── InfographicForm.tsx      # User input form
-│   ├── InfographicResult.tsx    # Generated output display
+│   ├── InfographicForm.tsx      # User input form (uses React Portal for modals)
+│   ├── InfographicResult.tsx    # Generated output display (dynamic import for exports)
 │   ├── ProcessingState.tsx      # Loading indicators
 │   ├── RichSelect.tsx           # Custom dropdown component
 │   ├── VersionComparison.tsx    # Version comparison view
-│   ├── VersionHistory.tsx       # Saved generations browser
+│   ├── VersionHistory.tsx       # Saved generations browser (lazy-loaded, 26KB)
 │   ├── BatchGeneration/         # Batch processing components
-│   │   ├── BatchManager.tsx     # Main batch management modal
+│   │   ├── BatchManager.tsx     # Main batch management modal (lazy-loaded, 22KB)
 │   │   ├── BatchQueueCreator.tsx# Queue creation interface
 │   │   ├── BatchQueueList.tsx   # List of all batch queues
 │   │   ├── BatchQueueCard.tsx   # Individual queue display
 │   │   └── BatchItemCard.tsx    # Batch item status card
 │   └── TemplateManager/         # Template management components
-│       ├── TemplateBrowser.tsx  # Template selection modal
+│       ├── TemplateBrowser.tsx  # Template selection modal (React Portal)
 │       ├── TemplateGrid.tsx     # Grid view of templates
 │       ├── TemplateCard.tsx     # Individual template card
 │       └── TemplateEditor.tsx   # Template creation/editing
 ├── utils/
-│   └── exportUtils.ts           # Export format utilities (PNG/PDF/SVG/ZIP)
+│   └── exportUtils.ts           # Export format utilities (lazy-loaded, 686KB)
 ├── docs/                        # Technical documentation
 └── to-dos/                      # Development roadmaps
 ```
+
+### Technical Implementation
+
+**Code Splitting & Lazy Loading:**
+- Main application bundle: 533.72 kB (gzipped: 137.17 kB)
+- Export libraries (jsPDF, JSZip): 686.49 kB (lazy-loaded on demand)
+- BatchManager: 22.09 kB (lazy-loaded when accessed)
+- VersionHistory: 26.10 kB (lazy-loaded when accessed)
+- Dynamic imports for export utilities to reduce initial load time
+
+**React Portal Usage:**
+- TemplateBrowser modal renders via `ReactDOM.createPortal()` for proper full-screen overlay
+- Escapes parent CSS constraints (relative positioning, max-width, overflow)
+- Ensures consistent modal behavior from both header and form buttons
+
+**State Management:**
+- All application state in `App.tsx` using React hooks
+- LocalStorage persistence for templates, versions, and form drafts
+- Queue state management via `batchService.ts`
+
+**Build Configuration:**
+- Vite 7 with optimized chunk splitting
+- 700KB chunk size warning limit for export libraries
+- Proper dependency ordering for React and its dependents
 
 ### AI Pipeline
 
@@ -248,7 +279,7 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 | Version | Theme | Target | Key Features |
 |---------|-------|--------|--------------|
 | v1.3.0 | Foundation | 2025-12-11 | Core generation, 22 styles, 10 palettes, version history |
-| v1.4.0 | Productivity Enhancement | 2025-12-11 (Current) | Batch generation, custom templates, SVG/PDF export |
+| v1.4.5 | Productivity Enhancement | 2025-12-11 (Current) | Batch generation, custom templates, SVG/PDF export, optimized build |
 | v1.5.0 | Collaboration & Sharing | Q2 2026 | User accounts, cloud sync, team workspaces |
 | v1.6.0 | AI Intelligence & Creativity | Q3 2026 | AI suggestions, template library, animations |
 | v1.7.0 | Platform & API | Q4 2026 | REST API, Python/JS SDKs, webhooks |
@@ -257,6 +288,15 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 | v2.0.0 | Stable Release | Q3 2027 | Performance optimization, UI/UX polish |
 
 ### Recent Updates
+
+**v1.4.5 - Build Optimization & Bug Fixes (2025-12-11):**
+- Fixed React Hooks violations in BatchManager, TemplateBrowser, and VersionHistory components
+- Resolved "Rendered more hooks than during previous render" error
+- Optimized production build with proper code splitting strategy
+- Fixed TemplateBrowser modal rendering using React Portal for full-screen overlay
+- Simplified Vite chunk splitting to prevent forwardRef errors
+- Enhanced lazy loading: BatchManager (22KB), VersionHistory (26KB), export-libs (686KB)
+- Build metrics: Main chunk 534KB, all lazy-loaded components load on demand
 
 **v1.4.0 - Productivity Enhancement (2025-12-11):**
 - Batch generation mode with queue management (up to 50 topics per batch)
@@ -330,14 +370,14 @@ See [FEATURE-ROADMAP.md](to-dos/FEATURE-ROADMAP.md) for complete details and [ve
 
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| [React](https://react.dev/) | 19.2 | UI framework |
-| [TypeScript](https://www.typescriptlang.org/) | 5.9 | Type safety |
-| [Vite](https://vitejs.dev/) | 7.2 | Build tool and dev server |
-| [TailwindCSS](https://tailwindcss.com/) | v4.1 (build-time) | Utility-first styling |
-| [Lucide React](https://lucide.dev/) | 0.560 | Icon library |
-| [@google/genai](https://www.npmjs.com/package/@google/genai) | 1.30 | Gemini API SDK |
-| [jsPDF](https://www.npmjs.com/package/jspdf) | 3.0 | PDF generation |
-| [JSZip](https://www.npmjs.com/package/jszip) | 3.10 | ZIP archive creation |
+| [React](https://react.dev/) | 19.2.3 | UI framework with hooks and portals |
+| [TypeScript](https://www.typescriptlang.org/) | 5.9.3 | Type safety and development tooling |
+| [Vite](https://vitejs.dev/) | 7.2.7 | Build tool with optimized code splitting |
+| [TailwindCSS](https://tailwindcss.com/) | 4.1.18 (build-time) | Utility-first styling framework |
+| [Lucide React](https://lucide.dev/) | 0.560.0 | Icon library |
+| [@google/genai](https://www.npmjs.com/package/@google/genai) | 1.30.0 | Gemini API SDK for AI integration |
+| [jsPDF](https://www.npmjs.com/package/jspdf) | 3.0.4 | PDF generation (lazy-loaded) |
+| [JSZip](https://www.npmjs.com/package/jszip) | 3.10.1 | ZIP archive creation (lazy-loaded) |
 
 ---
 

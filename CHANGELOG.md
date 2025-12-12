@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.5] - 2025-12-12
+
+### Fixed
+- **React Hooks Violations**
+  - BatchManager.tsx: Moved early return after useEffect hook
+  - TemplateBrowser.tsx: Moved early return after useEffect hook
+  - VersionHistory.tsx: Moved early return after useMemo/useEffect hooks
+  - Root cause: Components returned early before all hooks were called, violating React Rules of Hooks
+
+- **Production Build Runtime Errors**
+  - Fixed "forwardRef of undefined" error caused by aggressive chunk splitting
+  - Simplified Vite manualChunks configuration to only split export-libs
+  - Let Vite handle React/icons dependencies naturally for proper load order
+
+- **TemplateBrowser Modal Rendering**
+  - Modal now renders via `ReactDOM.createPortal()` at document.body level
+  - Fixed modal being trapped inside InfographicForm's CSS constraints
+  - Both header and form "Browse Templates" buttons now behave identically
+
+### Changed
+- **Build Optimization**
+  - Main chunk: 533.72 kB (gzip: 137.17 kB)
+  - Export libs: 686.49 kB (lazy-loaded on demand)
+  - BatchManager: 22.09 kB (lazy-loaded)
+  - VersionHistory: 26.10 kB (lazy-loaded)
+  - Increased chunk size warning limit to 700KB for export libraries
+
+### Technical
+- Added ReactDOM import to InfographicForm for portal usage
+- Refined lazy loading strategy: only BatchManager and VersionHistory are lazy-loaded
+- TemplateBrowser changed to static import (used by InfographicForm)
+- Dynamic imports for export utilities to reduce initial load time
+
+---
+
 ## [2.0.0] - 2027-09 (Planned)
 
 ### Theme: Stable Release
@@ -269,12 +304,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - @google/genai SDK for Gemini API integration
 - Component-based architecture with clear separation of concerns
 
-[Unreleased]: https://github.com/doublegate/InfoGraphix-GenAI/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/doublegate/InfoGraphix-GenAI/compare/v1.4.5...HEAD
 [2.0.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v2.0.0
 [1.9.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.9.0
 [1.8.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.8.0
 [1.7.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.7.0
 [1.6.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.6.0
 [1.5.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.5.0
+[1.4.5]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.4.5
 [1.4.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.4.0
 [1.3.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.3.0
