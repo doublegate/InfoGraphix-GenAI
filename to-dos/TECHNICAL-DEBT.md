@@ -66,6 +66,28 @@ Known issues, code quality improvements, and refactoring needs.
 
 ## Medium Priority
 
+### API Key Client-Side Exposure
+
+**Location:** Application-wide (AI Studio integration)
+
+**Issue:** API keys are handled client-side for AI Studio deployment model. While this is intentional for the target deployment environment, the security model is not clearly documented.
+
+**Code Review Finding:** v1.4.5 code review (2025-12-12)
+
+**Impact:** Security documentation gap - users may not understand the security implications of the client-side API key model.
+
+**Proposed Solution:**
+- Document security model in README.md
+- Add security considerations section to docs
+- Clarify AI Studio vs. local development security
+- Document API key best practices
+
+**Estimated Effort:** Low (documentation only)
+
+**Target Version:** v1.4.6 or v1.5.0
+
+---
+
 ### ~~Type Safety Gaps~~ (RESOLVED)
 
 **Location:** Various
@@ -144,6 +166,105 @@ App → InfographicForm → RichSelect
 **Estimated Effort:** Low
 
 ## Low Priority
+
+### Console Logging Not Filtered for Production
+
+**Location:** Application-wide
+
+**Issue:** 40+ console.log statements exist across the codebase without environment-based filtering. In production builds, these logs create unnecessary noise and may expose sensitive information.
+
+**Code Review Finding:** v1.4.5 code review (2025-12-12)
+
+**Impact:** Production debugging noise, potential information disclosure
+
+**Proposed Solution:**
+- Create logger utility with environment-based filtering
+- Replace all console.log calls with logger methods
+- Implement log levels (debug, info, warn, error)
+- Disable debug/info logs in production builds
+
+**Example:**
+```typescript
+// utils/logger.ts
+export const logger = {
+  debug: (...args: any[]) => {
+    if (import.meta.env.DEV) console.log(...args);
+  },
+  info: (...args: any[]) => {
+    if (import.meta.env.DEV) console.info(...args);
+  },
+  warn: (...args: any[]) => console.warn(...args),
+  error: (...args: any[]) => console.error(...args),
+};
+```
+
+**Estimated Effort:** Low (1-2 hours)
+
+**Target Version:** v1.5.0
+
+---
+
+### Missing Unit Tests
+
+**Location:** Application-wide
+
+**Issue:** No unit test framework is currently configured. This creates risk for future maintainability and regression prevention.
+
+**Code Review Finding:** v1.4.5 code review (2025-12-12)
+
+**Impact:** Future maintainability, regression prevention
+
+**Proposed Solution:**
+- Add Vitest test framework
+- Configure test environment with React Testing Library
+- Write unit tests for utility functions and services
+- Add component tests for key UI components
+- Configure test coverage reporting
+- Add CI integration
+
+**Priority Areas:**
+1. `services/geminiService.ts` - API integration logic
+2. `services/storageService.ts` - IndexedDB operations
+3. Custom hooks (`hooks/`) - State management logic
+4. Utility functions
+5. Component rendering and interactions
+
+**Estimated Effort:** High (ongoing)
+
+**Target Version:** v2.0.0 (comprehensive suite as per v2.0.0 plan)
+
+---
+
+### Callback Function Parameters
+
+**Location:** Multiple components
+
+**Issue:** Some callback functions pass multiple individual parameters where object destructuring would improve API clarity and extensibility.
+
+**Code Review Finding:** v1.4.5 code review (2025-12-12)
+
+**Impact:** Code readability, API design
+
+**Example:**
+```typescript
+// Current
+onGenerate(topic, inputType, size, aspectRatio, style, palette);
+
+// Proposed
+onGenerate({ topic, inputType, size, aspectRatio, style, palette });
+```
+
+**Benefits:**
+- Named parameters for clarity
+- Easier to add optional parameters
+- More flexible function signatures
+- Better IDE autocomplete
+
+**Estimated Effort:** Low (refactoring)
+
+**Target Version:** v1.5.0
+
+---
 
 ### Code Organization
 
@@ -284,14 +405,20 @@ When addressing debt:
 
 ## Metrics
 
-### Current Status (Updated 2025-12-11)
+### Current Status (Updated 2025-12-12)
 
 | Category | Total | Resolved | Remaining | Priority |
 |----------|-------|----------|-----------|----------|
 | High Priority | 3 | 3 | 0 | All resolved |
-| Medium Priority | 5 | 2 | 3 | Address within 2 releases |
-| Low Priority | 6 | 2 | 4 | Address as time permits |
+| Medium Priority | 6 | 3 | 3 | Address within 2 releases |
+| Low Priority | 9 | 2 | 7 | Address as time permits |
 | Refactoring | 4 | 1 | 3 | As needed |
+
+**Recent Additions (v1.4.5 Code Review - 2025-12-12):**
+- Medium: API Key Client-Side Exposure (documentation gap)
+- Low: Console Logging Not Filtered for Production
+- Low: Missing Unit Tests
+- Low: Callback Function Parameters
 
 ### Resolution Summary
 

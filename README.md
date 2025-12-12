@@ -2,7 +2,7 @@
 
 > Transform any topic into stunning, AI-generated infographics using Google Gemini
 
-[![Version](https://img.shields.io/badge/version-1.4.5-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.4.6-blue.svg)](CHANGELOG.md)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -25,11 +25,11 @@ InfoGraphix AI is a powerful web application that generates high-quality infogra
 - Export in multiple formats (PNG, PDF, SVG, ZIP)
 - Advanced version history with search and filtering
 
-**Latest Updates (v1.4.5):**
-- Fixed React Hooks violations in BatchManager, TemplateBrowser, and VersionHistory
-- Optimized production build with proper code splitting (main: 534KB, export-libs: 686KB lazy-loaded)
-- Fixed TemplateBrowser modal rendering with React Portal for proper full-screen overlay
-- Enhanced lazy loading for BatchManager (22KB) and VersionHistory (26KB)
+**Latest Updates (v1.4.6):**
+- Comprehensive security documentation (SECURITY.md) with API key security model
+- Project structure reorganization with all source in src/ directory
+- Path aliases configured for cleaner imports (@/ → src/)
+- Enhanced .gitignore with modern tooling patterns
 
 ---
 
@@ -160,39 +160,43 @@ See [.env.local.example](.env.local.example) for detailed configuration instruct
 
 ```
 InfoGraphix-GenAI/
-├── App.tsx                      # Main application orchestrator (534KB main chunk)
-├── index.tsx                    # React entry point
-├── types.ts                     # TypeScript enums and interfaces
+├── src/                         # Source code directory
+│   ├── App.tsx                  # Main application orchestrator (534KB main chunk)
+│   ├── index.tsx                # React entry point
+│   ├── types.ts                 # TypeScript enums and interfaces
+│   ├── services/
+│   │   ├── geminiService.ts     # Gemini API integration
+│   │   ├── batchService.ts      # Batch generation queue management
+│   │   ├── templateService.ts   # Template CRUD operations (10 default templates)
+│   │   └── storageService.ts    # LocalStorage abstraction
+│   ├── components/
+│   │   ├── AboutModal.tsx       # Application information modal
+│   │   ├── ApiKeySelector.tsx   # AI Studio key management
+│   │   ├── ErrorBoundary.tsx    # Error handling wrapper
+│   │   ├── FeedbackForm.tsx     # User feedback collection
+│   │   ├── InfographicForm.tsx  # User input form (uses React Portal for modals)
+│   │   ├── InfographicResult.tsx# Generated output display (dynamic import for exports)
+│   │   ├── ProcessingState.tsx  # Loading indicators
+│   │   ├── RichSelect.tsx       # Custom dropdown component
+│   │   ├── VersionComparison.tsx# Version comparison view
+│   │   ├── VersionHistory.tsx   # Saved generations browser (lazy-loaded, 26KB)
+│   │   ├── BatchGeneration/     # Batch processing components
+│   │   │   ├── BatchManager.tsx # Main batch management modal (lazy-loaded, 22KB)
+│   │   │   ├── BatchQueueCreator.tsx # Queue creation interface
+│   │   │   ├── BatchQueueList.tsx    # List of all batch queues
+│   │   │   ├── BatchQueueCard.tsx    # Individual queue display
+│   │   │   └── BatchItemCard.tsx     # Batch item status card
+│   │   └── TemplateManager/     # Template management components
+│   │       ├── TemplateBrowser.tsx   # Template selection modal (React Portal)
+│   │       ├── TemplateGrid.tsx      # Grid view of templates
+│   │       ├── TemplateCard.tsx      # Individual template card
+│   │       └── TemplateEditor.tsx    # Template creation/editing
+│   ├── utils/
+│   │   └── exportUtils.ts       # Export format utilities (lazy-loaded, 686KB)
+│   ├── hooks/
+│   └── styles/
+│       └── main.css             # Global styles
 ├── vite.config.ts               # Build configuration with code splitting
-├── services/
-│   ├── geminiService.ts         # Gemini API integration
-│   ├── batchService.ts          # Batch generation queue management
-│   ├── templateService.ts       # Template CRUD operations (10 default templates)
-│   └── storageService.ts        # LocalStorage abstraction
-├── components/
-│   ├── AboutModal.tsx           # Application information modal
-│   ├── ApiKeySelector.tsx       # AI Studio key management
-│   ├── ErrorBoundary.tsx        # Error handling wrapper
-│   ├── FeedbackForm.tsx         # User feedback collection
-│   ├── InfographicForm.tsx      # User input form (uses React Portal for modals)
-│   ├── InfographicResult.tsx    # Generated output display (dynamic import for exports)
-│   ├── ProcessingState.tsx      # Loading indicators
-│   ├── RichSelect.tsx           # Custom dropdown component
-│   ├── VersionComparison.tsx    # Version comparison view
-│   ├── VersionHistory.tsx       # Saved generations browser (lazy-loaded, 26KB)
-│   ├── BatchGeneration/         # Batch processing components
-│   │   ├── BatchManager.tsx     # Main batch management modal (lazy-loaded, 22KB)
-│   │   ├── BatchQueueCreator.tsx# Queue creation interface
-│   │   ├── BatchQueueList.tsx   # List of all batch queues
-│   │   ├── BatchQueueCard.tsx   # Individual queue display
-│   │   └── BatchItemCard.tsx    # Batch item status card
-│   └── TemplateManager/         # Template management components
-│       ├── TemplateBrowser.tsx  # Template selection modal (React Portal)
-│       ├── TemplateGrid.tsx     # Grid view of templates
-│       ├── TemplateCard.tsx     # Individual template card
-│       └── TemplateEditor.tsx   # Template creation/editing
-├── utils/
-│   └── exportUtils.ts           # Export format utilities (lazy-loaded, 686KB)
 ├── docs/                        # Technical documentation
 └── to-dos/                      # Development roadmaps
 ```
@@ -212,9 +216,9 @@ InfoGraphix-GenAI/
 - Ensures consistent modal behavior from both header and form buttons
 
 **State Management:**
-- All application state in `App.tsx` using React hooks
+- All application state in `src/App.tsx` using React hooks
 - LocalStorage persistence for templates, versions, and form drafts
-- Queue state management via `batchService.ts`
+- Queue state management via `src/services/batchService.ts`
 
 **Build Configuration:**
 - Vite 7 with optimized chunk splitting
@@ -395,12 +399,20 @@ Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md)
 
 ## Security
 
-For security concerns, please review our [Security Policy](SECURITY.md).
+InfoGraphix AI uses a **client-side architecture** with intentional design choices for Google AI Studio deployment. Please review our comprehensive [Security Policy](SECURITY.md) for details on:
 
-**Important:**
-- Never commit API keys or secrets
+- **API Key Security Model** - Why client-side API keys are used (AI Studio integration)
+- **Data Handling** - What data stays in your browser vs. what is sent to Google
+- **Production Considerations** - How to deploy securely outside AI Studio
+- **Vulnerability Reporting** - Responsible disclosure process
+
+**Quick Security Guidelines:**
+- Never commit API keys to version control
 - Use `.env.local` for local development (gitignored)
-- Report vulnerabilities via the security policy
+- Export important infographics regularly (localStorage has quota limits)
+- For public production deployments, implement a backend proxy (see SECURITY.md)
+
+**Reporting Vulnerabilities:** See [SECURITY.md](SECURITY.md#vulnerability-reporting) for responsible disclosure process.
 
 ---
 

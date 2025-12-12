@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.6] - 2025-12-12
+
+### Added
+- **SECURITY.md** - Comprehensive security documentation
+  - API key security model documentation (client-side design for AI Studio)
+  - Client-side architecture explanation and rationale
+  - Data handling and privacy information (localStorage usage)
+  - Production deployment considerations and backend proxy recommendations
+  - Vulnerability reporting guidelines and response timeline
+  - Security best practices for users and developers
+
+### Changed
+- **README.md** - Enhanced security section with links to comprehensive documentation
+- **Project Structure Documentation** - Updated version references to v1.4.6
+  - package.json
+  - src/metadata.json
+  - src/components/AboutModal.tsx
+  - src/utils/exportUtils.ts
+
+### Technical
+- Security policy aligned with client-side architecture design
+- Documented intentional design choices for Google AI Studio deployment
+- Added production deployment security guidelines
+
+---
+
 ## [1.4.5] - 2025-12-12
 
 ### Fixed
@@ -304,13 +330,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - @google/genai SDK for Gemini API integration
 - Component-based architecture with clear separation of concerns
 
-[Unreleased]: https://github.com/doublegate/InfoGraphix-GenAI/compare/v1.4.5...HEAD
+[Unreleased]: https://github.com/doublegate/InfoGraphix-GenAI/compare/v1.4.6...HEAD
 [2.0.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v2.0.0
 [1.9.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.9.0
 [1.8.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.8.0
 [1.7.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.7.0
 [1.6.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.6.0
 [1.5.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.5.0
+[1.4.6]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.4.6
 [1.4.5]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.4.5
 [1.4.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.4.0
 [1.3.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.3.0

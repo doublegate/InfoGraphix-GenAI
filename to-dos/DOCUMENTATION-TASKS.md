@@ -117,6 +117,32 @@ Documentation improvements and additions needed.
 
 ## Pending
 
+### API Key Security Model Documentation
+
+**Priority:** Medium
+
+**Source:** v1.4.5 code review finding (2025-12-12)
+
+**Tasks:**
+- [ ] Document client-side API key model in README.md
+- [ ] Add SECURITY.md file explaining the security model
+- [ ] Clarify AI Studio vs. local development security implications
+- [ ] Document API key best practices
+- [ ] Add warning about API key exposure in client-side deployments
+- [ ] Link to Google AI Studio documentation on API key management
+
+**Locations:**
+- `README.md` - Add security considerations section
+- `docs/SECURITY.md` - New file explaining security model
+- `docs/FAQ.md` - Add API key security FAQs
+
+**Rationale:**
+The application intentionally handles API keys client-side for AI Studio deployment, but this security model is not clearly documented, which could lead to user confusion or misuse.
+
+**Target Version:** v1.4.6 or v1.5.0
+
+---
+
 ### Video Tutorials
 
 **Priority:** Medium (Deferred)

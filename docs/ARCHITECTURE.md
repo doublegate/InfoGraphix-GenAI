@@ -123,7 +123,7 @@ The generation phase uses `gemini-3-pro-image-preview` (Nano Banana Pro).
 
 ## State Management
 
-All application state is managed in `App.tsx` using React hooks. No external state management library is used.
+All application state is managed in `src/App.tsx` using React hooks. No external state management library is used.
 
 ### State Architecture
 

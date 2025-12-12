@@ -23,19 +23,19 @@ Set `GEMINI_API_KEY` in `.env.local` for local development. The key requires a p
 
 ### AI Pipeline (Two-Phase Generation)
 
-1. **Analysis Phase** (`services/geminiService.ts:analyzeTopic`)
+1. **Analysis Phase** (`src/services/geminiService.ts:analyzeTopic`)
    - Model: `gemini-3-pro-preview` with thinking mode (32K budget)
    - Uses Google Search grounding for up-to-date information
    - Outputs: title, summary, keyPoints, visualPlan (image prompt), webSources
 
-2. **Image Generation Phase** (`services/geminiService.ts:generateInfographicImage`)
+2. **Image Generation Phase** (`src/services/geminiService.ts:generateInfographicImage`)
    - Model: `gemini-3-pro-image-preview` (Nano Banana Pro)
    - Supports 1K/2K/4K resolution and multiple aspect ratios
    - Returns base64-encoded image data
 
 ### State Management
 
-All state lives in `App.tsx` using React hooks. Key state flows:
+All state lives in `src/App.tsx` using React hooks. Key state flows:
 - `processingStep`: 'idle' | 'analyzing' | 'generating' | 'complete'
 - `savedVersions`: Persisted to localStorage as `infographix_versions`
 - Form drafts auto-save to localStorage as `infographix_form_draft`
@@ -43,19 +43,27 @@ All state lives in `App.tsx` using React hooks. Key state flows:
 ### Component Structure
 
 ```
-App.tsx                      # Main orchestrator with all state
-components/
-  ApiKeySelector.tsx         # AI Studio API key selection modal
-  InfographicForm.tsx        # Input form with style/palette selectors
-  InfographicResult.tsx      # Generated image display and download
-  ProcessingState.tsx        # Loading indicators during generation
-  VersionHistory.tsx         # Saved generations browser
-  RichSelect.tsx             # Custom dropdown with previews
-  FeedbackForm.tsx           # User rating/feedback
-  AboutModal.tsx             # App info modal
+src/
+  App.tsx                    # Main orchestrator with all state
+  index.tsx                  # React entry point
+  types.ts                   # TypeScript type definitions
+  components/
+    ApiKeySelector.tsx       # AI Studio API key selection modal
+    InfographicForm.tsx      # Input form with style/palette selectors
+    InfographicResult.tsx    # Generated image display and download
+    ProcessingState.tsx      # Loading indicators during generation
+    VersionHistory.tsx       # Saved generations browser
+    RichSelect.tsx           # Custom dropdown with previews
+    FeedbackForm.tsx         # User rating/feedback
+    AboutModal.tsx           # App info modal
+  services/
+    geminiService.ts         # Gemini API integration
+  hooks/
+  utils/
+  styles/
 ```
 
-### Type Definitions (`types.ts`)
+### Type Definitions (`src/types.ts`)
 
 Key enums control generation parameters:
 - `ImageSize`: Resolution_1K, Resolution_2K, Resolution_4K

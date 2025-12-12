@@ -8,7 +8,8 @@ Planned features and enhancements for InfoGraphix AI.
 |---------|--------|----------------|-------|
 | v1.3.0 | Released | 2025-12-11 | Foundation |
 | v1.4.0 | Released | 2025-12-11 | Productivity |
-| v1.4.5 | **CURRENT** | 2025-12-12 | Productivity (Patch) |
+| v1.4.5 | Released | 2025-12-12 | Productivity (Patch) |
+| v1.4.6 | **CURRENT** | 2025-12-12 | Security & Documentation |
 | v1.5.0 | Planned | Q2 2026 | Collaboration |
 | v1.6.0 | Planned | Q3 2026 | Intelligence |
 | v1.7.0 | Planned | Q4 2026 | Platform |
@@ -389,7 +390,15 @@ Planned features and enhancements for InfoGraphix AI.
 
 ## Completed Features
 
-### Version 1.4.5 (Current Release - 2025-12-12)
+### Version 1.4.6 (Current Release - 2025-12-12)
+
+- [x] Comprehensive security documentation (SECURITY.md)
+- [x] API key security model documentation
+- [x] Data handling and privacy information
+- [x] Production deployment security guidelines
+- [x] Enhanced README.md with security section
+
+### Version 1.4.5 (Released 2025-12-12)
 
 - [x] Fixed React Hooks violations in BatchManager, TemplateBrowser, VersionHistory
 - [x] Optimized production build with proper code splitting

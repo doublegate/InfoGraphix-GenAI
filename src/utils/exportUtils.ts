@@ -246,7 +246,7 @@ export const exportBatchAsZip = async (
   const metadata = {
     generated: new Date().toISOString(),
     count: items.length,
-    generator: 'InfoGraphix AI v1.4.5',
+    generator: 'InfoGraphix AI v1.4.6',
     format: 'PNG'
   };
 
