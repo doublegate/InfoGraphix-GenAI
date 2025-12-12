@@ -189,142 +189,827 @@ export const importTemplate = (file: File): Promise<TemplateConfig> => {
 };
 
 /**
- * Get default templates (10 pre-configured options)
+ * Template categories for organization
+ */
+export const TEMPLATE_CATEGORIES = [
+  'Business & Professional',
+  'Technology & Innovation',
+  'Education & Learning',
+  'Creative & Artistic',
+  'Data & Analytics',
+  'Social Media',
+  'Marketing & Branding',
+  'Science & Research',
+  'Health & Wellness',
+  'Entertainment & Gaming'
+] as const;
+
+export type TemplateCategory = typeof TEMPLATE_CATEGORIES[number];
+
+/**
+ * Get default templates (50+ pre-configured options across 10 categories)
+ * v1.6.0 Enhancement: Expanded template library with categorization
  */
 export const getDefaultTemplates = (): TemplateConfig[] => {
   const now = Date.now();
   return [
+    // === Business & Professional (8 templates) ===
     {
-      id: 'default-modern-professional',
+      id: 'biz-modern-professional',
       name: 'Modern Professional',
       description: 'Clean and professional design for business presentations',
       style: InfographicStyle.Modern,
       palette: ColorPalette.BlueWhite,
       size: ImageSize.Resolution_2K,
       aspectRatio: AspectRatio.Portrait,
-      tags: ['professional', 'business', 'clean'],
+      tags: ['professional', 'business', 'clean', 'business'],
       createdAt: now,
       updatedAt: now,
       creator: 'InfoGraphix AI'
     },
     {
-      id: 'default-tech-dark',
-      name: 'Tech Dark Mode',
+      id: 'biz-corporate-elegant',
+      name: 'Corporate Elegant',
+      description: 'Trustworthy corporate design with blue and grey tones',
+      style: InfographicStyle.Corporate,
+      palette: ColorPalette.BlueWhite,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.StandardLandscape,
+      tags: ['corporate', 'professional', 'business', 'business'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'biz-minimal-mono',
+      name: 'Minimal Monochrome',
+      description: 'Timeless black and white design for serious business',
+      style: InfographicStyle.Modern,
+      palette: ColorPalette.Monochrome,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Square,
+      tags: ['minimal', 'monochrome', 'business', 'business'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'biz-elegant-presentation',
+      name: 'Elegant Presentation',
+      description: 'Sophisticated Art Deco design for high-stakes presentations',
+      style: InfographicStyle.ArtDeco,
+      palette: ColorPalette.Midnight,
+      size: ImageSize.Resolution_4K,
+      aspectRatio: AspectRatio.Landscape,
+      tags: ['elegant', 'presentation', 'business', 'business'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'biz-executive-summary',
+      name: 'Executive Summary',
+      description: 'Clean layout optimized for C-suite presentations',
+      style: InfographicStyle.Modern,
+      palette: ColorPalette.Midnight,
+      size: ImageSize.Resolution_4K,
+      aspectRatio: AspectRatio.Landscape,
+      tags: ['executive', 'business', 'premium', 'business'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'biz-annual-report',
+      name: 'Annual Report Style',
+      description: 'Professional design for financial and annual reports',
+      style: InfographicStyle.Corporate,
+      palette: ColorPalette.Monochrome,
+      size: ImageSize.Resolution_4K,
+      aspectRatio: AspectRatio.Portrait,
+      tags: ['report', 'business', 'finance', 'business'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'biz-consulting-deck',
+      name: 'Consulting Deck',
+      description: 'Strategy consulting presentation style',
+      style: InfographicStyle.Modern,
+      palette: ColorPalette.BlueWhite,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.StandardLandscape,
+      tags: ['consulting', 'business', 'strategy', 'business'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'biz-pitch-deck',
+      name: 'Investor Pitch Deck',
+      description: 'High-impact design for startup pitches and investor meetings',
+      style: InfographicStyle.Modern,
+      palette: ColorPalette.GrayscaleRed,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.StandardLandscape,
+      tags: ['pitch', 'startup', 'business', 'business'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+
+    // === Technology & Innovation (7 templates) ===
+    {
+      id: 'tech-cyberpunk-dark',
+      name: 'Cyberpunk Dark Mode',
       description: 'High-tech aesthetic with neon accents on dark background',
       style: InfographicStyle.Cyberpunk,
       palette: ColorPalette.DarkNeon,
       size: ImageSize.Resolution_2K,
       aspectRatio: AspectRatio.Landscape,
-      tags: ['tech', 'dark', 'futuristic'],
+      tags: ['tech', 'dark', 'futuristic', 'technology'],
       createdAt: now,
       updatedAt: now,
       creator: 'InfoGraphix AI'
     },
     {
-      id: 'default-nature-organic',
-      name: 'Nature & Organic',
-      description: 'Earthy tones with organic design elements',
-      style: InfographicStyle.Watercolor,
-      palette: ColorPalette.Forest,
+      id: 'tech-futuristic-sci-fi',
+      name: 'Futuristic Sci-Fi',
+      description: 'Cutting-edge design with holographic elements',
+      style: InfographicStyle.Futuristic,
+      palette: ColorPalette.DarkNeon,
       size: ImageSize.Resolution_2K,
       aspectRatio: AspectRatio.Portrait,
-      tags: ['nature', 'organic', 'artistic'],
+      tags: ['futuristic', 'sci-fi', 'tech', 'technology'],
       createdAt: now,
       updatedAt: now,
       creator: 'InfoGraphix AI'
     },
     {
-      id: 'default-minimal-mono',
-      name: 'Minimal Monochrome',
-      description: 'Timeless black and white design',
-      style: InfographicStyle.Modern,
-      palette: ColorPalette.Monochrome,
-      size: ImageSize.Resolution_2K,
-      aspectRatio: AspectRatio.Square,
-      tags: ['minimal', 'monochrome', 'timeless'],
-      createdAt: now,
-      updatedAt: now,
-      creator: 'InfoGraphix AI'
-    },
-    {
-      id: 'default-vibrant-social',
-      name: 'Vibrant Social Media',
-      description: 'Eye-catching design optimized for social platforms',
-      style: InfographicStyle.FlatDesign,
-      palette: ColorPalette.Vibrant,
-      size: ImageSize.Resolution_1K,
-      aspectRatio: AspectRatio.Square,
-      tags: ['social', 'vibrant', 'engaging'],
-      createdAt: now,
-      updatedAt: now,
-      creator: 'InfoGraphix AI'
-    },
-    {
-      id: 'default-elegant-presentation',
-      name: 'Elegant Presentation',
-      description: 'Sophisticated design for high-stakes presentations',
-      style: InfographicStyle.ArtDeco,
-      palette: ColorPalette.Midnight,
+      id: 'tech-engineering-blueprint',
+      name: 'Engineering Blueprint',
+      description: 'Technical blueprint style with grid lines and schematics',
+      style: InfographicStyle.Engineering,
+      palette: ColorPalette.BlueWhite,
       size: ImageSize.Resolution_4K,
       aspectRatio: AspectRatio.Landscape,
-      tags: ['elegant', 'presentation', 'premium'],
+      tags: ['engineering', 'technical', 'blueprint', 'technology'],
       createdAt: now,
       updatedAt: now,
       creator: 'InfoGraphix AI'
     },
     {
-      id: 'default-hand-drawn',
-      name: 'Hand-Drawn Casual',
-      description: 'Approachable sketch-style infographic',
+      id: 'tech-isometric-3d',
+      name: 'Isometric 3D Tech',
+      description: '3D isometric perspective for tech infrastructure',
+      style: InfographicStyle.Isometric,
+      palette: ColorPalette.Vibrant,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Square,
+      tags: ['isometric', '3d', 'tech', 'technology'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'tech-glassmorphism',
+      name: 'Glassmorphism UI',
+      description: 'Modern glassmorphic design for UI/UX concepts',
+      style: InfographicStyle.Glassmorphism,
+      palette: ColorPalette.Pastel,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Portrait,
+      tags: ['glassmorphism', 'modern', 'ui', 'technology'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'tech-ai-ml',
+      name: 'AI & Machine Learning',
+      description: 'Neural network-inspired design for AI topics',
+      style: InfographicStyle.Futuristic,
+      palette: ColorPalette.Midnight,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.StandardLandscape,
+      tags: ['ai', 'ml', 'neural', 'technology'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'tech-circuit-board',
+      name: 'Circuit Board',
+      description: 'Microelectronics-inspired design for hardware topics',
+      style: InfographicStyle.Engineering,
+      palette: ColorPalette.DarkNeon,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Landscape,
+      tags: ['circuit', 'hardware', 'electronics', 'technology'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+
+    // === Education & Learning (5 templates) ===
+    {
+      id: 'edu-chalkboard-classic',
+      name: 'Chalkboard Classic',
+      description: 'Traditional classroom chalkboard aesthetic',
+      style: InfographicStyle.Chalkboard,
+      palette: ColorPalette.Monochrome,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.StandardLandscape,
+      tags: ['education', 'classroom', 'teaching', 'education'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'edu-hand-drawn-notes',
+      name: 'Hand-Drawn Notes',
+      description: 'Friendly sketch-style for approachable learning content',
       style: InfographicStyle.HandDrawn,
       palette: ColorPalette.Pastel,
       size: ImageSize.Resolution_2K,
       aspectRatio: AspectRatio.Portrait,
-      tags: ['casual', 'sketch', 'friendly'],
+      tags: ['sketch', 'casual', 'education', 'education'],
       createdAt: now,
       updatedAt: now,
       creator: 'InfoGraphix AI'
     },
     {
-      id: 'default-data-viz',
+      id: 'edu-academic-paper',
+      name: 'Academic Paper',
+      description: 'Scholarly design for academic and research content',
+      style: InfographicStyle.Modern,
+      palette: ColorPalette.BlueWhite,
+      size: ImageSize.Resolution_4K,
+      aspectRatio: AspectRatio.Portrait,
+      tags: ['academic', 'research', 'scholarly', 'education'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'edu-playful-kids',
+      name: 'Playful Kids Learning',
+      description: 'Colorful and engaging design for children',
+      style: InfographicStyle.PaperCutout,
+      palette: ColorPalette.Vibrant,
+      size: ImageSize.Resolution_1K,
+      aspectRatio: AspectRatio.Square,
+      tags: ['kids', 'playful', 'colorful', 'education'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'edu-tutorial-guide',
+      name: 'Tutorial Guide',
+      description: 'Step-by-step instructional design',
+      style: InfographicStyle.FlatDesign,
+      palette: ColorPalette.BlueWhite,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Portrait,
+      tags: ['tutorial', 'guide', 'instructional', 'education'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+
+    // === Creative & Artistic (7 templates) ===
+    {
+      id: 'art-watercolor-organic',
+      name: 'Watercolor Organic',
+      description: 'Artistic watercolor design with natural flow',
+      style: InfographicStyle.Watercolor,
+      palette: ColorPalette.Pastel,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Portrait,
+      tags: ['watercolor', 'artistic', 'organic', 'creative'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'art-pop-art-bold',
+      name: 'Pop Art Bold',
+      description: 'Bold colors and thick outlines in comic book style',
+      style: InfographicStyle.PopArt,
+      palette: ColorPalette.Vibrant,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Square,
+      tags: ['pop-art', 'bold', 'comic', 'creative'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'art-abstract-modern',
+      name: 'Abstract Modern',
+      description: 'Creative data visualization using fluid shapes',
+      style: InfographicStyle.Abstract,
+      palette: ColorPalette.Sunset,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Landscape,
+      tags: ['abstract', 'modern', 'creative', 'creative'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'art-vaporwave-retro',
+      name: 'Vaporwave Retro',
+      description: 'Nostalgic 80s/90s aesthetic with neon colors',
+      style: InfographicStyle.Vaporwave,
+      palette: ColorPalette.DarkNeon,
+      size: ImageSize.Resolution_1K,
+      aspectRatio: AspectRatio.Square,
+      tags: ['vaporwave', 'retro', '80s', 'creative'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'art-graffiti-urban',
+      name: 'Graffiti Urban',
+      description: 'Street art style with spray paint aesthetics',
+      style: InfographicStyle.Graffiti,
+      palette: ColorPalette.Vibrant,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Landscape,
+      tags: ['graffiti', 'urban', 'street-art', 'creative'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'art-paper-cutout',
+      name: 'Paper Cutout Craft',
+      description: 'Layered paper effect with depth and texture',
+      style: InfographicStyle.PaperCutout,
+      palette: ColorPalette.Pastel,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Portrait,
+      tags: ['paper', 'craft', 'layered', 'creative'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'art-claymorphism',
+      name: 'Claymorphism 3D',
+      description: 'Soft inflated 3D shapes with matte finish',
+      style: InfographicStyle.Claymorphism,
+      palette: ColorPalette.Pastel,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Square,
+      tags: ['clay', '3d', 'soft', 'creative'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+
+    // === Data & Analytics (6 templates) ===
+    {
+      id: 'data-viz-standard',
       name: 'Data Visualization',
       description: 'Chart-focused design for data-heavy content',
       style: InfographicStyle.FlatDesign,
       palette: ColorPalette.BlueWhite,
       size: ImageSize.Resolution_2K,
       aspectRatio: AspectRatio.StandardLandscape,
-      tags: ['data', 'charts', 'analytics'],
+      tags: ['data', 'charts', 'analytics', 'data'],
       createdAt: now,
       updatedAt: now,
       creator: 'InfoGraphix AI'
     },
     {
-      id: 'default-retro-vibes',
-      name: 'Retro Vibes',
-      description: 'Nostalgic design with vintage aesthetics',
+      id: 'data-dashboard-modern',
+      name: 'Modern Dashboard',
+      description: 'Analytics dashboard design with multiple data points',
+      style: InfographicStyle.Modern,
+      palette: ColorPalette.Midnight,
+      size: ImageSize.Resolution_4K,
+      aspectRatio: AspectRatio.Landscape,
+      tags: ['dashboard', 'analytics', 'data', 'data'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'data-infographic-stats',
+      name: 'Statistical Infographic',
+      description: 'Numbers-focused design for statistics and metrics',
+      style: InfographicStyle.FlatDesign,
+      palette: ColorPalette.Vibrant,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Portrait,
+      tags: ['statistics', 'metrics', 'data', 'data'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'data-comparison-chart',
+      name: 'Comparison Charts',
+      description: 'Side-by-side comparison optimized layout',
+      style: InfographicStyle.Modern,
+      palette: ColorPalette.BlueWhite,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.StandardLandscape,
+      tags: ['comparison', 'charts', 'data', 'data'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'data-timeline-history',
+      name: 'Timeline & History',
+      description: 'Chronological data presentation design',
+      style: InfographicStyle.FlatDesign,
+      palette: ColorPalette.Sunset,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Landscape,
+      tags: ['timeline', 'history', 'chronological', 'data'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'data-process-flow',
+      name: 'Process Flow Diagram',
+      description: 'Workflow and process visualization',
+      style: InfographicStyle.Isometric,
+      palette: ColorPalette.BlueWhite,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Landscape,
+      tags: ['process', 'workflow', 'diagram', 'data'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+
+    // === Social Media (5 templates) ===
+    {
+      id: 'social-vibrant-square',
+      name: 'Vibrant Social Post',
+      description: 'Eye-catching design optimized for Instagram and Twitter',
+      style: InfographicStyle.FlatDesign,
+      palette: ColorPalette.Vibrant,
+      size: ImageSize.Resolution_1K,
+      aspectRatio: AspectRatio.Square,
+      tags: ['social', 'instagram', 'twitter', 'social-media'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'social-story-vertical',
+      name: 'Story Format Vertical',
+      description: 'Optimized for Instagram/Facebook Stories',
+      style: InfographicStyle.FlatDesign,
+      palette: ColorPalette.Sunset,
+      size: ImageSize.Resolution_1K,
+      aspectRatio: AspectRatio.Portrait,
+      tags: ['story', 'vertical', 'instagram', 'social-media'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'social-pinterest-tall',
+      name: 'Pinterest Tall Pin',
+      description: 'Vertical design optimized for Pinterest',
+      style: InfographicStyle.Modern,
+      palette: ColorPalette.Pastel,
+      size: ImageSize.Resolution_1K,
+      aspectRatio: AspectRatio.StandardPortrait,
+      tags: ['pinterest', 'pin', 'vertical', 'social-media'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'social-linkedin-professional',
+      name: 'LinkedIn Professional',
+      description: 'Professional social design for LinkedIn posts',
+      style: InfographicStyle.Modern,
+      palette: ColorPalette.BlueWhite,
+      size: ImageSize.Resolution_1K,
+      aspectRatio: AspectRatio.Landscape,
+      tags: ['linkedin', 'professional', 'business', 'social-media'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'social-engagement-boost',
+      name: 'Engagement Booster',
+      description: 'High-contrast design to maximize social engagement',
+      style: InfographicStyle.PopArt,
+      palette: ColorPalette.GrayscaleRed,
+      size: ImageSize.Resolution_1K,
+      aspectRatio: AspectRatio.Square,
+      tags: ['engagement', 'viral', 'attention', 'social-media'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+
+    // === Marketing & Branding (5 templates) ===
+    {
+      id: 'market-brand-modern',
+      name: 'Modern Brand Identity',
+      description: 'Clean branding design for modern companies',
+      style: InfographicStyle.Modern,
+      palette: ColorPalette.BlueWhite,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Square,
+      tags: ['branding', 'modern', 'identity', 'marketing'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'market-product-launch',
+      name: 'Product Launch',
+      description: 'High-impact design for product announcements',
+      style: InfographicStyle.FlatDesign,
+      palette: ColorPalette.Vibrant,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Landscape,
+      tags: ['product', 'launch', 'announcement', 'marketing'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'market-campaign-creative',
+      name: 'Creative Campaign',
+      description: 'Bold creative design for marketing campaigns',
+      style: InfographicStyle.PopArt,
+      palette: ColorPalette.Vibrant,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Portrait,
+      tags: ['campaign', 'creative', 'bold', 'marketing'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'market-event-promo',
+      name: 'Event Promotion',
+      description: 'Eye-catching design for event marketing',
+      style: InfographicStyle.Vaporwave,
+      palette: ColorPalette.DarkNeon,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Landscape,
+      tags: ['event', 'promotion', 'marketing', 'marketing'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'market-testimonial',
+      name: 'Customer Testimonial',
+      description: 'Trust-building design for customer quotes',
+      style: InfographicStyle.Modern,
+      palette: ColorPalette.Pastel,
+      size: ImageSize.Resolution_1K,
+      aspectRatio: AspectRatio.Square,
+      tags: ['testimonial', 'trust', 'customer', 'marketing'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+
+    // === Science & Research (4 templates) ===
+    {
+      id: 'sci-research-paper',
+      name: 'Research Paper',
+      description: 'Academic and scientific research visualization',
+      style: InfographicStyle.Modern,
+      palette: ColorPalette.BlueWhite,
+      size: ImageSize.Resolution_4K,
+      aspectRatio: AspectRatio.Portrait,
+      tags: ['research', 'science', 'academic', 'science'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'sci-medical-health',
+      name: 'Medical & Healthcare',
+      description: 'Clean medical and healthcare information design',
+      style: InfographicStyle.Modern,
+      palette: ColorPalette.Pastel,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Portrait,
+      tags: ['medical', 'health', 'healthcare', 'science'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'sci-biology-nature',
+      name: 'Biology & Nature',
+      description: 'Organic design for biology and environmental topics',
+      style: InfographicStyle.Watercolor,
+      palette: ColorPalette.Forest,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Portrait,
+      tags: ['biology', 'nature', 'environment', 'science'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'sci-chemistry-lab',
+      name: 'Chemistry Lab',
+      description: 'Scientific laboratory aesthetic for chemistry',
+      style: InfographicStyle.Engineering,
+      palette: ColorPalette.BlueWhite,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Landscape,
+      tags: ['chemistry', 'lab', 'science', 'science'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+
+    // === Health & Wellness (3 templates) ===
+    {
+      id: 'health-wellness-calm',
+      name: 'Wellness & Calm',
+      description: 'Soothing design for health and wellness content',
+      style: InfographicStyle.Watercolor,
+      palette: ColorPalette.Pastel,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Portrait,
+      tags: ['wellness', 'calm', 'health', 'health'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'health-fitness-energy',
+      name: 'Fitness & Energy',
+      description: 'Dynamic design for fitness and exercise content',
+      style: InfographicStyle.FlatDesign,
+      palette: ColorPalette.Vibrant,
+      size: ImageSize.Resolution_1K,
+      aspectRatio: AspectRatio.Square,
+      tags: ['fitness', 'energy', 'exercise', 'health'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'health-nutrition-guide',
+      name: 'Nutrition Guide',
+      description: 'Fresh design for nutrition and food content',
+      style: InfographicStyle.FlatDesign,
+      palette: ColorPalette.Forest,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.Portrait,
+      tags: ['nutrition', 'food', 'health', 'health'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+
+    // === Entertainment & Gaming (5 templates) ===
+    {
+      id: 'game-pixel-retro',
+      name: 'Pixel Art Retro Gaming',
+      description: '8-bit retro gaming aesthetic',
+      style: InfographicStyle.PixelArt,
+      palette: ColorPalette.Vibrant,
+      size: ImageSize.Resolution_1K,
+      aspectRatio: AspectRatio.Square,
+      tags: ['gaming', 'retro', '8-bit', 'entertainment'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'game-fantasy-rpg',
+      name: 'Fantasy RPG',
+      description: 'Fantasy game-inspired design with medieval aesthetics',
       style: InfographicStyle.Vintage,
       palette: ColorPalette.Warm,
       size: ImageSize.Resolution_2K,
       aspectRatio: AspectRatio.Portrait,
-      tags: ['retro', 'vintage', 'nostalgic'],
+      tags: ['fantasy', 'rpg', 'gaming', 'entertainment'],
       createdAt: now,
       updatedAt: now,
       creator: 'InfoGraphix AI'
     },
     {
-      id: 'default-geometric-modern',
-      name: 'Geometric Modern',
-      description: 'Bold geometric shapes with Bauhaus influence',
-      style: InfographicStyle.Bauhaus,
-      palette: ColorPalette.GrayscaleRed,
+      id: 'game-steampunk',
+      name: 'Steampunk Adventure',
+      description: 'Victorian industrial sci-fi aesthetic',
+      style: InfographicStyle.Steampunk,
+      palette: ColorPalette.Warm,
       size: ImageSize.Resolution_2K,
-      aspectRatio: AspectRatio.Square,
-      tags: ['geometric', 'modern', 'bauhaus'],
+      aspectRatio: AspectRatio.Landscape,
+      tags: ['steampunk', 'adventure', 'gaming', 'entertainment'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'game-esports-competitive',
+      name: 'Esports Competitive',
+      description: 'High-energy design for competitive gaming',
+      style: InfographicStyle.Cyberpunk,
+      palette: ColorPalette.DarkNeon,
+      size: ImageSize.Resolution_2K,
+      aspectRatio: AspectRatio.StandardLandscape,
+      tags: ['esports', 'competitive', 'gaming', 'entertainment'],
+      createdAt: now,
+      updatedAt: now,
+      creator: 'InfoGraphix AI'
+    },
+    {
+      id: 'ent-movie-cinematic',
+      name: 'Cinematic Movie',
+      description: 'Cinematic design for film and entertainment',
+      style: InfographicStyle.Modern,
+      palette: ColorPalette.Midnight,
+      size: ImageSize.Resolution_4K,
+      aspectRatio: AspectRatio.Landscape,
+      tags: ['cinematic', 'movie', 'film', 'entertainment'],
       createdAt: now,
       updatedAt: now,
       creator: 'InfoGraphix AI'
     }
   ];
+};
+
+/**
+ * Get templates by category
+ * v1.6.0 Enhancement: Category-based filtering
+ */
+export const getTemplatesByCategory = (category: string): TemplateConfig[] => {
+  const templates = loadTemplates();
+  const categoryLower = category.toLowerCase();
+
+  return templates.filter(t =>
+    t.tags?.some(tag => tag.toLowerCase() === categoryLower)
+  );
+};
+
+/**
+ * Get category for a template based on its tags
+ * Returns the primary category (first matching category tag)
+ */
+export const getTemplateCategory = (template: TemplateConfig): string => {
+  const categoryTags = ['business', 'technology', 'education', 'creative', 'data', 'social-media', 'marketing', 'science', 'health', 'entertainment'];
+
+  for (const tag of template.tags || []) {
+    if (categoryTags.includes(tag.toLowerCase())) {
+      // Map tag to category name
+      const categoryMap: Record<string, string> = {
+        'business': 'Business & Professional',
+        'technology': 'Technology & Innovation',
+        'education': 'Education & Learning',
+        'creative': 'Creative & Artistic',
+        'data': 'Data & Analytics',
+        'social-media': 'Social Media',
+        'marketing': 'Marketing & Branding',
+        'science': 'Science & Research',
+        'health': 'Health & Wellness',
+        'entertainment': 'Entertainment & Gaming'
+      };
+      return categoryMap[tag.toLowerCase()] || 'Other';
+    }
+  }
+
+  return 'Other';
+};
+
+/**
+ * Get template count by category
+ */
+export const getTemplateCounts = (): Record<string, number> => {
+  const templates = loadTemplates();
+  const counts: Record<string, number> = {};
+
+  TEMPLATE_CATEGORIES.forEach(category => {
+    counts[category] = 0;
+  });
+  counts['Other'] = 0;
+
+  templates.forEach(template => {
+    const category = getTemplateCategory(template);
+    counts[category] = (counts[category] || 0) + 1;
+  });
+
+  return counts;
 };
 
 /**

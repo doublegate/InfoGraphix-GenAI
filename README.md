@@ -2,7 +2,7 @@
 
 > Transform any topic into stunning, AI-generated infographics using Google Gemini
 
-[![Version](https://img.shields.io/badge/version-1.5.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.6.0-blue.svg)](CHANGELOG.md)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -25,12 +25,13 @@ InfoGraphix AI is a powerful web application that generates high-quality infogra
 - Export in multiple formats (PNG, PDF, SVG, ZIP)
 - Advanced version history with search and filtering
 
-**Latest Updates (v1.5.0):**
-- Keyboard shortcuts system with 10 power user shortcuts (Ctrl+Enter, Ctrl+S, Shift+?, etc.)
-- WCAG 2.1 AA accessibility compliance with screen reader support and ARIA labels
-- Internationalization (i18n) with English and Spanish language support
-- High contrast mode with system preference detection and manual toggle
-- Screen reader announcements for all processing states and actions
+**Latest Updates (v1.6.0):**
+- AI Design Suggestions (Beta) - Get intelligent style and palette recommendations powered by Gemini 3 Pro
+- Custom Palette Generator - Extract colors from images and create custom color schemes
+- Enhanced Template Library - Expanded from 10 to 55 professional templates across 10 categories
+- Advanced color theory algorithms - Complementary, triadic, analogous, and more
+- WCAG accessibility checking for custom palettes
+- Category-based template filtering for easier discovery
 
 ---
 
@@ -46,6 +47,9 @@ InfoGraphix AI is a powerful web application that generates high-quality infogra
 
 - **22 Artistic Styles** - Modern, Cyberpunk, Bauhaus, Art Deco, Watercolor, Blueprint, and more
 - **10 Color Palettes** - Professional, Vibrant, Earth Tones, Ocean, Sunset, Monochrome, and others
+- **AI Design Suggestions** - Get 3 intelligent style and 3 palette recommendations based on your topic
+- **Custom Palette Generator** - Extract colors from images with 5 color scheme algorithms
+- **55 Professional Templates** - Organized into 10 categories for easy discovery
 - **Multiple Resolutions** - 1K, 2K, or 4K output quality
 - **Aspect Ratios** - Square (1:1), Landscape (16:9), Portrait (9:16), and standard formats
 
@@ -137,7 +141,13 @@ Upload a `.md` file to use as the primary source material. The AI will analyze y
 Create up to 50 infographics in a single queue. Enter multiple topics (one per line), configure shared settings, and let the system process them sequentially with progress tracking.
 
 **Template Management:**
-Save your favorite style configurations as reusable templates. The system includes 10 default templates, and you can create custom templates with names, descriptions, and tags.
+Save your favorite style configurations as reusable templates. The system includes 55 professional templates organized into 10 categories (Business, Technology, Education, Creative, Data, Social Media, Marketing, Science, Health, Entertainment), and you can create custom templates with names, descriptions, and tags.
+
+**AI Design Suggestions:**
+Get intelligent style and palette recommendations based on your topic. The AI analyzes your content and suggests 3 optimal styles with reasoning and 3 color palettes with confidence scores. One-click application makes it easy to apply suggestions.
+
+**Custom Palette Generator:**
+Upload an image to extract dominant colors and generate custom color schemes using 5 different algorithms (complementary, triadic, analogous, split-complementary, tetradic). The system automatically checks WCAG accessibility and provides contrast ratios.
 
 **Export Options:**
 Download generated infographics in multiple formats:

@@ -357,6 +357,100 @@ export interface SavedVersion {
   feedback?: Feedback;
 }
 
+/**
+ * AI-powered style suggestion from Gemini
+ * v1.6.0 Feature: AI Intelligence & Creativity
+ */
+export interface StyleSuggestionItem {
+  /** Suggested infographic style */
+  style: InfographicStyle;
+  /** AI reasoning for this suggestion */
+  reasoning: string;
+  /** Confidence score (0-1) */
+  confidence: number;
+}
+
+/**
+ * AI-powered palette suggestion from Gemini
+ * v1.6.0 Feature: AI Intelligence & Creativity
+ */
+export interface PaletteSuggestionItem {
+  /** Suggested color palette */
+  palette: ColorPalette;
+  /** AI reasoning for this suggestion */
+  reasoning: string;
+  /** Confidence score (0-1) */
+  confidence: number;
+}
+
+/**
+ * Complete AI style and palette suggestions
+ * v1.6.0 Feature: AI Intelligence & Creativity
+ */
+export interface StyleSuggestion {
+  /** Detected topic category */
+  topicCategory: string;
+  /** Array of style suggestions (typically 3) */
+  suggestedStyles: StyleSuggestionItem[];
+  /** Array of palette suggestions (typically 3) */
+  suggestedPalettes: PaletteSuggestionItem[];
+}
+
+/**
+ * Layout variant option for infographic generation
+ * v1.6.0 Feature: Layout Optimization
+ */
+export interface LayoutVariant {
+  /** Type of layout emphasis */
+  layoutType: 'balanced' | 'text-heavy' | 'visual-heavy';
+  /** Detailed visual plan for image generation */
+  visualPlan: string;
+  /** Human-readable description of this layout */
+  description: string;
+}
+
+/**
+ * Extended analysis result with layout variants
+ * v1.6.0 Feature: Layout Optimization
+ */
+export interface AnalysisResultWithLayouts extends AnalysisResult {
+  /** Array of layout variant options (2-3) */
+  layoutVariants: LayoutVariant[];
+}
+
+/**
+ * Parsed CSV data for data visualization
+ * v1.6.0 Feature: Data Visualization Templates
+ */
+export interface ParsedCSVData {
+  /** Column headers */
+  headers: string[];
+  /** Data rows (array of arrays) */
+  rows: string[][];
+  /** Detected data types per column */
+  columnTypes: Array<'string' | 'number' | 'date'>;
+  /** Total number of rows */
+  rowCount: number;
+}
+
+/**
+ * Data visualization template configuration
+ * v1.6.0 Feature: Data Visualization Templates
+ */
+export interface DataVizTemplate extends TemplateConfig {
+  /** Recommended chart type */
+  chartType: 'bar' | 'line' | 'pie' | 'scatter' | 'timeline' | 'heatmap' | 'area';
+  /** Required data structure */
+  requiredColumns: {
+    /** Minimum number of columns */
+    min: number;
+    /** Maximum number of columns (optional) */
+    max?: number;
+  };
+  /** Whether this template supports time series data */
+  supportsTimeSeries: boolean;
+}
+
 // Global declaration for the AI Studio environment API
 declare global {
   interface AIStudio {

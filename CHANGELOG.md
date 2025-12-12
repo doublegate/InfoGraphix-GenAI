@@ -7,6 +7,108 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2025-12-12
+
+### Theme: AI Intelligence & Creativity
+
+*Intelligent design assistance powered by AI, advanced color customization, and expanded template library.*
+
+### Added
+- **AI Design Suggestions (Beta)**
+  - Intelligent style and palette recommendations powered by Gemini 3 Pro
+  - Topic-aware analysis with Google Search grounding for up-to-date context
+  - Three style suggestions with detailed reasoning
+  - Three color palette suggestions with confidence scores
+  - One-click application of AI recommendations
+  - Collapsible UI panel integrated into InfographicForm
+  - Custom hook `useStyleSuggestions` for state management
+
+- **Custom Palette Generator**
+  - Client-side color extraction from uploaded images using Vibrant.js
+  - Multiple color scheme generation algorithms:
+    - Complementary (opposite hue)
+    - Triadic (120° spaced hues)
+    - Analogous (adjacent hues)
+    - Split-Complementary (base + 2 adjacent to complement)
+    - Tetradic (double complementary)
+  - WCAG accessibility checking (AA and AAA standards)
+  - Visual color swatches with hex codes
+  - Save custom palettes to localStorage
+  - Drag-and-drop image upload support
+  - Real-time color preview with accessibility indicators
+
+- **Enhanced Template Library**
+  - Expanded from 10 to 55 professional templates
+  - Organized into 10 categories:
+    - Business & Professional (8 templates)
+    - Technology & Innovation (7 templates)
+    - Education & Learning (5 templates)
+    - Creative & Artistic (7 templates)
+    - Data & Analytics (6 templates)
+    - Social Media (5 templates)
+    - Marketing & Branding (5 templates)
+    - Science & Research (4 templates)
+    - Health & Wellness (3 templates)
+    - Entertainment & Gaming (5 templates)
+  - Category-based filtering for easy discovery
+  - Template metadata includes tags for improved search
+
+### Added (Technical)
+- **Color Extraction Service** (`services/colorExtractionService.ts`)
+  - 565 lines of color theory algorithms
+  - RGB/Hex/HSL color space conversions
+  - Contrast ratio calculations
+  - Accessible text color generation
+  - Custom palette management with localStorage
+
+- **New Components**
+  - `StyleSuggestions.tsx` - AI suggestion display and application
+  - `PaletteGenerator.tsx` - Image upload and color extraction UI
+  - `hooks/useStyleSuggestions.ts` - Custom hook for AI suggestions
+
+- **Dependencies**
+  - `node-vibrant@3.2.1` - Client-side color extraction
+
+### Changed
+- **Template Service** (`services/templateService.ts`)
+  - Added `TEMPLATE_CATEGORIES` constant (10 categories)
+  - Added `getTemplatesByCategory()` - Filter templates by category
+  - Added `getTemplateCategory()` - Get primary category for template
+  - Added `getTemplateCounts()` - Count templates per category
+  - `getDefaultTemplates()` now returns 55 templates (up from 10)
+
+- **InfographicForm Component**
+  - Integrated AI Design Suggestions panel (collapsible)
+  - Integrated Custom Palette Generator panel (collapsible)
+  - Improved UX with organized feature sections
+
+- **Type Definitions** (`types.ts`)
+  - Added `StyleSuggestionItem` interface
+  - Added `PaletteSuggestionItem` interface
+  - Added `StyleSuggestion` interface
+  - Added `ColorScheme` interface
+  - Added `LayoutVariant` enum (for future use)
+
+### Technical
+- All features are client-side compatible (no backend required)
+- AI suggestions use Gemini 3 Pro with thinking mode (32K token budget)
+- Color extraction runs entirely in browser (privacy-preserving)
+- Custom palettes stored in localStorage as `infographix_custom_palettes`
+- Template count increased from 10 to 55 (+450%)
+
+### Performance
+- Color extraction optimized for images up to 10MB
+- AI suggestions cached in component state
+- Template loading from localStorage remains fast (<10ms)
+
+### Notes
+- Animation support deferred to future release (Gemini API limitation)
+- Layout variants partially implemented (types defined, UI pending)
+- Data visualization templates defined in library, CSV import deferred
+- Community features deferred (requires backend infrastructure)
+
+---
+
 ## [1.4.6] - 2025-12-12
 
 ### Added

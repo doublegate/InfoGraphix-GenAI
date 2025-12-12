@@ -1,5 +1,14 @@
 import { GoogleGenAI } from "@google/genai";
-import { AnalysisResult, AspectRatio, GithubFilters, ImageSize, WebSource, InfographicStyle, ColorPalette } from "../types";
+import {
+  AnalysisResult,
+  AspectRatio,
+  GithubFilters,
+  ImageSize,
+  WebSource,
+  InfographicStyle,
+  ColorPalette,
+  StyleSuggestion,
+} from "../types";
 
 // Helper to ensure API Key is ready
 const getAI = () => {
@@ -285,6 +294,148 @@ export const analyzeTopic = async (
     if (error instanceof SyntaxError) {
       console.error("JSON Parse Error. Raw text:", error.message);
       throw new Error("Failed to parse the AI's response. The model output was not valid JSON. Please try again.");
+    }
+    return handleGeminiError(error);
+  }
+};
+
+/**
+ * AI-Powered Style and Palette Suggestions
+ * v1.6.0 Feature: AI Intelligence & Creativity
+ *
+ * Analyzes a topic and suggests optimal styles and color palettes
+ * based on topic category, mood, and content type.
+ */
+export const suggestStyleAndPalette = async (topic: string): Promise<StyleSuggestion> => {
+  const ai = getAI();
+
+  const prompt = `
+  You are an expert design consultant specializing in infographic visual design and color theory.
+  Your task is to analyze the following topic and suggest the best infographic styles and color palettes.
+
+  **Topic:** "${topic}"
+
+  **Analysis Steps:**
+  1. Categorize the topic (e.g., technology, business, nature, education, healthcare, finance, creative, data science, etc.)
+  2. Determine the mood/tone (professional, playful, serious, creative, technical, etc.)
+  3. Suggest 3 optimal infographic styles that match the topic's category and tone
+  4. Suggest 3 color palettes that enhance the visual communication
+  5. Provide reasoning and confidence scores for each suggestion
+
+  **Available Infographic Styles:**
+  - "Modern Minimalist" - Clean lines, whitespace, contemporary
+  - "Futuristic / Sci-Fi" - High-tech, neon accents, digital
+  - "Engineering Blueprint" - Technical drawings, grid layouts
+  - "Vintage / Retro" - Nostalgic, aged textures
+  - "Corporate Professional" - Clean, authoritative, business
+  - "Abstract Data Art" - Artistic data visualization
+  - "Hand Drawn Sketch" - Sketch-like, informal
+  - "Isometric 3D" - 3D perspective, dimensional
+  - "Cyberpunk / Glitch" - Neon, glitch effects
+  - "Watercolor / Artistic" - Soft colors, organic shapes
+  - "Pop Art / Comic" - Bold colors, halftone dots
+  - "Bauhaus / Geometric" - Geometric shapes, primary colors
+  - "Vaporwave / Aesthetic" - Pastel gradients, retro-futuristic
+  - "Flat Design 2.0" - Clean vectors, modern UI
+  - "Low Poly 3D" - Triangulated surfaces, faceted 3D
+  - "Art Deco / Luxury" - Elegant, geometric, 1920s
+  - "Pixel Art / 8-Bit" - Retro gaming, blocky graphics
+  - "Paper Cutout / Craft" - Layered paper, craft aesthetic
+  - "Chalkboard / Educational" - Hand-drawn on dark background
+  - "Glassmorphism / Frosted" - Frosted glass, blur effects
+  - "Steampunk / Industrial" - Victorian machinery, brass, gears
+  - "Claymorphism / Soft 3D" - Soft 3D, rounded shapes
+  - "Graffiti / Street Art" - Urban art, spray paint
+
+  **Available Color Palettes:**
+  - "Professional Blue & White" - Corporate, trustworthy, clean
+  - "Dark Mode Neon" - Dark backgrounds with vibrant neon
+  - "Warm Earth Tones" - Browns, oranges, terracotta
+  - "Monochrome" - Black, white, grays
+  - "High Contrast Vibrant" - Saturated, bold colors
+  - "Soft Pastels" - Light, soft colors
+  - "Forest Deep Greens" - Greens and teals
+  - "Sunset Gradient" - Orange to purple gradient
+  - "Midnight Blue & Silver" - Deep blues with metallic accents
+  - "Grayscale with Red Accents" - Neutral grays with red highlights
+
+  Return the output in purely JSON format.
+  Start the response with { and end with }.
+  Do not wrap the JSON in markdown code blocks.
+
+  Structure:
+  {
+    "topicCategory": "The detected category (e.g., technology, business, nature, etc.)",
+    "suggestedStyles": [
+      {
+        "style": "Exact style name from the list above",
+        "reasoning": "Why this style fits the topic (1-2 sentences)",
+        "confidence": 0.95
+      },
+      {
+        "style": "Second style suggestion",
+        "reasoning": "Reasoning for this choice",
+        "confidence": 0.85
+      },
+      {
+        "style": "Third style suggestion",
+        "reasoning": "Reasoning for this choice",
+        "confidence": 0.75
+      }
+    ],
+    "suggestedPalettes": [
+      {
+        "palette": "Exact palette name from the list above",
+        "reasoning": "Why this palette enhances the topic (1-2 sentences)",
+        "confidence": 0.90
+      },
+      {
+        "palette": "Second palette suggestion",
+        "reasoning": "Reasoning for this choice",
+        "confidence": 0.80
+      },
+      {
+        "palette": "Third palette suggestion",
+        "reasoning": "Reasoning for this choice",
+        "confidence": 0.70
+      }
+    ]
+  }
+
+  **Important:** Use EXACT style and palette names from the lists provided above.
+  Confidence scores should be between 0 and 1, where 1 is highest confidence.
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3-pro-preview",
+      contents: prompt,
+      config: {
+        // No thinking budget needed for quick suggestions
+        tools: [{ googleSearch: {} }], // Use search for current topic context
+      },
+    });
+
+    let text = response.text;
+    if (!text) throw new Error("No suggestions generated.");
+
+    // Extract JSON
+    const startIndex = text.indexOf('{');
+    const endIndex = text.lastIndexOf('}');
+
+    if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+      text = text.substring(startIndex, endIndex + 1);
+    } else {
+      text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    }
+
+    const suggestion = JSON.parse(text) as StyleSuggestion;
+    return suggestion;
+
+  } catch (error: any) {
+    if (error instanceof SyntaxError) {
+      console.error("JSON Parse Error for suggestions. Raw text:", error.message);
+      throw new Error("Failed to parse AI suggestions. Please try again.");
     }
     return handleGeminiError(error);
   }

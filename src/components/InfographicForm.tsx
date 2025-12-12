@@ -4,6 +4,9 @@ import { Search, Monitor, Image as ImageIcon, FileText, Cpu, ChevronDown, Chevro
 import { ImageSize, AspectRatio, GithubFilters, InfographicStyle, ColorPalette, TemplateConfig } from '../types';
 import RichSelect, { RichOption } from './RichSelect';
 import { TemplateBrowser } from './TemplateManager';
+import { StyleSuggestions } from './StyleSuggestions';
+import { PaletteGenerator } from './PaletteGenerator';
+import { useStyleSuggestions } from '../hooks/useStyleSuggestions';
 
 interface InfographicFormProps {
   onSubmit: (topic: string, size: ImageSize, aspectRatio: AspectRatio, style: InfographicStyle, palette: ColorPalette, filters?: GithubFilters, fileContent?: string) => void;
@@ -133,6 +136,11 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
   // Multi-URL State
   const [isMultiUrlMode, setIsMultiUrlMode] = useState(false);
 
+  // AI Suggestions State
+  const [showAiSuggestions, setShowAiSuggestions] = useState(false);
+  const [showPaletteGenerator, setShowPaletteGenerator] = useState(false);
+  const { suggestions, isLoading: suggestionsLoading, error: suggestionsError, getSuggestions, applySuggestion, clearSuggestions } = useStyleSuggestions();
+
   // Load initial values if provided
   useEffect(() => {
     if (initialValues) {
@@ -239,6 +247,28 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
 
   const clearTemplate = () => {
     setActiveTemplate(null);
+  };
+
+  const handleRequestSuggestions = async () => {
+    if (topic.trim()) {
+      await getSuggestions(topic, undefined, fileContent || undefined);
+    }
+  };
+
+  const handleApplySuggestion = (styleIndex: number, paletteIndex: number) => {
+    const result = applySuggestion(styleIndex, paletteIndex);
+    if (result) {
+      setStyle(result.style);
+      setPalette(result.palette);
+    }
+  };
+
+  const handlePaletteGenerated = (colors: string[]) => {
+    // For now, we can't directly use custom colors in the ColorPalette enum
+    // But we can suggest the closest match or save to localStorage for future use
+    console.log('Generated palette colors:', colors);
+    // This would require extending the palette system to support custom palettes
+    // For v1.6.0, we save to localStorage and user can manually select closest match
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -394,7 +424,7 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
           )}
         </div>
 
-        {/* Collapsible Advanced Filters (Disable if file uploaded?) - Actually keeping it enabled is fine, filters could technically apply to analysis logic, but less relevant. Let's keep it but maybe hide if file? Nah, keep consistent. */}
+        {/* Collapsible Advanced Filters */}
         <div className="border-t border-slate-700/50 pt-4">
           <button
             type="button"
@@ -405,7 +435,7 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
             Advanced Search Filters (GitHub/Code)
             {showFilters ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
-          
+
           {showFilters && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-slate-900/50 rounded-xl border border-slate-700/50 animate-in fade-in slide-in-from-top-2 duration-300">
               <div>
@@ -440,6 +470,56 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
                   disabled={isProcessing}
                 />
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* AI Design Suggestions */}
+        <div className="border-t border-slate-700/50 pt-4">
+          <button
+            type="button"
+            onClick={() => setShowAiSuggestions(!showAiSuggestions)}
+            className="flex items-center gap-2 text-sm font-semibold text-slate-400 hover:text-purple-400 transition-colors mb-4"
+          >
+            <Sparkles className="w-4 h-4" />
+            AI Design Suggestions (Beta)
+            {showAiSuggestions ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+
+          {showAiSuggestions && (
+            <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+              <StyleSuggestions
+                suggestions={suggestions}
+                isLoading={suggestionsLoading}
+                error={suggestionsError}
+                currentStyle={style}
+                currentPalette={palette}
+                onApply={handleApplySuggestion}
+                onRequestSuggestions={handleRequestSuggestions}
+                disabled={isProcessing || !topic.trim()}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Custom Palette Generator */}
+        <div className="border-t border-slate-700/50 pt-4">
+          <button
+            type="button"
+            onClick={() => setShowPaletteGenerator(!showPaletteGenerator)}
+            className="flex items-center gap-2 text-sm font-semibold text-slate-400 hover:text-pink-400 transition-colors mb-4"
+          >
+            <Palette className="w-4 h-4" />
+            Custom Palette Generator
+            {showPaletteGenerator ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+
+          {showPaletteGenerator && (
+            <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+              <PaletteGenerator
+                onPaletteGenerated={handlePaletteGenerated}
+                disabled={isProcessing}
+              />
             </div>
           )}
         </div>
