@@ -10,8 +10,8 @@ Planned features and enhancements for InfoGraphix AI.
 | v1.4.0 | Released | 2025-12-11 | Productivity |
 | v1.4.5 | Released | 2025-12-12 | Productivity (Patch) |
 | v1.4.6 | Released | 2025-12-12 | Security & Documentation |
-| v1.5.0 | **CURRENT** | 2025-12-12 | Accessibility & Global Reach |
-| v1.6.0 | Planned | Q3 2026 | Intelligence |
+| v1.5.0 | Released | 2025-12-12 | Accessibility & Global Reach |
+| v1.6.0 | **CURRENT** | 2025-12-12 | AI Intelligence & Creativity |
 | v1.7.0 | Planned | Q4 2026 | Platform |
 | v1.8.0 | Planned | Q1 2027 | Ecosystem |
 | v1.9.0 | Planned | Q2 2027 | Enterprise |

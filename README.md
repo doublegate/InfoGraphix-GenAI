@@ -313,14 +313,32 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 |---------|-------|--------|--------------|
 | v1.3.0 | Foundation | 2025-12-11 | Core generation, 22 styles, 10 palettes, version history |
 | v1.4.0 | Productivity Enhancement | 2025-12-11 | Batch generation, custom templates, SVG/PDF export |
-| v1.5.0 | Accessibility & Global Reach | 2025-12-12 (Current) | Keyboard shortcuts, i18n (EN/ES), WCAG 2.1 AA, high contrast |
-| v1.6.0 | AI Intelligence & Creativity | Q3 2026 | AI suggestions, template library, animations |
+| v1.5.0 | Accessibility & Global Reach | 2025-12-12 | Keyboard shortcuts, i18n (EN/ES), WCAG 2.1 AA, high contrast |
+| v1.6.0 | AI Intelligence & Creativity | 2025-12-12 (Current) | AI design suggestions, custom palette generator, 55 templates |
 | v1.7.0 | Platform & API | Q4 2026 | REST API, Python/JS SDKs, webhooks |
 | v1.8.0 | Ecosystem Integrations | Q1 2027 | Google Workspace, Notion, Figma, Slack |
 | v1.9.0 | Enterprise & Advanced | Q2 2027 | SSO/SAML, RBAC, admin dashboard |
 | v2.0.0 | Stable Release | Q3 2027 | Performance optimization, UI/UX polish |
 
 ### Recent Updates
+
+**v1.6.0 - AI Intelligence & Creativity (2025-12-12):**
+- AI-powered style and palette suggestions using Gemini 3 Pro with thinking mode
+- Topic-aware analysis with Google Search grounding for context
+- Three intelligent style recommendations with detailed reasoning
+- Three color palette suggestions with confidence scores
+- Custom palette generator with image upload and color extraction (Vibrant.js)
+- Five color scheme algorithms: Complementary, Triadic, Analogous, Split-Complementary, Tetradic
+- WCAG accessibility checking (AA and AAA standards) for custom palettes
+- Expanded template library from 10 to 55 professional templates
+- Category-based template organization (10 categories: Business, Technology, Education, Creative, Data, Social Media, Marketing, Science, Health, Entertainment)
+- One-click application of AI recommendations
+- Client-side color extraction for privacy (no server uploads)
+- Custom palette persistence in localStorage
+- New components: StyleSuggestions, PaletteGenerator
+- New service: colorExtractionService.ts (565 lines of color theory algorithms)
+- New hook: useStyleSuggestions for AI suggestion state management
+- New dependency: node-vibrant@4.0.3 for color extraction
 
 **v1.5.0 - Accessibility & Global Reach (2025-12-12):**
 - Keyboard shortcuts system with 10 power user shortcuts (Ctrl+Enter to generate, Ctrl+S to save, Shift+? for help)
