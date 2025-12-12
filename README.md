@@ -2,7 +2,7 @@
 
 > Transform any topic into stunning, AI-generated infographics using Google Gemini
 
-[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](CHANGELOG.md)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -43,11 +43,13 @@ InfoGraphix AI is a web application that generates high-quality infographic imag
 - **Custom Markdown** - Upload .md files for custom content analysis
 - **GitHub Filters** - Filter by language, file extensions, or update date
 
-### User Experience
+### Productivity Features
 
-- **Version History** - Save and revisit previous generations
+- **Batch Generation** - Create up to 50 infographics in a single queue with progress tracking
+- **Custom Templates** - Save and reuse your favorite style configurations
+- **Enhanced Version History** - Advanced search, filters, and pagination for saved generations
+- **Export Formats** - Download as PNG, PDF, SVG, or multi-resolution ZIP
 - **Auto-Save Drafts** - Never lose your form input
-- **Download Support** - Save generated infographics as PNG
 - **Feedback System** - Rate and comment on generations
 
 ---
@@ -209,8 +211,8 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 
 | Version | Theme | Target | Key Features |
 |---------|-------|--------|--------------|
-| v1.3.0 | Foundation | Current | Core generation, 22 styles, 10 palettes, version history |
-| v1.4.0 | Productivity Enhancement | Q1 2026 | Batch generation, custom templates, SVG/PDF export |
+| v1.3.0 | Foundation | 2025-12-11 | Core generation, 22 styles, 10 palettes, version history |
+| v1.4.0 | Productivity Enhancement | Current | Batch generation, custom templates, SVG/PDF export |
 | v1.5.0 | Collaboration & Sharing | Q2 2026 | User accounts, cloud sync, team workspaces |
 | v1.6.0 | AI Intelligence & Creativity | Q3 2026 | AI suggestions, template library, animations |
 | v1.7.0 | Platform & API | Q4 2026 | REST API, Python/JS SDKs, webhooks |
@@ -218,13 +220,16 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 | v1.9.0 | Enterprise & Advanced | Q2 2027 | SSO/SAML, RBAC, admin dashboard |
 | v2.0.0 | Stable Release | Q3 2027 | Performance optimization, UI/UX polish |
 
-### Upcoming Features by Theme
+### Recent Updates
 
-**v1.4.0 - Productivity (Q1 2026):**
-- Batch generation mode (up to 50 topics)
-- Custom style template system
-- Enhanced version history with search and filtering
-- Export to SVG, PDF, and multi-resolution formats
+**v1.4.0 - Productivity Enhancement (Current):**
+- Batch generation mode with queue management (up to 50 topics per batch)
+- Custom template system with save/load/import/export
+- Enhanced version history with advanced filtering and pagination
+- Export to PNG, PDF, SVG, and multi-resolution ZIP formats
+- Multi-URL analysis for comparative infographics
+
+### Upcoming Features by Theme
 
 **v1.5.0 - Collaboration (Q2 2026):**
 - User accounts with OAuth2 authentication

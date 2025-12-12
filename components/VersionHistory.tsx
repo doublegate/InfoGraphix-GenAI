@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { History, Clock, ArrowRight, Trash2, Calendar, Palette, Paintbrush, ArrowLeftRight, CheckSquare, Square, Search, X, ArrowDownAZ, ArrowUpAZ, CalendarClock, CalendarArrowDown } from 'lucide-react';
-import { SavedVersion } from '../types';
+import React, { useState, useMemo } from 'react';
+import { History, Clock, ArrowRight, Trash2, Calendar, Palette, Paintbrush, ArrowLeftRight, CheckSquare, Square, Search, X, ArrowDownAZ, ArrowUpAZ, CalendarClock, CalendarArrowDown, Filter, ChevronLeft, ChevronRight, BarChart3 } from 'lucide-react';
+import { SavedVersion, ImageSize, AspectRatio, InfographicStyle, ColorPalette } from '../types';
 import VersionComparison from './VersionComparison';
 
 interface VersionHistoryProps {
@@ -14,11 +14,20 @@ interface VersionHistoryProps {
 
 type SortOrder = 'newest' | 'oldest' | 'az' | 'za';
 
-const VersionHistory: React.FC<VersionHistoryProps> = ({ 
-  isOpen, 
-  onClose, 
-  versions, 
-  onLoadVersion, 
+interface AdvancedFilters {
+  size?: ImageSize;
+  aspectRatio?: AspectRatio;
+  style?: InfographicStyle;
+  palette?: ColorPalette;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+const VersionHistory: React.FC<VersionHistoryProps> = ({
+  isOpen,
+  onClose,
+  versions,
+  onLoadVersion,
   onDeleteVersion,
   onClearHistory
 }) => {
@@ -27,6 +36,13 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
   const [showComparison, setShowComparison] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
+
+  // v1.4.0 Enhanced features
+  const [showFilters, setShowFilters] = useState(false);
+  const [showStats, setShowStats] = useState(false);
+  const [filters, setFilters] = useState<AdvancedFilters>({});
+  const [itemsPerPage, setItemsPerPage] = useState(25);
+  const [currentPage, setCurrentPage] = useState(1);
 
   if (!isOpen) return null;
 
@@ -46,12 +62,41 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
     }
   };
 
-  const filteredVersions = versions
-    .filter(v => 
-      v.topic.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      v.data.analysis.title.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .sort((a, b) => {
+  const clearFilters = () => {
+    setFilters({});
+    setSearchQuery('');
+  };
+
+  // Enhanced filtering with advanced filters
+  const filteredVersions = useMemo(() => {
+    let result = versions.filter(v => {
+      // Text search
+      const matchesSearch = searchQuery === '' ||
+        v.topic.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        v.data.analysis.title.toLowerCase().includes(searchQuery.toLowerCase());
+
+      // Advanced filters
+      const matchesSize = !filters.size || v.size === filters.size;
+      const matchesRatio = !filters.aspectRatio || v.aspectRatio === filters.aspectRatio;
+      const matchesStyle = !filters.style || v.style === filters.style;
+      const matchesPalette = !filters.palette || v.palette === filters.palette;
+
+      // Date range filters
+      let matchesDateRange = true;
+      if (filters.dateFrom) {
+        const dateFrom = new Date(filters.dateFrom).getTime();
+        matchesDateRange = matchesDateRange && v.timestamp >= dateFrom;
+      }
+      if (filters.dateTo) {
+        const dateTo = new Date(filters.dateTo).getTime() + 86400000; // Add 1 day
+        matchesDateRange = matchesDateRange && v.timestamp < dateTo;
+      }
+
+      return matchesSearch && matchesSize && matchesRatio && matchesStyle && matchesPalette && matchesDateRange;
+    });
+
+    // Sort
+    result.sort((a, b) => {
       switch (sortOrder) {
         case 'newest': return b.timestamp - a.timestamp;
         case 'oldest': return a.timestamp - b.timestamp;
@@ -60,6 +105,45 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
         default: return 0;
       }
     });
+
+    return result;
+  }, [versions, searchQuery, filters, sortOrder]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredVersions.length / itemsPerPage);
+  const paginatedVersions = filteredVersions.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Statistics
+  const stats = useMemo(() => {
+    const styleCount: Record<string, number> = {};
+    const paletteCount: Record<string, number> = {};
+    const sizeCount: Record<string, number> = {};
+
+    versions.forEach(v => {
+      if (v.style) styleCount[v.style] = (styleCount[v.style] || 0) + 1;
+      if (v.palette) paletteCount[v.palette] = (paletteCount[v.palette] || 0) + 1;
+      sizeCount[v.size] = (sizeCount[v.size] || 0) + 1;
+    });
+
+    const mostUsedStyle = Object.entries(styleCount).sort((a, b) => b[1] - a[1])[0];
+    const mostUsedPalette = Object.entries(paletteCount).sort((a, b) => b[1] - a[1])[0];
+
+    return {
+      total: versions.length,
+      filtered: filteredVersions.length,
+      mostUsedStyle: mostUsedStyle?.[0],
+      mostUsedPalette: mostUsedPalette?.[0],
+      sizeBreakdown: sizeCount
+    };
+  }, [versions, filteredVersions]);
+
+  // Reset page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filters, itemsPerPage]);
 
   const v1 = versions.find(v => v.id === selectedIds[0]);
   const v2 = versions.find(v => v.id === selectedIds[1]);
@@ -86,18 +170,29 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
               <h2 id="version-history-title" className="text-xl font-bold text-white flex items-center gap-2">
                 <History className="w-5 h-5 text-blue-400" aria-hidden="true" />
                 Version History
+                <span className="text-sm font-normal text-slate-400">({stats.filtered}/{stats.total})</span>
               </h2>
               <div className="flex gap-2">
-                 {versions.length > 0 && (
-                  <button
-                    onClick={onClearHistory}
-                    className="p-2 text-slate-400 hover:text-red-400 transition-colors rounded-lg hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-red-500"
-                    title="Clear All History"
-                    aria-label="Clear all version history"
-                  >
-                    <Trash2 className="w-4 h-4" aria-hidden="true" />
-                  </button>
-                 )}
+                {versions.length > 0 && (
+                  <>
+                    <button
+                      onClick={() => setShowStats(!showStats)}
+                      className={`p-2 transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${showStats ? 'text-blue-400 bg-blue-900/20' : 'text-slate-400 hover:text-white'}`}
+                      title="Show Statistics"
+                      aria-label="Toggle statistics panel"
+                    >
+                      <BarChart3 className="w-4 h-4" aria-hidden="true" />
+                    </button>
+                    <button
+                      onClick={onClearHistory}
+                      className="p-2 text-slate-400 hover:text-red-400 transition-colors rounded-lg hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-red-500"
+                      title="Clear All History"
+                      aria-label="Clear all version history"
+                    >
+                      <Trash2 className="w-4 h-4" aria-hidden="true" />
+                    </button>
+                  </>
+                )}
                 <button
                   onClick={onClose}
                   className="p-2 text-slate-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg"
@@ -107,6 +202,38 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
                 </button>
               </div>
             </div>
+
+            {/* Statistics Panel */}
+            {showStats && (
+              <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700 space-y-2 text-sm">
+                <h3 className="font-semibold text-white mb-2 flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4" />
+                  Statistics
+                </h3>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <div className="text-slate-400">Total Versions</div>
+                    <div className="text-white font-semibold">{stats.total}</div>
+                  </div>
+                  <div>
+                    <div className="text-slate-400">Filtered</div>
+                    <div className="text-white font-semibold">{stats.filtered}</div>
+                  </div>
+                  {stats.mostUsedStyle && (
+                    <div className="col-span-2">
+                      <div className="text-slate-400">Most Used Style</div>
+                      <div className="text-white font-semibold truncate">{stats.mostUsedStyle}</div>
+                    </div>
+                  )}
+                  {stats.mostUsedPalette && (
+                    <div className="col-span-2">
+                      <div className="text-slate-400">Most Used Palette</div>
+                      <div className="text-white font-semibold truncate">{stats.mostUsedPalette}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Toolbar: Search & Sort */}
             <div className="flex gap-2" role="search">
@@ -145,8 +272,119 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
                    {sortOrder === 'za' && <ArrowUpAZ className="w-4 h-4" />}
                 </div>
               </div>
+
+              {/* Filter Toggle Button */}
+              {versions.length > 0 && (
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all border ${
+                    showFilters
+                      ? 'bg-blue-600 border-blue-500 text-white'
+                      : 'bg-slate-800 border-slate-600 text-slate-300 hover:bg-slate-700'
+                  }`}
+                >
+                  <Filter className="w-4 h-4" />
+                  {showFilters ? 'Hide Filters' : 'Advanced Filters'}
+                </button>
+              )}
             </div>
-            
+
+            {/* Advanced Filters Panel */}
+            {showFilters && (
+              <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700 space-y-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-semibold text-white text-sm flex items-center gap-2">
+                    <Filter className="w-4 h-4" />
+                    Advanced Filters
+                  </h3>
+                  <button
+                    onClick={clearFilters}
+                    className="text-xs text-slate-400 hover:text-white transition-colors"
+                  >
+                    Clear All
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs text-slate-400 block mb-1">Resolution</label>
+                    <select
+                      value={filters.size || ''}
+                      onChange={(e) => setFilters({ ...filters, size: e.target.value as ImageSize || undefined })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs text-white rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                      <option value="">All</option>
+                      {Object.values(ImageSize).map(size => (
+                        <option key={size} value={size}>{size}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-slate-400 block mb-1">Aspect Ratio</label>
+                    <select
+                      value={filters.aspectRatio || ''}
+                      onChange={(e) => setFilters({ ...filters, aspectRatio: e.target.value as AspectRatio || undefined })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs text-white rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                      <option value="">All</option>
+                      {Object.values(AspectRatio).map(ratio => (
+                        <option key={ratio} value={ratio}>{ratio}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="text-xs text-slate-400 block mb-1">Style</label>
+                    <select
+                      value={filters.style || ''}
+                      onChange={(e) => setFilters({ ...filters, style: e.target.value as InfographicStyle || undefined })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs text-white rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                      <option value="">All Styles</option>
+                      {Object.values(InfographicStyle).map(style => (
+                        <option key={style} value={style}>{style}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="text-xs text-slate-400 block mb-1">Color Palette</label>
+                    <select
+                      value={filters.palette || ''}
+                      onChange={(e) => setFilters({ ...filters, palette: e.target.value as ColorPalette || undefined })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs text-white rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                      <option value="">All Palettes</option>
+                      {Object.values(ColorPalette).map(palette => (
+                        <option key={palette} value={palette}>{palette}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-slate-400 block mb-1">Date From</label>
+                    <input
+                      type="date"
+                      value={filters.dateFrom || ''}
+                      onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs text-white rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-slate-400 block mb-1">Date To</label>
+                    <input
+                      type="date"
+                      value={filters.dateTo || ''}
+                      onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 text-xs text-white rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Action Bar */}
             <div className="flex gap-2">
               <button
@@ -156,8 +394,8 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
                 }}
                 disabled={versions.length < 2}
                 className={`flex-1 flex items-center justify-center gap-2 text-sm font-medium py-2 rounded-lg transition-all border ${
-                  isCompareMode 
-                    ? 'bg-blue-600 border-blue-500 text-white' 
+                  isCompareMode
+                    ? 'bg-blue-600 border-blue-500 text-white'
                     : versions.length < 2
                       ? 'bg-slate-800/50 border-slate-700 text-slate-600 cursor-not-allowed'
                       : 'bg-slate-800 border-slate-600 text-slate-300 hover:bg-slate-700'
@@ -169,7 +407,7 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
             {filteredVersions.length === 0 ? (
               <div className="text-center py-12 text-slate-500 animate-in fade-in duration-500">
                 <History className="w-12 h-12 mx-auto mb-3 opacity-20" />
@@ -177,7 +415,8 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
                 {!searchQuery && <p className="text-xs mt-1">Generate an infographic and save it to see it here.</p>}
               </div>
             ) : (
-              filteredVersions.map((version, index) => {
+              <>
+                {paginatedVersions.map((version, index) => {
                 const isSelected = selectedIds.includes(version.id);
                 const isDisabled = isCompareMode && !isSelected && selectedIds.length >= 2;
 
@@ -287,7 +526,50 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
                     </div>
                   </div>
                 );
-              })
+              })}
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="sticky bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-700 p-4 mt-4">
+                    <div className="flex items-center justify-between text-sm mb-3">
+                      <div className="text-slate-400">
+                        Showing {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredVersions.length)} of {filteredVersions.length}
+                      </div>
+                      <select
+                        value={itemsPerPage}
+                        onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                        className="bg-slate-800 border border-slate-700 text-xs text-white rounded px-2 py-1 outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option value="10">10 per page</option>
+                        <option value="25">25 per page</option>
+                        <option value="50">50 per page</option>
+                        <option value="100">100 per page</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                        disabled={currentPage === 1}
+                        className="p-2 rounded-lg bg-slate-800 border border-slate-700 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-700 transition-colors"
+                        aria-label="Previous page"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <div className="text-slate-300 text-sm min-w-[80px] text-center">
+                        Page {currentPage} of {totalPages}
+                      </div>
+                      <button
+                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                        disabled={currentPage === totalPages}
+                        className="p-2 rounded-lg bg-slate-800 border border-slate-700 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-700 transition-colors"
+                        aria-label="Next page"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
 

@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Layers, Github, Globe, History as HistoryIcon, Info } from 'lucide-react';
+import { Layers, Github, Globe, History as HistoryIcon, Info, List as ListIcon, BookTemplate } from 'lucide-react';
 import ApiKeySelector from './components/ApiKeySelector';
 import InfographicForm from './components/InfographicForm';
 import ProcessingState from './components/ProcessingState';
 import InfographicResult from './components/InfographicResult';
 import VersionHistory from './components/VersionHistory';
 import AboutModal from './components/AboutModal';
+import BatchManager from './components/BatchGeneration/BatchManager';
+import TemplateBrowser from './components/TemplateManager/TemplateBrowser';
 import { analyzeTopic, generateInfographicImage } from './services/geminiService';
-import { AspectRatio, GeneratedInfographic, ImageSize, GithubFilters, SavedVersion, Feedback, InfographicStyle, ColorPalette } from './types';
+import { AspectRatio, GeneratedInfographic, ImageSize, GithubFilters, SavedVersion, Feedback, InfographicStyle, ColorPalette, TemplateConfig } from './types';
 
 function App() {
   const [isApiKeyReady, setIsApiKeyReady] = useState(false);
@@ -30,10 +32,15 @@ function App() {
   const [savedVersions, setSavedVersions] = useState<SavedVersion[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [showBatchManager, setShowBatchManager] = useState(false);
+  const [showTemplateManager, setShowTemplateManager] = useState(false);
   const [isCurrentResultSaved, setIsCurrentResultSaved] = useState(false);
-  
+
   // Feedback for current session view
   const [currentFeedback, setCurrentFeedback] = useState<Feedback | undefined>(undefined);
+
+  // Active mode ('single' or 'batch')
+  const [activeMode, setActiveMode] = useState<'single' | 'batch'>('single');
 
   // Load versions from localStorage on mount
   useEffect(() => {
@@ -171,6 +178,24 @@ function App() {
     }
   };
 
+  const handleApplyTemplate = (template: TemplateConfig) => {
+    // Apply template to form
+    setFormInitialValues({
+      style: template.style,
+      palette: template.palette,
+      size: template.size,
+      aspectRatio: template.aspectRatio
+    });
+    setShowTemplateManager(false);
+  };
+
+  const handleSwitchMode = (mode: 'single' | 'batch') => {
+    setActiveMode(mode);
+    if (mode === 'batch') {
+      setShowBatchManager(true);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-200 selection:bg-blue-500/30 font-sans">
       {/* Skip to main content link for keyboard users */}
@@ -207,14 +232,22 @@ function App() {
             </p>
           </div>
           
-          <nav className="flex gap-3" aria-label="Main navigation">
-             <button
-              onClick={() => setShowAbout(true)}
+          <nav className="flex gap-3 flex-wrap justify-center md:justify-end" aria-label="Main navigation">
+            <button
+              onClick={() => setShowTemplateManager(true)}
               className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-all text-slate-300 shadow-sm hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label="About InfoGraphix AI"
+              aria-label="Manage templates"
             >
-              <Info className="w-5 h-5" aria-hidden="true" />
-              About
+              <BookTemplate className="w-5 h-5" aria-hidden="true" />
+              Templates
+            </button>
+            <button
+              onClick={() => handleSwitchMode('batch')}
+              className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-all text-slate-300 shadow-sm hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="Batch generation mode"
+            >
+              <ListIcon className="w-5 h-5" aria-hidden="true" />
+              Batch
             </button>
             <button
               onClick={() => setShowHistory(true)}
@@ -223,6 +256,14 @@ function App() {
             >
               <HistoryIcon className="w-5 h-5" aria-hidden="true" />
               History {savedVersions.length > 0 && <span className="bg-blue-600 text-white text-xs px-1.5 rounded-full" aria-hidden="true">{savedVersions.length}</span>}
+            </button>
+            <button
+              onClick={() => setShowAbout(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-all text-slate-300 shadow-sm hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="About InfoGraphix AI"
+            >
+              <Info className="w-5 h-5" aria-hidden="true" />
+              About
             </button>
           </nav>
         </header>
@@ -266,18 +307,32 @@ function App() {
       </div>
 
       {/* Overlays */}
-      <VersionHistory 
-        isOpen={showHistory} 
-        onClose={() => setShowHistory(false)} 
+      <VersionHistory
+        isOpen={showHistory}
+        onClose={() => setShowHistory(false)}
         versions={savedVersions}
         onLoadVersion={handleLoadVersion}
         onDeleteVersion={handleDeleteVersion}
         onClearHistory={handleClearHistory}
       />
-      
-      <AboutModal 
-        isOpen={showAbout} 
-        onClose={() => setShowAbout(false)} 
+
+      <AboutModal
+        isOpen={showAbout}
+        onClose={() => setShowAbout(false)}
+      />
+
+      <BatchManager
+        isOpen={showBatchManager}
+        onClose={() => {
+          setShowBatchManager(false);
+          setActiveMode('single');
+        }}
+      />
+
+      <TemplateBrowser
+        isOpen={showTemplateManager}
+        onClose={() => setShowTemplateManager(false)}
+        onApplyTemplate={handleApplyTemplate}
       />
     </div>
   );

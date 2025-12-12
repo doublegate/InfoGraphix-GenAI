@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Monitor, Image as ImageIcon, FileText, Cpu, ChevronDown, ChevronUp, Filter, Palette, Paintbrush, RefreshCw, Upload, X } from 'lucide-react';
-import { ImageSize, AspectRatio, GithubFilters, InfographicStyle, ColorPalette } from '../types';
+import { Search, Monitor, Image as ImageIcon, FileText, Cpu, ChevronDown, ChevronUp, Filter, Palette, Paintbrush, RefreshCw, Upload, X, Sparkles, List } from 'lucide-react';
+import { ImageSize, AspectRatio, GithubFilters, InfographicStyle, ColorPalette, TemplateConfig } from '../types';
 import RichSelect, { RichOption } from './RichSelect';
+import { TemplateBrowser } from './TemplateManager';
 
 interface InfographicFormProps {
   onSubmit: (topic: string, size: ImageSize, aspectRatio: AspectRatio, style: InfographicStyle, palette: ColorPalette, filters?: GithubFilters, fileContent?: string) => void;
@@ -124,6 +125,13 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
   const [recentTopics, setRecentTopics] = useState<string[]>([]);
   const [hasDraft, setHasDraft] = useState(false);
 
+  // Template State
+  const [showTemplateBrowser, setShowTemplateBrowser] = useState(false);
+  const [activeTemplate, setActiveTemplate] = useState<TemplateConfig | null>(null);
+
+  // Multi-URL State
+  const [isMultiUrlMode, setIsMultiUrlMode] = useState(false);
+
   // Load initial values if provided
   useEffect(() => {
     if (initialValues) {
@@ -219,6 +227,19 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
     setTopic('');
   };
 
+  const handleTemplateSelect = (template: TemplateConfig) => {
+    setStyle(template.style);
+    setPalette(template.palette);
+    setSize(template.size);
+    setRatio(template.aspectRatio);
+    setActiveTemplate(template);
+    setShowTemplateBrowser(false);
+  };
+
+  const clearTemplate = () => {
+    setActiveTemplate(null);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (topic.trim() && !isProcessing) {
@@ -237,7 +258,7 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
         fileExtensions: extensions || undefined,
         lastUpdatedAfter: date || undefined
       } : undefined;
-      
+
       // Pass fileContent if available
       onSubmit(topic, size, ratio, style, palette, filters, fileContent || undefined);
     }
@@ -265,43 +286,81 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
         <div>
           <div className="flex justify-between items-center mb-2 ml-1">
             <label className="text-sm font-medium text-slate-300">
-              {fileName ? "Infographic Title" : "Topic, URL, or Repo"}
+              {fileName
+                ? "Infographic Title"
+                : isMultiUrlMode
+                ? "Multiple URLs (one per line or comma-separated)"
+                : "Topic, URL, or Repo"}
             </label>
-            {!fileName && (
-              <label className="text-xs text-blue-400 hover:text-blue-300 cursor-pointer flex items-center gap-1 transition-colors">
-                <Upload className="w-3 h-3" />
-                Upload .md file
-                <input 
-                  type="file" 
-                  accept=".md" 
-                  onChange={handleFileChange}
-                  className="hidden" 
+            <div className="flex items-center gap-3">
+              {!fileName && (
+                <button
+                  type="button"
+                  onClick={() => setIsMultiUrlMode(!isMultiUrlMode)}
+                  className="text-xs text-purple-400 hover:text-purple-300 cursor-pointer flex items-center gap-1 transition-colors"
                   disabled={isProcessing}
-                />
-              </label>
-            )}
+                >
+                  <List className="w-3 h-3" />
+                  {isMultiUrlMode ? 'Single URL' : 'Multiple URLs'}
+                </button>
+              )}
+              {!fileName && (
+                <label className="text-xs text-blue-400 hover:text-blue-300 cursor-pointer flex items-center gap-1 transition-colors">
+                  <Upload className="w-3 h-3" />
+                  Upload .md file
+                  <input
+                    type="file"
+                    accept=".md"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    disabled={isProcessing}
+                  />
+                </label>
+              )}
+            </div>
           </div>
-          
+
           <div className="relative group">
-            <input
-              type="text"
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              placeholder={fileName ? "Enter a title for this infographic" : "e.g., https://github.com/torvalds/linux or 'SpaceX Starship'"}
-              className={`w-full bg-slate-900 border text-white rounded-xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-slate-500 ${
-                fileName ? 'border-blue-500/50 ring-1 ring-blue-500/20' : 'border-slate-700 group-hover:border-slate-600'
-              }`}
-              disabled={isProcessing}
-              list={!fileName ? "recent-topics" : undefined}
-            />
-            
-            {fileName ? (
-              <FileText className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-400 w-5 h-5" />
+            {isMultiUrlMode && !fileName ? (
+              <textarea
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                placeholder="Enter URLs separated by commas or new lines:&#10;https://example.com/page1&#10;https://github.com/user/repo&#10;https://docs.python.org/3/"
+                className="w-full bg-slate-900 border border-slate-700 group-hover:border-slate-600 text-white rounded-xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-slate-500 resize-none"
+                disabled={isProcessing}
+                rows={5}
+              />
             ) : (
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-blue-500 transition-colors" />
+              <input
+                type="text"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                placeholder={
+                  fileName
+                    ? "Enter a title for this infographic"
+                    : "e.g., https://github.com/torvalds/linux or 'SpaceX Starship'"
+                }
+                className={`w-full bg-slate-900 border text-white rounded-xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-slate-500 ${
+                  fileName
+                    ? 'border-blue-500/50 ring-1 ring-blue-500/20'
+                    : 'border-slate-700 group-hover:border-slate-600'
+                }`}
+                disabled={isProcessing}
+                list={!fileName ? "recent-topics" : undefined}
+              />
             )}
 
-            {!fileName && (
+            {fileName ? (
+              <FileText className="absolute left-4 top-4 text-blue-400 w-5 h-5" />
+            ) : (
+              <Search
+                className={`absolute left-4 ${
+                  isMultiUrlMode ? 'top-4' : 'top-1/2 -translate-y-1/2'
+                } text-slate-400 w-5 h-5 group-focus-within:text-blue-500 transition-colors`}
+              />
+            )}
+
+            {!fileName && !isMultiUrlMode && (
               <datalist id="recent-topics">
                 {recentTopics.map((rt, idx) => (
                   <option key={idx} value={rt} />
@@ -382,6 +441,43 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
               </div>
             </div>
           )}
+        </div>
+
+        {/* Template Quick Apply */}
+        <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-xl border border-slate-700/50">
+          <div className="flex items-center gap-3">
+            <Sparkles className="w-5 h-5 text-purple-400" />
+            <div>
+              <h3 className="text-sm font-semibold text-white">Quick Apply Template</h3>
+              <p className="text-xs text-slate-400">
+                {activeTemplate
+                  ? `Using: ${activeTemplate.name}`
+                  : 'Use a saved template or configure manually'}
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setShowTemplateBrowser(true)}
+              disabled={isProcessing}
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm rounded-lg transition-colors flex items-center gap-2"
+            >
+              <Sparkles className="w-4 h-4" />
+              Browse Templates
+            </button>
+            {activeTemplate && (
+              <button
+                type="button"
+                onClick={clearTemplate}
+                disabled={isProcessing}
+                className="p-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-colors"
+                title="Clear template"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Style & Palette Controls using RichSelect */}
@@ -495,6 +591,14 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
           )}
         </button>
       </form>
+
+      {/* Template Browser Modal */}
+      <TemplateBrowser
+        isOpen={showTemplateBrowser}
+        onClose={() => setShowTemplateBrowser(false)}
+        mode="select"
+        onApplyTemplate={handleTemplateSelect}
+      />
     </div>
   );
 };

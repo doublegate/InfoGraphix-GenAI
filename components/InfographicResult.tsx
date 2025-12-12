@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Download, Info, CheckCircle2, Link as LinkIcon, Save, Loader2 } from 'lucide-react';
-import { GeneratedInfographic, Feedback } from '../types';
+import { Download, Info, CheckCircle2, Link as LinkIcon, Save, Loader2, FileImage, FileText, FileStack } from 'lucide-react';
+import { GeneratedInfographic, Feedback, ExportFormat, ImageSize, AspectRatio } from '../types';
+import { exportInfographic } from '../utils/exportUtils';
 import FeedbackForm from './FeedbackForm';
 
 interface InfographicResultProps {
@@ -9,27 +10,51 @@ interface InfographicResultProps {
   onFeedback: (rating: number, comment: string) => void;
   currentFeedback?: Feedback;
   isSaved?: boolean;
+  currentSize?: ImageSize;
+  currentRatio?: AspectRatio;
 }
 
-const InfographicResult: React.FC<InfographicResultProps> = ({ 
-  data, 
-  onSave, 
-  onFeedback, 
+const InfographicResult: React.FC<InfographicResultProps> = ({
+  data,
+  onSave,
+  onFeedback,
   currentFeedback,
-  isSaved 
+  isSaved,
+  currentSize = ImageSize.Resolution_2K,
+  currentRatio = AspectRatio.Portrait
 }) => {
   const [isSaving, setIsSaving] = useState(false);
+  const [exportFormat, setExportFormat] = useState<ExportFormat>(ExportFormat.PNG);
+  const [isExporting, setIsExporting] = useState(false);
 
   if (!data) return null;
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!data.imageUrl) return;
-    const link = document.createElement('a');
-    link.href = data.imageUrl;
-    link.download = `infographic-${data.analysis.title.replace(/\s+/g, '-').toLowerCase()}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+
+    setIsExporting(true);
+    try {
+      const filename = `infographic-${data.analysis.title.replace(/\s+/g, '-').toLowerCase()}`;
+
+      if (exportFormat === ExportFormat.MultiRes) {
+        alert('Multi-resolution export requires re-generating the infographic at each resolution. This feature will be available in the Batch Mode.');
+        setIsExporting(false);
+        return;
+      }
+
+      await exportInfographic(
+        exportFormat,
+        data.imageUrl,
+        filename,
+        currentSize,
+        currentRatio
+      );
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert(`Export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleSaveClick = async () => {
@@ -159,14 +184,41 @@ const InfographicResult: React.FC<InfographicResultProps> = ({
                 <div className="text-white">
                   <p className="text-sm font-medium opacity-80">Generated with Nano Banana Pro</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-3 items-center">
+                  {/* Export Format Selector */}
+                  <div className="flex flex-col gap-1">
+                    <label htmlFor="export-format" className="text-xs text-white/70 font-medium">
+                      Export As
+                    </label>
+                    <select
+                      id="export-format"
+                      value={exportFormat}
+                      onChange={(e) => setExportFormat(e.target.value as ExportFormat)}
+                      className="px-3 py-1.5 bg-slate-800/90 text-white text-sm rounded-lg border border-slate-600 hover:border-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                      disabled={isExporting}
+                    >
+                      <option value={ExportFormat.PNG}>PNG Image</option>
+                      <option value={ExportFormat.PDF}>PDF Document</option>
+                      <option value={ExportFormat.SVG}>SVG Vector</option>
+                      <option value={ExportFormat.MultiRes}>Multi-Resolution</option>
+                    </select>
+                  </div>
+
+                  {/* Download Button */}
                   <button
                     onClick={handleDownload}
-                    className="p-2 bg-white text-slate-900 rounded-lg hover:bg-blue-50 transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900"
-                    title="Download High-Res"
-                    aria-label="Download high-resolution infographic"
+                    disabled={isExporting}
+                    className={`p-2 bg-white text-slate-900 rounded-lg hover:bg-blue-50 transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 self-end ${
+                      isExporting ? 'opacity-60 cursor-wait' : ''
+                    }`}
+                    title={`Download as ${exportFormat}`}
+                    aria-label={`Download infographic as ${exportFormat}`}
                   >
-                    <Download className="w-5 h-5" aria-hidden="true" />
+                    {isExporting ? (
+                      <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+                    ) : (
+                      <Download className="w-5 h-5" aria-hidden="true" />
+                    )}
                   </button>
                 </div>
              </div>

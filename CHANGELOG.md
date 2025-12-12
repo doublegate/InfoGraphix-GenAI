@@ -148,57 +148,86 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.4.0] - 2026-03 (Planned)
+## [1.4.0] - 2025-12-11 (Current Release)
 
 ### Theme: Productivity Enhancement
 
-*Batch processing, templates, and enhanced workflows. See `to-dos/version-plans/v1.4.0-PLAN.md` for details.*
+*Batch processing, templates, and enhanced workflows for power users.*
 
 ### Added
-- Comprehensive user guide (docs/USER-GUIDE.md) with step-by-step instructions for all features
-- FAQ document (docs/FAQ.md) covering 60+ common questions across 10 categories
-- Mermaid diagrams in ARCHITECTURE.md for system visualization
-  - High-level system architecture diagram
-  - Component hierarchy diagram
-  - Component interaction flow sequence diagram
-  - State architecture diagram
-  - Processing step state machine
-  - Complete data flow diagram
-- Enhanced API documentation (docs/API.md) with:
-  - Real-world examples for all API functions
-  - Detailed error response formats with recovery steps
-  - Four sequence diagrams (generation flow, authentication, error recovery, version history)
-  - Resolution and dimension reference table
-- Comprehensive CONTRIBUTING.md enhancements:
-  - Manual testing checklist for contributors
-  - Detailed code style guidelines with examples
-  - Commit message templates and examples
-  - PR review process documentation
-  - Testing requirements section
+- **Batch Generation System**
+  - Queue-based batch processing (up to 50 topics per batch)
+  - Queue management with pause/resume/retry capabilities
+  - Progress tracking with visual status indicators
+  - Batch export to ZIP with all completed infographics
+  - Configuration presets for queue creation
+  - LocalStorage persistence for queue state
+
+- **Custom Template System**
+  - Save and reuse style configurations
+  - 10 pre-built default templates
+  - Template CRUD operations (create, read, update, delete)
+  - Import/export templates as JSON
+  - Template search and filtering by name, description, and tags
+  - Template duplication for quick variations
+  - Reset to defaults option
+
+- **Enhanced Version History**
+  - Advanced filtering by size, aspect ratio, style, palette
+  - Date range filtering
+  - Full-text search across topics
+  - Pagination (10/25/50/100 items per page)
+  - Statistics panel showing total generations and breakdown by parameters
+  - Sorting options for better organization
+
+- **Export Format Options**
+  - PNG export (default, lossless)
+  - PDF export with metadata
+  - SVG export (wrapped in SVG container)
+  - Multi-resolution export (1K, 2K, 4K in single ZIP)
+  - Export format selector in result view
+
+- **Enhanced Gemini Service**
+  - Multi-URL analysis for comparative infographics
+  - Improved GitHub repository structure analysis
+  - URL detection and specialized prompts
+  - Enhanced error handling and retry logic
+
+- **New UI Components**
+  - BatchManager modal for queue management
+  - TemplateBrowser modal for template selection
+  - BatchQueueCreator for new queue creation
+  - BatchQueueList for viewing all queues
+  - BatchItemCard for individual batch item status
+  - TemplateEditor for creating/editing templates
+  - TemplateGrid for browsing templates
+  - TemplateCard for template preview
 
 ### Changed
-- README.md updated with TailwindCSS v4 build-time reference (was incorrectly listed as CDN)
-- README.md documentation section now includes User Guide and FAQ links
-- CONTRIBUTING.md code style section expanded with TypeScript, React, and formatting examples
+- App.tsx now supports both single and batch generation modes
+- InfographicForm updated with template quick-apply and multi-URL input
+- InfographicResult enhanced with export format selection
+- Navigation bar reorganized with Templates and Batch buttons
 
-- Batch generation mode (up to 50 topics)
-- Custom style template system (save, import, export)
-- Enhanced version history (search, filter, pagination)
-- Export format options (SVG, PDF, multi-resolution)
-- Improved GitHub repository analysis
-- Multi-page URL analysis and comparison
+### Technical
+- Added jsPDF (v3.0.4) for PDF generation
+- Added JSZip (v3.10.1) for ZIP archive creation
+- Added @types/jspdf for TypeScript support
+- New utility module: utils/exportUtils.ts
+- New service modules: services/templateService.ts, services/batchService.ts
+- Extended type definitions in types.ts for batch and template features
 
-### Features
-- Queue management with progress tracking
-- ZIP download for batch results
-- Template library with preview
-- Advanced filtering and sorting
-- GitHub GraphQL API integration
-- Sitemap parsing for websites
+### Documentation
+- Comprehensive user guide (docs/USER-GUIDE.md) with step-by-step instructions
+- FAQ document (docs/FAQ.md) covering 60+ common questions across 10 categories
+- Mermaid diagrams in ARCHITECTURE.md for system visualization
+- Enhanced API documentation with real-world examples and sequence diagrams
+- CONTRIBUTING.md with testing checklists and code style guidelines
+- README.md updated with TailwindCSS v4 build-time reference
 
 ---
 
-## [1.3.0] - 2025-12-11 (Current Release)
+## [1.3.0] - 2025-12-11
 
 ### Added
 - Two-phase AI pipeline for infographic generation
