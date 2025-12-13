@@ -9,6 +9,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 *No unreleased changes*
 
+## [2.1.1] - 2025-12-13
+
+### Added
+- Project structure reorganization for cleaner root directory
+- Technical documentation consolidated in `docs/technical/`
+- CI configuration moved to `.github/` directory
+
+### Changed
+- Relocated 5 documentation files to appropriate subdirectories
+- Moved `codecov.yml` to `.github/codecov.yml`
+- Moved workflow documentation to `docs/technical/`
+
+### Fixed
+- 14 TypeScript type errors in test files
+- 11 ESLint violations in test files
+- Feedback type interface compliance (added id, timestamp)
+- GithubFilters interface (extensions → fileExtensions)
+- TemplateConfig interface compliance
+- Floating promise violations
+
+### Technical Details
+- **Files Relocated:**
+  - `CLEANUP_SUMMARY.md` → `docs/technical/`
+  - `OPTIMIZATION-SUMMARY.md` → `docs/technical/`
+  - `WORKFLOW-ARCHITECTURE.md` → `docs/technical/`
+  - `WORKFLOWS.md` → `docs/technical/`
+  - `codecov.yml` → `.github/`
+
+- **Type Fixes Applied:**
+  - `Feedback` type: Added required `id` and `timestamp` fields
+  - `GithubFilters` type: Changed `extensions` to `fileExtensions`
+  - `TemplateConfig` type: Removed invalid `category` field
+
+- **ESLint Fixes:**
+  - Removed unused variables/imports
+  - Fixed floating promises with `void` or `await`
+
 ## [2.1.0] - 2025-12-13
 
 ### Theme: Expanded Test Coverage

@@ -6,7 +6,7 @@
   <img src="images/Infographix-GenAI_sketch.jpg" alt="InfoGraphix AI Concept Sketch" width="800">
 </p>
 
-[![Version](https://img.shields.io/badge/version-2.0.3-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.1.1-blue.svg)](CHANGELOG.md)
 [![CI](https://github.com/doublegate/InfoGraphix-GenAI/actions/workflows/ci.yml/badge.svg)](https://github.com/doublegate/InfoGraphix-GenAI/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/doublegate/InfoGraphix-GenAI/branch/main/graph/badge.svg)](https://codecov.io/gh/doublegate/InfoGraphix-GenAI)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
@@ -33,13 +33,13 @@ InfoGraphix AI is a powerful web application that generates high-quality infogra
 - Export in multiple formats (PNG, PDF, SVG, ZIP)
 - Advanced version history with search and filtering
 
-**Latest Updates (v2.0.3):**
+**Latest Updates (v2.1.1):**
 
-- Batch Processing - Resolved network errors and optimized adaptive polling (5s -> 10s -> 30s)
-- Bug Fixes - Fixed 6 application issues including batch processing, i18n, and UX improvements
-- UI Polish - Updated filter button text and improved batch processing error handling
-- Code Quality - Resolved 12 ESLint errors causing CI failures (no-console, react-hooks/exhaustive-deps)
-- CI/CD - All workflows passing with improved lint compliance
+- Project Reorganization - 5 documentation files relocated for cleaner root directory
+- CI/CD Fixes - Resolved 14 TypeScript type errors and 11 ESLint violations in test files
+- Documentation Structure - Technical docs consolidated in `docs/technical/`, CI config in `.github/`
+- Type System Improvements - Fixed Feedback, GithubFilters, and TemplateConfig type compliance
+- Code Quality - All 299 tests passing with 81.29% coverage maintained
 
 ---
 
@@ -491,7 +491,8 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 | v2.0.0 | Testing & Advanced Features | 2025-12-12 | Vitest infrastructure, theme system, enhanced i18n |
 | v2.0.1 | Bug Fixes | 2025-12-13 | Image rendering fix, storage hook migration |
 | v2.0.2 | Documentation & Polish | 2025-12-13 | README images, docs reorganization, CI fixes |
-| v2.0.3 | Stability & Quality | 2025-12-13 (Current) | Batch processing fixes, ESLint compliance, polling optimization |
+| v2.0.3 | Stability & Quality | 2025-12-13 | Batch processing fixes, ESLint compliance, polling optimization |
+| v2.1.1 | Project Reorganization & CI Fixes | 2025-12-13 (Current) | Documentation restructure, TypeScript/ESLint test fixes |
 | v2.1.0 | Expanded Test Coverage | Q1 2026 | 70% test coverage, integration tests, property-based tests |
 | v2.2.0 | Platform & API | Q2 2026 | REST API, Python/JS SDKs, webhooks |
 | v2.3.0 | Ecosystem Integrations | Q3 2026 | Google Workspace, Notion, Figma, Slack |
@@ -499,6 +500,16 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 | v3.0.0 | Stable Release | Q1 2027 | Performance optimization, UI/UX polish |
 
 ### Recent Updates
+
+**v2.1.1 - Project Reorganization & CI Fixes (2025-12-13):**
+
+- Fixed 14 TypeScript type errors in test files (Feedback, GithubFilters, TemplateConfig interfaces)
+- Fixed 11 ESLint violations in test files (unused variables, floating promises)
+- Relocated 5 documentation files to appropriate subdirectories for cleaner project structure
+- Moved technical documentation to `docs/technical/` directory
+- Moved codecov.yml to `.github/` directory for better organization
+- All 299 tests passing with 81.29% code coverage maintained
+- Full CI/CD pipeline passing with zero errors
 
 **v2.0.3 - Stability & Quality (2025-12-13):**
 
