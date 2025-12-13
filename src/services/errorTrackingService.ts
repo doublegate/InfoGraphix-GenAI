@@ -45,7 +45,7 @@ export const initErrorTracking = (): void => {
     tracesSampleRate: environment === 'production' ? 0.1 : 1.0,
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
-    release: `infographix-genai@${import.meta.env.VITE_APP_VERSION || '2.0.1'}`,
+    release: `infographix-genai@${import.meta.env.VITE_APP_VERSION || '2.0.2'}`,
     beforeSend(event) {
       // Filter localhost errors
       if (event.request?.url?.includes('localhost')) {

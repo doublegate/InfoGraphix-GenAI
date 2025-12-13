@@ -2,53 +2,17 @@
 
 > Transform any topic into stunning, AI-generated infographics using Google Gemini
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](CHANGELOG.md)
-[![CI](https://github.com/parobek/InfoGraphix-GenAI/workflows/CI/badge.svg)](https://github.com/parobek/InfoGraphix-GenAI/actions/workflows/ci.yml)
+<p align="center">
+  <img src="images/Infographix-GenAI_sketch.jpg" alt="InfoGraphix AI Concept Sketch" width="800">
+</p>
+
+[![Version](https://img.shields.io/badge/version-2.0.2-blue.svg)](CHANGELOG.md)
+[![CI](https://github.com/doublegate/InfoGraphix-GenAI/actions/workflows/ci.yml/badge.svg)](https://github.com/doublegate/InfoGraphix-GenAI/actions/workflows/ci.yml)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Gemini](https://img.shields.io/badge/Google_Gemini-3_Pro-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-
----
-
-## Table of Contents
-
-- [InfoGraphix AI](#infographix-ai)
-  - [Table of Contents](#table-of-contents)
-  - [Overview](#overview)
-  - [Features](#features)
-    - [AI-Powered Generation](#ai-powered-generation)
-    - [Customization Options](#customization-options)
-    - [Input Flexibility](#input-flexibility)
-    - [Productivity Features](#productivity-features)
-    - [Accessibility \& Internationalization](#accessibility--internationalization)
-    - [Code Quality \& Testing](#code-quality--testing)
-  - [Quick Start](#quick-start)
-    - [Prerequisites](#prerequisites)
-    - [Installation](#installation)
-    - [Google AI Studio Deployment](#google-ai-studio-deployment)
-  - [Usage](#usage)
-    - [Basic Generation](#basic-generation)
-    - [Advanced Options](#advanced-options)
-  - [Configuration](#configuration)
-    - [Environment Variables](#environment-variables)
-    - [API Key Requirements](#api-key-requirements)
-  - [Architecture](#architecture)
-    - [Technical Implementation](#technical-implementation)
-    - [AI Pipeline](#ai-pipeline)
-  - [Documentation](#documentation)
-  - [Roadmap](#roadmap)
-    - [Version Timeline](#version-timeline)
-    - [Recent Updates](#recent-updates)
-    - [Upcoming Features by Theme](#upcoming-features-by-theme)
-  - [Scripts](#scripts)
-  - [Tech Stack](#tech-stack)
-  - [Contributing](#contributing)
-  - [Security](#security)
-  - [License](#license)
-  - [Changelog](#changelog)
-  - [Acknowledgments](#acknowledgments)
 
 ---
 
@@ -68,14 +32,13 @@ InfoGraphix AI is a powerful web application that generates high-quality infogra
 - Export in multiple formats (PNG, PDF, SVG, ZIP)
 - Advanced version history with search and filtering
 
-**Latest Updates (v2.0.0):**
+**Latest Updates (v2.0.2):**
 
-- Comprehensive Testing Infrastructure - Vitest with React Testing Library, 70% coverage targets
-- Theme System - Centralized design tokens with 300+ system variables
-- Enhanced i18n - RTL support, number/date/relative time formatting, pluralization
-- Accessibility Testing - Automated WCAG 2.1 AA compliance checking
-- Developer Experience - TypeScript strict mode, ESLint strict rules, structured logging
-- Foundation for Test-Driven Development - Unit tests for services, hooks, and components
+- README Enhancement - Added concept sketch and architecture blueprint images
+- Documentation Reorganization - Technical docs, guides, and planning in organized subdirectories
+- Bug Fix - Resolved image rendering issue with React state synchronization
+- Bug Fix - Fixed history save functionality (migrated from localStorage to IndexedDB)
+- CI/CD - Fixed ESLint complexity warnings and improved workflow reliability
 
 ---
 
@@ -270,6 +233,12 @@ See [.env.local.example](.env.local.example) for detailed configuration instruct
 - Must be from a Google Cloud project with **billing enabled**
 - Free tier: 2 requests/minute (limited)
 - Paid tier: 60 requests/minute (recommended)
+
+---
+
+<p align="center">
+  <img src="images/Infographix-GenAI_blueprint.jpg" alt="InfoGraphix AI Architecture Blueprint" width="800">
+</p>
 
 ---
 
@@ -518,7 +487,9 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 | v1.7.0 | Technical Debt Remediation | 2025-12-12 | TypeScript strict mode, CI/CD, logger utility, ESLint |
 | v1.8.0 | Architecture Improvements | 2025-12-12 | IndexedDB migration, Context API, performance optimizations |
 | v1.9.0 | Code Quality | 2025-12-12 | Named constants, storage helpers, JSDoc, rate limiting |
-| v2.0.0 | Testing & Advanced Features | 2025-12-12 (Current) | Vitest infrastructure, theme system, enhanced i18n |
+| v2.0.0 | Testing & Advanced Features | 2025-12-12 | Vitest infrastructure, theme system, enhanced i18n |
+| v2.0.1 | Bug Fixes | 2025-12-13 | Image rendering fix, storage hook migration |
+| v2.0.2 | Documentation & Polish | 2025-12-13 (Current) | README images, docs reorganization, CI fixes |
 | v2.1.0 | Expanded Test Coverage | Q1 2026 | 70% test coverage, integration tests, property-based tests |
 | v2.2.0 | Platform & API | Q2 2026 | REST API, Python/JS SDKs, webhooks |
 | v2.3.0 | Ecosystem Integrations | Q3 2026 | Google Workspace, Notion, Figma, Slack |
@@ -526,6 +497,24 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 | v3.0.0 | Stable Release | Q1 2027 | Performance optimization, UI/UX polish |
 
 ### Recent Updates
+
+**v2.0.2 - Documentation & Polish (2025-12-13):**
+
+- README enhancement with concept sketch and architecture blueprint images
+- Fixed broken CI badge (corrected GitHub username in URL)
+- Removed Table of Contents for cleaner document structure
+- Documentation reorganization into technical/, guides/, and planning/ subdirectories
+- 26 files reorganized with preserved git history
+- 39 cross-references updated across codebase
+- All CI/CD workflows passing
+
+**v2.0.1 - Bug Fixes (2025-12-13):**
+
+- Fixed image rendering bug in useImageErrorHandling hook (React state sync issue)
+- Fixed history save functionality - migrated from deprecated localStorage hook to IndexedDB
+- Resolved ESLint complexity warnings with targeted disable comments
+- Fixed unused ESLint directive in test file
+- All 26 tests passing, CI workflow green
 
 **v2.0.0 - Testing & Advanced Features (2025-12-12):**
 

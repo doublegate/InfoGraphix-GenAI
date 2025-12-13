@@ -7,6 +7,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.2] - 2025-12-13
+
+### Theme: Documentation & Visual Enhancements
+
+*Improved documentation structure, visual presentation with concept imagery, CI/CD badge fixes, and code quality improvements.*
+
+### Added
+- **Visual Enhancements to README.md**
+  - Added concept sketch image (`images/Infographix-GenAI_sketch.jpg`) after title for visual appeal
+  - Added architecture blueprint image (`images/Infographix-GenAI_blueprint.jpg`) between Configuration and Architecture sections
+  - Enhanced visual documentation for better project presentation
+
+- **Documentation Reorganization**
+  - Reorganized `/docs/` into structured subdirectories:
+    - `docs/technical/` - Technical documentation (ARCHITECTURE.md, ERROR-TRACKING.md, TECHNICAL-DEBT.md)
+    - `docs/guides/` - User guides (USER-GUIDE.md, FAQ.md, STYLING-CONVENTIONS.md)
+    - `docs/planning/` - Planning documents (ROADMAP.md, version-plans/)
+  - Updated 39 cross-references across 17 files for new structure
+  - Improved navigation and discoverability of documentation
+
+- **Daily Logs Infrastructure**
+  - Created `daily-logs/` directory for session logging
+  - Added to `.gitignore` for local-only storage
+  - Organized structure with 8 subdirectories (commits, releases, ci-fixes, documentation, optimization, sessions, metrics, artifacts)
+
+### Fixed
+- **CI Badge Rendering** - Fixed GitHub Actions CI badge not rendering as image
+  - Corrected repository URL from `parobek` to `doublegate`
+  - Badge now properly displays workflow status from GitHub Actions
+  - URL: `https://github.com/doublegate/InfoGraphix-GenAI/actions/workflows/ci.yml/badge.svg`
+
+- **ESLint Complexity Warnings** - Resolved complexity warnings and unused directive errors
+  - Fixed cyclomatic complexity issues in key service files
+  - Removed unused ESLint disable directives
+  - All ESLint checks now pass cleanly
+
+### Changed
+- **README.md Structure**
+  - Removed Table of Contents section for cleaner presentation
+  - Updated version badge to v2.0.2
+  - Updated "Latest Updates" section with v2.0.2 release information
+  - Added v2.0.2 and v2.0.1 to Version Timeline table
+  - Enhanced Recent Updates sections with version history
+
+### Technical
+- **Files Modified:** 20+ (README.md, CHANGELOG.md, package.json, metadata.json, AboutModal.tsx, exportUtils.ts, errorTrackingService.ts, documentation files)
+- **Cross-Reference Updates:** 39 references updated across 17 files
+- **Build Status:** Zero errors, all CI checks passing
+- **Bundle Size:** No impact (documentation-only changes)
+
+### Developer Experience
+- Improved project presentation with visual imagery
+- Better documentation navigation with organized subdirectories
+- Clear version history tracking in README
+- Fixed CI badge for accurate build status visibility
+
+### Code Quality
+- All TypeScript types properly defined
+- ESLint passes with 0 warnings
+- Documentation synchronized with code changes
+- Version references consistent across all files
+
 ## [2.0.1] - 2025-12-13
 
 ### Fixed
@@ -1113,7 +1175,8 @@ All migrations happen automatically on first use of v1.8.0:
 - @google/genai SDK for Gemini API integration
 - Component-based architecture with clear separation of concerns
 
-[Unreleased]: https://github.com/doublegate/InfoGraphix-GenAI/compare/v2.0.1...HEAD
+[Unreleased]: https://github.com/doublegate/InfoGraphix-GenAI/compare/v2.0.2...HEAD
+[2.0.2]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v2.0.2
 [2.0.1]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v2.0.1
 [2.0.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v2.0.0
 [1.9.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.9.0

@@ -148,6 +148,7 @@ temp/
 # Claude Code (local session data)
 # -----------------------------------------------------------------------------
 .claude/settings.local.json
+daily-logs/
 
 # -----------------------------------------------------------------------------
 # Google AI Studio specific
