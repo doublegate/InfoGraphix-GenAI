@@ -39,12 +39,12 @@ const BatchManager: React.FC<BatchManagerProps> = ({ isOpen, onClose, onStartQue
 
   useEffect(() => {
     if (isOpen) {
-      refreshQueues();
+      void refreshQueues();
     }
   }, [isOpen]);
 
-  const refreshQueues = () => {
-    const loaded = loadQueues();
+  const refreshQueues = async () => {
+    const loaded = await loadQueues();
     setQueues(loaded);
   };
 
@@ -59,7 +59,7 @@ const BatchManager: React.FC<BatchManagerProps> = ({ isOpen, onClose, onStartQue
     delayBetweenItems?: number,
     stopOnError?: boolean
   ) => {
-    createQueue(
+    void createQueue(
       name,
       topics,
       style,
@@ -70,7 +70,7 @@ const BatchManager: React.FC<BatchManagerProps> = ({ isOpen, onClose, onStartQue
       delayBetweenItems,
       stopOnError
     );
-    refreshQueues();
+    void refreshQueues();
   };
 
   const handleStart = (queueId: string) => {
@@ -82,17 +82,17 @@ const BatchManager: React.FC<BatchManagerProps> = ({ isOpen, onClose, onStartQue
   };
 
   const handlePause = (queueId: string) => {
-    pauseQueue(queueId);
+    void pauseQueue(queueId);
     setRunningQueueId(null);
-    refreshQueues();
+    void refreshQueues();
   };
 
   const handleDelete = (queueId: string) => {
-    deleteQueue(queueId);
+    void deleteQueue(queueId);
     if (selectedQueue?.id === queueId) {
       setSelectedQueue(null);
     }
-    refreshQueues();
+    void refreshQueues();
   };
 
   const handleView = (queue: BatchQueue) => {
@@ -113,7 +113,7 @@ const BatchManager: React.FC<BatchManagerProps> = ({ isOpen, onClose, onStartQue
 
     // Dynamic import to only load export libraries when needed
     const { exportBatchAsZip } = await import('../../utils/exportUtils');
-    exportBatchAsZip(items, queue.name.replace(/[^a-z0-9_-]/gi, '_'));
+    void exportBatchAsZip(items, queue.name.replace(/[^a-z0-9_-]/gi, '_'));
   };
 
   if (!isOpen) return null;
@@ -133,7 +133,7 @@ const BatchManager: React.FC<BatchManagerProps> = ({ isOpen, onClose, onStartQue
 
             <div className="flex gap-2">
               <button
-                onClick={refreshQueues}
+                onClick={() => { void refreshQueues(); }}
                 className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
                 title="Refresh queues"
               >
@@ -174,7 +174,7 @@ const BatchManager: React.FC<BatchManagerProps> = ({ isOpen, onClose, onStartQue
               <div className="flex gap-2">
                 {selectedQueue.items.some((item) => item.result) && (
                   <button
-                    onClick={() => handleExportCompleted(selectedQueue)}
+                    onClick={() => { void handleExportCompleted(selectedQueue); }}
                     className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-500 text-white text-sm rounded-lg transition-colors"
                   >
                     <Download className="w-4 h-4" />

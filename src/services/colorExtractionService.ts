@@ -116,14 +116,21 @@ export async function extractColorsFromImage(
 
         const colors: ExtractedColor[] = [];
 
+        // Swatch type for node-vibrant
+        interface VibrantSwatch {
+          getHex(): string;
+          getRgb(): number[];
+          getPopulation(): number;
+        }
+
         // Extract colors in priority order
-        const swatches: Array<{ key: string; swatch: unknown }> = [
-          { key: 'Vibrant', swatch: palette.Vibrant },
-          { key: 'DarkVibrant', swatch: palette.DarkVibrant },
-          { key: 'LightVibrant', swatch: palette.LightVibrant },
-          { key: 'Muted', swatch: palette.Muted },
-          { key: 'DarkMuted', swatch: palette.DarkMuted },
-          { key: 'LightMuted', swatch: palette.LightMuted },
+        const swatches: Array<{ key: string; swatch: VibrantSwatch | null }> = [
+          { key: 'Vibrant', swatch: palette.Vibrant as VibrantSwatch | null },
+          { key: 'DarkVibrant', swatch: palette.DarkVibrant as VibrantSwatch | null },
+          { key: 'LightVibrant', swatch: palette.LightVibrant as VibrantSwatch | null },
+          { key: 'Muted', swatch: palette.Muted as VibrantSwatch | null },
+          { key: 'DarkMuted', swatch: palette.DarkMuted as VibrantSwatch | null },
+          { key: 'LightMuted', swatch: palette.LightMuted as VibrantSwatch | null },
         ];
 
         for (const { key, swatch } of swatches) {

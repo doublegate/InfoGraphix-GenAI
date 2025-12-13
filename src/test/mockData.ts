@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { vi } from 'vitest';
 import {
   InfographicRequest,
   AnalysisResult,
@@ -18,8 +20,6 @@ export const mockInfographicRequest: InfographicRequest = {
   aspectRatio: AspectRatio.Landscape,
   style: InfographicStyle.Modern,
   palette: ColorPalette.Vibrant,
-  fileContent: null,
-  githubFilters: null,
 };
 
 export const mockAnalysisResult: AnalysisResult = {
@@ -33,27 +33,23 @@ export const mockAnalysisResult: AnalysisResult = {
   visualPlan: 'A modern infographic design with vibrant colors.',
   webSources: [
     {
-      url: 'https://example.com/source1',
+      uri: 'https://example.com/source1',
       title: 'Source 1',
-      snippet: 'Relevant information from source 1',
     },
   ],
-  suggestions: {
-    styles: [InfographicStyle.Modern, InfographicStyle.Minimalist],
-    palettes: [ColorPalette.Vibrant, ColorPalette.Professional],
-    reasoning: 'Modern and minimalist styles work well for technical topics.',
-  },
 };
 
 export const mockSavedVersion: SavedVersion = {
   id: 'test-id-123',
   timestamp: Date.now(),
-  imageData: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
-  request: mockInfographicRequest,
-  analysis: mockAnalysisResult,
-  metadata: {
-    generationTime: 1500,
-    modelUsed: 'gemini-3-pro-image-preview',
+  topic: mockInfographicRequest.topic,
+  size: mockInfographicRequest.size,
+  aspectRatio: mockInfographicRequest.aspectRatio,
+  style: mockInfographicRequest.style,
+  palette: mockInfographicRequest.palette,
+  data: {
+    imageUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+    analysis: mockAnalysisResult,
   },
 };
 
@@ -64,7 +60,7 @@ export const mockTemplate = {
   description: 'A test template for business infographics',
   settings: {
     style: InfographicStyle.Modern,
-    palette: ColorPalette.Professional,
+    palette: ColorPalette.BlueWhite,
     aspectRatio: AspectRatio.Landscape,
     size: ImageSize.Resolution_2K,
   },

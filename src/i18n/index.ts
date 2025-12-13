@@ -14,7 +14,7 @@ export const RTL_LANGUAGES = ['ar', 'he', 'fa', 'ur'] as const;
  * Check if a language code is RTL
  */
 export const isRTL = (language: string): boolean => {
-  return RTL_LANGUAGES.includes(language as any);
+  return RTL_LANGUAGES.includes(language as typeof RTL_LANGUAGES[number]);
 };
 
 /**

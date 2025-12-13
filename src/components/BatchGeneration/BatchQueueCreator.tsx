@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { X, Plus, Trash2, Save, AlertCircle } from 'lucide-react';
+import { X, Save, AlertCircle } from 'lucide-react';
 import {
   InfographicStyle,
   ColorPalette,
@@ -42,7 +42,7 @@ const BatchQueueCreator: React.FC<BatchQueueCreatorProps> = ({
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>(AspectRatio.Portrait);
   const [delayBetweenItems, setDelayBetweenItems] = useState(2000);
   const [stopOnError, setStopOnError] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
+  const [_showFilters, _setShowFilters] = useState(false);
   const [language, setLanguage] = useState('');
   const [extensions, setExtensions] = useState('');
   const [date, setDate] = useState('');
@@ -92,7 +92,7 @@ const BatchQueueCreator: React.FC<BatchQueueCreatorProps> = ({
       setLanguage('');
       setExtensions('');
       setDate('');
-      setShowFilters(false);
+      _setShowFilters(false);
       onClose();
     }
   };

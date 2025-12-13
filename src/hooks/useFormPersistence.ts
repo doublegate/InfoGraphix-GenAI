@@ -179,7 +179,7 @@ export function useFormPersistence(): UseFormPersistenceReturn {
       }
     };
 
-    loadDraft();
+    void loadDraft();
   }, [ensureMigration]);
 
   /**
@@ -215,7 +215,7 @@ export function useFormPersistence(): UseFormPersistenceReturn {
 
     // Set new timeout
     saveTimeoutRef.current = setTimeout(() => {
-      saveToStorage(valuesToSave);
+      void saveToStorage(valuesToSave);
     }, DEBOUNCE_MS);
   }, [saveToStorage]);
 
@@ -252,13 +252,15 @@ export function useFormPersistence(): UseFormPersistenceReturn {
   /**
    * Clear saved form data
    */
-  const clearDraft = useCallback(async () => {
+  const clearDraft = useCallback(() => {
     setValuesState(DEFAULT_FORM_VALUES);
-    try {
-      await clearFormDraftFromDB();
-    } catch (e) {
-      log.error('Failed to clear form draft:', e);
-    }
+    void (async () => {
+      try {
+        await clearFormDraftFromDB();
+      } catch (e) {
+        log.error('Failed to clear form draft:', e);
+      }
+    })();
   }, []);
 
   /**

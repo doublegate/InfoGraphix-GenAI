@@ -84,7 +84,7 @@ const InfographicResult: React.FC<InfographicResultProps> = ({
       <div className="flex justify-between items-center bg-slate-800/50 p-4 rounded-xl border border-slate-700 backdrop-blur-sm shadow-lg">
         <h2 className="text-xl font-bold text-white">Generation Result</h2>
         <button
-          onClick={handleSaveClick}
+          onClick={() => { void handleSaveClick(); }}
           disabled={isSaved || isSaving}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
             isSaved 
@@ -222,7 +222,7 @@ const InfographicResult: React.FC<InfographicResultProps> = ({
 
                   {/* Download Button */}
                   <button
-                    onClick={handleDownload}
+                    onClick={() => { void handleDownload(); }}
                     disabled={isExporting}
                     className={`p-2 bg-white text-slate-900 rounded-lg hover:bg-blue-50 transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 self-end ${
                       isExporting ? 'opacity-60 cursor-wait' : ''

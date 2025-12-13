@@ -98,7 +98,7 @@ export function PaletteGenerator({ onPaletteGenerated, disabled = false }: Palet
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      handleFileUpload(file);
+      void handleFileUpload(file);
     }
   };
 
@@ -116,7 +116,7 @@ export function PaletteGenerator({ onPaletteGenerated, disabled = false }: Palet
 
     const file = e.dataTransfer.files[0];
     if (file) {
-      handleFileUpload(file);
+      void handleFileUpload(file);
     }
   };
 

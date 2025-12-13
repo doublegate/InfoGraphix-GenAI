@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import '@testing-library/jest-dom';
-import { expect, afterEach, vi } from 'vitest';
+import { afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 
 // Cleanup after each test
@@ -23,23 +24,21 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Mock IntersectionObserver
-global.IntersectionObserver = class IntersectionObserver {
-  constructor() {}
+(globalThis as any).IntersectionObserver = class IntersectionObserver {
   disconnect() {}
   observe() {}
   takeRecords() {
     return [];
   }
   unobserve() {}
-} as any;
+};
 
 // Mock ResizeObserver
-global.ResizeObserver = class ResizeObserver {
-  constructor() {}
+(globalThis as any).ResizeObserver = class ResizeObserver {
   disconnect() {}
   observe() {}
   unobserve() {}
-} as any;
+};
 
 // Mock IndexedDB
 const indexedDB = {
@@ -48,7 +47,7 @@ const indexedDB = {
   databases: vi.fn(),
 };
 
-global.indexedDB = indexedDB as any;
+(globalThis as any).indexedDB = indexedDB;
 
 // Mock localStorage
 const localStorageMock = {
@@ -60,16 +59,16 @@ const localStorageMock = {
   key: vi.fn(),
 };
 
-global.localStorage = localStorageMock as any;
+(globalThis as any).localStorage = localStorageMock;
 
 // Mock AI Studio window.aistudio object
-(global as any).aistudio = {
+(globalThis as any).aistudio = {
   hasSelectedApiKey: vi.fn().mockReturnValue(false),
   openSelectKey: vi.fn(),
 };
 
 // Suppress console errors in tests (optional - remove if you want to see them)
-global.console = {
+(globalThis as any).console = {
   ...console,
   error: vi.fn(),
   warn: vi.fn(),

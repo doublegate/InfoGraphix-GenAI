@@ -12,7 +12,7 @@ export default function LanguageSelector() {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleLanguageChange = (languageCode: string) => {
-    i18n.changeLanguage(languageCode);
+    void i18n.changeLanguage(languageCode);
     setIsOpen(false);
   };
 

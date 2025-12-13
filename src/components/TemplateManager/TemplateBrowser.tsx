@@ -9,7 +9,6 @@ import {
   Search,
   Upload,
   RotateCcw,
-  Download,
   FileText,
   X
 } from 'lucide-react';
@@ -51,7 +50,7 @@ const TemplateBrowser: React.FC<TemplateBrowserProps> = ({
   // Load templates on mount
   useEffect(() => {
     if (isOpen) {
-      refreshTemplates();
+      void refreshTemplates();
     }
   }, [isOpen]);
 
@@ -71,8 +70,8 @@ const TemplateBrowser: React.FC<TemplateBrowserProps> = ({
     }
   }, [searchQuery, templates]);
 
-  const refreshTemplates = () => {
-    const loaded = loadTemplates();
+  const refreshTemplates = async () => {
+    const loaded = await loadTemplates();
     setTemplates(loaded);
   };
 
@@ -98,7 +97,7 @@ const TemplateBrowser: React.FC<TemplateBrowserProps> = ({
     tags?: string[]
   ) => {
     if (editorMode === 'edit' && editingTemplate) {
-      updateTemplate(editingTemplate.id, {
+      void updateTemplate(editingTemplate.id, {
         name,
         style,
         palette,
@@ -108,22 +107,22 @@ const TemplateBrowser: React.FC<TemplateBrowserProps> = ({
         tags
       });
     } else {
-      createTemplate(name, style, palette, size, aspectRatio, description, tags);
+      void createTemplate(name, style, palette, size, aspectRatio, description, tags);
     }
-    refreshTemplates();
+    void refreshTemplates();
   };
 
   const handleDelete = (id: string) => {
-    deleteTemplate(id);
-    refreshTemplates();
+    void deleteTemplate(id);
+    void refreshTemplates();
   };
 
   const handleExport = (template: TemplateConfig) => {
-    exportTemplate(template);
+    void exportTemplate(template);
   };
 
   const handleDuplicate = (template: TemplateConfig) => {
-    createTemplate(
+    void createTemplate(
       `${template.name} (Copy)`,
       template.style,
       template.palette,
@@ -132,7 +131,7 @@ const TemplateBrowser: React.FC<TemplateBrowserProps> = ({
       template.description,
       template.tags
     );
-    refreshTemplates();
+    void refreshTemplates();
   };
 
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -141,7 +140,7 @@ const TemplateBrowser: React.FC<TemplateBrowserProps> = ({
 
     try {
       await importTemplate(file);
-      refreshTemplates();
+      void refreshTemplates();
       alert('Template imported successfully!');
     } catch (error) {
       alert(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -153,8 +152,8 @@ const TemplateBrowser: React.FC<TemplateBrowserProps> = ({
 
   const handleResetToDefaults = () => {
     if (confirm('Reset all templates to defaults? This will remove your custom templates.')) {
-      resetToDefaults();
-      refreshTemplates();
+      void resetToDefaults();
+      void refreshTemplates();
     }
   };
 
@@ -193,7 +192,7 @@ const TemplateBrowser: React.FC<TemplateBrowserProps> = ({
                     <input
                       type="file"
                       accept=".json"
-                      onChange={handleImport}
+                      onChange={(e) => { void handleImport(e); }}
                       className="hidden"
                     />
                   </label>

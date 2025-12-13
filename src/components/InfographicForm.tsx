@@ -12,14 +12,7 @@ import { useStyleSuggestions } from '../hooks/useStyleSuggestions';
 interface InfographicFormProps {
   onSubmit: (request: InfographicRequest) => void;
   isProcessing: boolean;
-  initialValues?: {
-    topic: string;
-    size: ImageSize;
-    aspectRatio: AspectRatio;
-    style: InfographicStyle;
-    palette: ColorPalette;
-    filters?: GithubFilters;
-  };
+  initialValues?: Partial<InfographicRequest>;
 }
 
 const STORAGE_KEY_RECENT = 'infographix_recent_topics';
@@ -141,16 +134,16 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
   // AI Suggestions State
   const [showAiSuggestions, setShowAiSuggestions] = useState(false);
   const [showPaletteGenerator, setShowPaletteGenerator] = useState(false);
-  const { suggestions, isLoading: suggestionsLoading, error: suggestionsError, getSuggestions, applySuggestion, clearSuggestions } = useStyleSuggestions();
+  const { suggestions, isLoading: suggestionsLoading, error: suggestionsError, getSuggestions, applySuggestion } = useStyleSuggestions();
 
-  // Load initial values if provided
+  // Load initial values if provided (handles Partial<InfographicRequest>)
   useEffect(() => {
     if (initialValues) {
-      setTopic(initialValues.topic);
-      setSize(initialValues.size);
-      setRatio(initialValues.aspectRatio);
-      setStyle(initialValues.style);
-      setPalette(initialValues.palette);
+      if (initialValues.topic !== undefined) setTopic(initialValues.topic);
+      if (initialValues.size !== undefined) setSize(initialValues.size);
+      if (initialValues.aspectRatio !== undefined) setRatio(initialValues.aspectRatio);
+      if (initialValues.style !== undefined) setStyle(initialValues.style);
+      if (initialValues.palette !== undefined) setPalette(initialValues.palette);
       if (initialValues.filters) {
         setLanguage(initialValues.filters.language || '');
         setExtensions(initialValues.filters.fileExtensions || '');
@@ -516,7 +509,7 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
                 currentStyle={style}
                 currentPalette={palette}
                 onApply={handleApplySuggestion}
-                onRequestSuggestions={handleRequestSuggestions}
+                onRequestSuggestions={() => { void handleRequestSuggestions(); }}
                 disabled={isProcessing || !topic.trim()}
               />
             </div>

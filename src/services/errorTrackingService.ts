@@ -25,7 +25,8 @@ export const initErrorTracking = (): void => {
   const environment = import.meta.env.MODE;
 
   if (!sentryDsn || environment === 'development') {
-    console.log('[Error Tracking] Disabled (no DSN or dev environment)');
+    // eslint-disable-next-line no-console
+    console.info('[Error Tracking] Disabled (no DSN or dev environment)');
     return;
   }
 
@@ -67,7 +68,8 @@ export const initErrorTracking = (): void => {
   });
   */
 
-  console.log('[Error Tracking] Stub mode - install @sentry/react to enable');
+  // eslint-disable-next-line no-console
+  console.info('[Error Tracking] Stub mode - install @sentry/react to enable');
 };
 
 /**
@@ -91,7 +93,8 @@ export const captureError = (error: Error, context?: Record<string, unknown>): v
 export const setUserContext = (userId: string, metadata?: Record<string, unknown>): void => {
   // TODO: Uncomment when Sentry is installed
   // Sentry.setUser({ id: userId, ...metadata });
-  console.debug('[Error Tracking] User context set (stub):', userId, metadata);
+  // eslint-disable-next-line no-console
+  console.info('[Error Tracking] User context set (stub):', userId, metadata);
 };
 
 /**
@@ -104,5 +107,6 @@ export const addBreadcrumb = (
 ): void => {
   // TODO: Uncomment when Sentry is installed
   // Sentry.addBreadcrumb({ message, category, data, level: 'info' });
-  console.debug('[Error Tracking] Breadcrumb (stub):', category, message, data);
+  // eslint-disable-next-line no-console
+  console.info('[Error Tracking] Breadcrumb (stub):', category, message, data);
 };

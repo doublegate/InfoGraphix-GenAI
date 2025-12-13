@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { log } from '../utils/logger';
 
 interface UseImageErrorHandlingOptions {

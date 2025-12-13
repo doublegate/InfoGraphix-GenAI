@@ -17,7 +17,7 @@ import { log } from '../utils/logger';
 import {
   getBatchQueue as getBatchQueueFromDB,
   saveBatchQueue as saveBatchQueueToDB,
-  deleteBatchItem as deleteBatchItemFromDB,
+  deleteBatchItem as _deleteBatchItemFromDB,
   updateBatchItem as updateBatchItemInDB,
   clearBatchQueue as clearBatchQueueFromDB,
   migrateBatchQueueFromLocalStorage,
@@ -67,7 +67,7 @@ const convertToQueue = (items: BatchQueueItem[]): BatchQueue => {
     createdAt: item.createdAt,
     startedAt: undefined,
     completedAt: item.completedAt,
-    result: item.result,
+    result: item.result as BatchItem['result'],
     error: item.error,
   }));
 
@@ -242,7 +242,7 @@ export const updateQueueItem = async (
 /**
  * Delete a queue (clears all items)
  */
-export const deleteQueue = async (id: string): Promise<boolean> => {
+export const deleteQueue = async (_id: string): Promise<boolean> => {
   await ensureMigration();
 
   try {

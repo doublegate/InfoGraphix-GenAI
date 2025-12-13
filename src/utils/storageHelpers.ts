@@ -347,7 +347,7 @@ export function checkLocalStorageQuota(): {
   try {
     let usedBytes = 0;
     for (const key in localStorage) {
-      if (localStorage.hasOwnProperty(key)) {
+      if (Object.hasOwn(localStorage, key)) {
         usedBytes += key.length + (localStorage.getItem(key)?.length || 0);
       }
     }

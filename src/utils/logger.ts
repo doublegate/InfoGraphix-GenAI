@@ -7,6 +7,8 @@
  * TD-004: Technical Debt Remediation
  */
 
+/* eslint-disable no-console */
+
 export enum LogLevel {
   DEBUG = 0,
   INFO = 1,

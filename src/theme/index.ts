@@ -18,4 +18,6 @@ export {
   type Theme,
 } from './tokens';
 
-export default theme from './tokens';
+// Default export for convenience
+import { theme as themeDefault } from './tokens';
+export default themeDefault;

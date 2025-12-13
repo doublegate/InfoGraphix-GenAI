@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { analyzeTopic, generateInfographicImage, getRateLimiter } from './geminiService';
 import { InfographicStyle, ColorPalette, ImageSize, AspectRatio } from '../types';
@@ -61,7 +62,7 @@ describe('geminiService', () => {
         }),
       }));
 
-      const result = await analyzeTopic('Test Topic');
+      const result = await analyzeTopic('Test Topic', InfographicStyle.Modern, ColorPalette.Vibrant);
 
       expect(result).toBeDefined();
       expect(result.title).toBe(mockAnalysisResult.title);
@@ -73,7 +74,7 @@ describe('geminiService', () => {
     it('should throw error when API key is missing', async () => {
       delete process.env.API_KEY;
 
-      await expect(analyzeTopic('Test Topic')).rejects.toThrow(
+      await expect(analyzeTopic('Test Topic', InfographicStyle.Modern, ColorPalette.Vibrant)).rejects.toThrow(
         'API Key not found'
       );
     });
@@ -88,7 +89,7 @@ describe('geminiService', () => {
         }),
       }));
 
-      await expect(analyzeTopic('Test Topic')).rejects.toThrow(
+      await expect(analyzeTopic('Test Topic', InfographicStyle.Modern, ColorPalette.Vibrant)).rejects.toThrow(
         /Rate limit exceeded/
       );
     });
@@ -103,7 +104,7 @@ describe('geminiService', () => {
         }),
       }));
 
-      await expect(analyzeTopic('Test Topic')).rejects.toThrow(
+      await expect(analyzeTopic('Test Topic', InfographicStyle.Modern, ColorPalette.Vibrant)).rejects.toThrow(
         /Permission denied/
       );
     });
@@ -118,7 +119,7 @@ describe('geminiService', () => {
         }),
       }));
 
-      await analyzeTopic('https://github.com/test/repo');
+      await analyzeTopic('https://github.com/test/repo', InfographicStyle.Modern, ColorPalette.Vibrant);
 
       expect(mockGenerateContent).toHaveBeenCalled();
       const callArgs = mockGenerateContent.mock.calls[0][0];
@@ -135,7 +136,7 @@ describe('geminiService', () => {
         }),
       }));
 
-      await analyzeTopic('https://example.com/1\nhttps://example.com/2');
+      await analyzeTopic('https://example.com/1\nhttps://example.com/2', InfographicStyle.Modern, ColorPalette.Vibrant);
 
       expect(mockGenerateContent).toHaveBeenCalled();
     });
@@ -152,13 +153,11 @@ describe('geminiService', () => {
 
       const filters = {
         language: 'TypeScript',
-        extensions: ['.ts', '.tsx'],
-        excludePaths: ['node_modules'],
-        startDate: '2024-01-01',
-        endDate: '2024-12-31',
+        fileExtensions: '.ts,.tsx',
+        lastUpdatedAfter: '2024-01-01',
       };
 
-      await analyzeTopic('https://github.com/test/repo', filters);
+      await analyzeTopic('https://github.com/test/repo', InfographicStyle.Modern, ColorPalette.Vibrant, filters);
 
       expect(mockGenerateContent).toHaveBeenCalled();
       const callArgs = mockGenerateContent.mock.calls[0][0];
@@ -178,11 +177,7 @@ describe('geminiService', () => {
       }));
 
       const result = await generateInfographicImage(
-        'Test title',
-        ['Point 1', 'Point 2'],
-        'Visual plan',
-        InfographicStyle.Modern,
-        ColorPalette.Vibrant,
+        'Visual plan for the infographic',
         ImageSize.Resolution_2K,
         AspectRatio.Landscape
       );
@@ -205,11 +200,7 @@ describe('geminiService', () => {
 
       await expect(
         generateInfographicImage(
-          'Test',
-          ['Point'],
-          'Plan',
-          InfographicStyle.Modern,
-          ColorPalette.Vibrant,
+          'Visual plan',
           ImageSize.Resolution_2K,
           AspectRatio.Landscape
         )
@@ -231,11 +222,7 @@ describe('geminiService', () => {
 
       await expect(
         generateInfographicImage(
-          'Test',
-          ['Point'],
-          'Plan',
-          InfographicStyle.Modern,
-          ColorPalette.Vibrant,
+          'Visual plan',
           ImageSize.Resolution_2K,
           AspectRatio.Landscape
         )

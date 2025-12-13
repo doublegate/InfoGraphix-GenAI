@@ -1,14 +1,11 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   openDatabase,
-  saveVersion,
-  getVersions,
-  deleteVersion,
-  clearVersions,
   compressImage,
-  getStorageQuota,
+  checkStorageQuota,
 } from './storageService';
-import { mockSavedVersion, mockIDBDatabase, mockIDBRequest } from '../test/mockData';
+import { mockIDBDatabase, mockIDBRequest } from '../test/mockData';
 
 // Mock IndexedDB
 const mockIndexedDB = {
@@ -19,7 +16,7 @@ const mockIndexedDB = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  global.indexedDB = mockIndexedDB as any;
+  (globalThis as any).indexedDB = mockIndexedDB;
 });
 
 describe('storageService', () => {
@@ -106,32 +103,36 @@ describe('storageService', () => {
     });
   });
 
-  describe('getStorageQuota', () => {
+  describe('checkStorageQuota', () => {
     it('should return storage quota information', async () => {
       const mockEstimate = {
-        usage: 1000000,
-        quota: 10000000,
+        usage: 1048576, // 1MB in bytes
+        quota: 10485760, // 10MB in bytes
       };
 
-      global.navigator.storage = {
-        estimate: vi.fn().mockResolvedValue(mockEstimate),
-      } as any;
+      (globalThis as any).navigator = {
+        storage: {
+          estimate: vi.fn().mockResolvedValue(mockEstimate),
+        },
+      };
 
-      const quota = await getStorageQuota();
+      const quota = await checkStorageQuota();
 
-      expect(quota.used).toBe(1000000);
-      expect(quota.total).toBe(10000000);
+      expect(quota.usedMB).toBe(1);
+      expect(quota.quotaMB).toBe(10);
       expect(quota.percentUsed).toBe(10);
+      expect(quota.warning).toBe(false);
     });
 
     it('should handle missing storage API', async () => {
-      delete (global.navigator as any).storage;
+      (globalThis as any).navigator = {};
 
-      const quota = await getStorageQuota();
+      const quota = await checkStorageQuota();
 
-      expect(quota.used).toBe(0);
-      expect(quota.total).toBe(0);
+      expect(quota.usedMB).toBe(0);
+      expect(quota.quotaMB).toBe(0);
       expect(quota.percentUsed).toBe(0);
+      expect(quota.warning).toBe(false);
     });
   });
 });

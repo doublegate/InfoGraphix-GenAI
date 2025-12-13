@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { log } from '../utils/logger';
 import { Key, Lock, ExternalLink } from 'lucide-react';
 
@@ -10,7 +10,7 @@ const ApiKeySelector: React.FC<ApiKeySelectorProps> = ({ onReady }) => {
   const [hasKey, setHasKey] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const checkKey = async () => {
+  const checkKey = useCallback(async () => {
     if (window.aistudio && window.aistudio.hasSelectedApiKey) {
       const selected = await window.aistudio.hasSelectedApiKey();
       setHasKey(selected);
@@ -27,7 +27,7 @@ const ApiKeySelector: React.FC<ApiKeySelectorProps> = ({ onReady }) => {
       }
     }
     setLoading(false);
-  };
+  }, [onReady]);
 
   useEffect(() => {
     void checkKey();

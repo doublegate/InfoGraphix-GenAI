@@ -11,14 +11,13 @@ import LanguageSelector from './components/LanguageSelector';
 import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import { TemplateBrowser } from './components/TemplateManager';
-import { AspectRatio, GeneratedInfographic, ImageSize, GithubFilters, SavedVersion, Feedback, InfographicStyle, ColorPalette, TemplateConfig, InfographicRequest } from './types';
+import { SavedVersion, Feedback, InfographicStyle, ColorPalette, TemplateConfig } from './types';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useAnnouncer } from './hooks/useAnnouncer';
 import { useHighContrast } from './hooks/useHighContrast';
 import { useModals } from './hooks/useModals';
 import { useSavedVersions } from './hooks/useSavedVersions';
 import { useGeneration } from './contexts';
-import { log } from './utils/logger';
 
 // Lazy load heavy modal components for better code splitting
 // Note: TemplateBrowser is statically imported (used by InfographicForm)
@@ -150,7 +149,7 @@ function App() {
     });
 
     setProcessingStep('complete');
-  }, []);
+  }, [setResult, setCurrentTopic, setCurrentSize, setCurrentRatio, setCurrentStyle, setCurrentPalette, setCurrentFilters, setCurrentFeedback, setIsCurrentResultSaved, setFormInitialValues, setProcessingStep]);
 
   const handleFeedback = useCallback((rating: number, comment: string) => {
     const feedback: Feedback = {
@@ -165,7 +164,7 @@ function App() {
     if (isCurrentResultSaved && result) {
        // Ideally we would update the saved version here, but keeping it simple for now
     }
-  }, [isCurrentResultSaved, result]);
+  }, [isCurrentResultSaved, result, setCurrentFeedback]);
 
   const handleApplyTemplate = useCallback((template: TemplateConfig) => {
     // Apply template to form
@@ -204,7 +203,7 @@ function App() {
   // Keyboard shortcuts
   useKeyboardShortcuts({
     onGenerate: handleKeyboardGenerate,
-    onSave: result && !isCurrentResultSaved ? handleSaveVersion : undefined,
+    onSave: result && !isCurrentResultSaved ? () => { void handleSaveVersion(); } : undefined,
     onDownload: result ? () => {
       const link = document.createElement('a');
       link.download = `infographic-${Date.now()}.png`;
@@ -348,7 +347,7 @@ function App() {
           ) : isApiKeyReady ? (
             <>
               <InfographicForm
-                onSubmit={handleGenerate}
+                onSubmit={(req) => { void handleGenerate(req); }}
                 isProcessing={processingStep !== 'idle' && processingStep !== 'complete'}
                 initialValues={formInitialValues}
               />
@@ -361,9 +360,9 @@ function App() {
 
               <ProcessingState step={processingStep} />
               
-              <InfographicResult 
-                data={result} 
-                onSave={handleSaveVersion}
+              <InfographicResult
+                data={result}
+                onSave={() => { void handleSaveVersion(); }}
                 onFeedback={handleFeedback}
                 currentFeedback={currentFeedback}
                 isSaved={isCurrentResultSaved}

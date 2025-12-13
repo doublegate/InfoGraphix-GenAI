@@ -4,34 +4,33 @@ import ProcessingState from './ProcessingState';
 
 describe('ProcessingState', () => {
   it('should render analyzing state', () => {
-    render(<ProcessingState processingStep="analyzing" />);
+    render(<ProcessingState step="analyzing" />);
 
-    expect(screen.getByText(/Analyzing topic/i)).toBeInTheDocument();
+    expect(screen.getByText(/Deep Analysis in Progress/i)).toBeInTheDocument();
   });
 
   it('should render generating state', () => {
-    render(<ProcessingState processingStep="generating" />);
+    render(<ProcessingState step="generating" />);
 
-    expect(screen.getByText(/Generating infographic/i)).toBeInTheDocument();
+    expect(screen.getByText(/Generating High-Fidelity Render/i)).toBeInTheDocument();
   });
 
   it('should not render when idle', () => {
-    const { container } = render(<ProcessingState processingStep="idle" />);
+    const { container } = render(<ProcessingState step="idle" />);
 
     expect(container.firstChild).toBeNull();
   });
 
   it('should not render when complete', () => {
-    const { container } = render(<ProcessingState processingStep="complete" />);
+    const { container } = render(<ProcessingState step="complete" />);
 
     expect(container.firstChild).toBeNull();
   });
 
-  it('should display thinking indicators', () => {
-    render(<ProcessingState processingStep="analyzing" />);
+  it('should display progress indicators', () => {
+    render(<ProcessingState step="analyzing" />);
 
-    // Check for loading spinner or animated elements
-    const spinner = screen.getByRole('status', { hidden: true });
-    expect(spinner).toBeInTheDocument();
+    // Check for the step indicator text
+    expect(screen.getByText(/Gemini 3 Pro is researching/i)).toBeInTheDocument();
   });
 });

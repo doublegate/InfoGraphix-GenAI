@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrainCircuit, Loader2, Sparkles } from 'lucide-react';
+import { BrainCircuit, Sparkles } from 'lucide-react';
 
 /**
  * Props for ProcessingState component.

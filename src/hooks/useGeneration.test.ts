@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { useGeneration } from './useGeneration';
-import { InfographicStyle, ColorPalette, ImageSize, AspectRatio } from '../types';
 
 // Mock geminiService
 vi.mock('../services/geminiService', () => ({
@@ -33,10 +32,9 @@ describe('useGeneration', () => {
     const { result } = renderHook(() => useGeneration());
 
     expect(result.current.processingStep).toBe('idle');
-    expect(result.current.currentRequest).toBeNull();
-    expect(result.current.analysisResult).toBeNull();
-    expect(result.current.generatedImage).toBeNull();
+    expect(result.current.result).toBeNull();
     expect(result.current.error).toBeNull();
+    expect(result.current.isProcessing).toBe(false);
   });
 
   it('should have generate function', () => {

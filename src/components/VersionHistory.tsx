@@ -454,19 +454,21 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
                         </h3>
                         {!isCompareMode && (
                           <button
-                            onClick={async (e) => {
+                            onClick={(e) => {
                               e.stopPropagation();
                               if (window.confirm("Delete this version?")) {
                                 setDeletingIds(prev => new Set(prev).add(version.id));
-                                try {
-                                  await onDeleteVersion(version.id);
-                                } finally {
-                                  setDeletingIds(prev => {
-                                    const next = new Set(prev);
-                                    next.delete(version.id);
-                                    return next;
-                                  });
-                                }
+                                void (async () => {
+                                  try {
+                                    onDeleteVersion(version.id);
+                                  } finally {
+                                    setDeletingIds(prev => {
+                                      const next = new Set(prev);
+                                      next.delete(version.id);
+                                      return next;
+                                    });
+                                  }
+                                })();
                               }
                             }}
                             disabled={deletingIds.has(version.id)}
