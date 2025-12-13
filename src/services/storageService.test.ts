@@ -13,12 +13,9 @@ import {
   migrateFromLocalStorage,
   updateVersionFeedback,
   saveTemplate,
-  getTemplates,
   getTemplateById,
-  updateTemplate,
   deleteTemplate,
   saveBatchQueue,
-  getBatchQueue,
   updateBatchItem,
   deleteBatchItem,
   clearBatchQueue,
@@ -28,7 +25,6 @@ import {
   migrateTemplatesFromLocalStorage,
   migrateBatchQueueFromLocalStorage,
   migrateFormDraftFromLocalStorage,
-  migrateAllFromLocalStorage,
   resetDatabaseForTesting,
   BatchQueueItem,
   FormDraft,
@@ -575,19 +571,15 @@ describe('Template CRUD operations', () => {
   const mockTemplate: TemplateConfig = {
     id: 'template-1',
     name: 'Test Template',
-    category: 'Business',
     description: 'A test template',
-    settings: {
-      style: InfographicStyle.Modern,
-      palette: ColorPalette.Vibrant,
-      aspectRatio: AspectRatio.Landscape,
-      size: ImageSize.Resolution_2K,
-    },
-    previewUrl: 'https://example.com/preview.png',
-    prompt: 'Test prompt',
+    style: InfographicStyle.Modern,
+    palette: ColorPalette.Vibrant,
+    size: ImageSize.Resolution_2K,
+    aspectRatio: AspectRatio.Landscape,
     tags: ['test'],
-    isCustom: true,
     createdAt: Date.now(),
+    updatedAt: Date.now(),
+    creator: 'test-user',
   };
 
   beforeEach(() => {
@@ -1023,7 +1015,7 @@ describe('updateVersionFeedback', () => {
     });
 
     await expect(
-      updateVersionFeedback('non-existent', { rating: 5, comment: 'Great!' })
+      updateVersionFeedback('non-existent', { id: 'fb1', rating: 5, comment: 'Great!', timestamp: Date.now() })
     ).rejects.toThrow('Version not found');
   });
 
@@ -1045,7 +1037,7 @@ describe('updateVersionFeedback', () => {
       return putRequest;
     });
 
-    await updateVersionFeedback('test-id-123', { rating: 5, comment: 'Great!' });
+    await updateVersionFeedback('test-id-123', { id: 'fb1', rating: 5, comment: 'Great!', timestamp: Date.now() });
 
     expect(mockStore.put).toHaveBeenCalled();
   });

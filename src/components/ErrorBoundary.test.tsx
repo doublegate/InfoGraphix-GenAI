@@ -158,15 +158,6 @@ describe('ErrorBoundary', () => {
     });
 
     it('should reset error state when Try Again is clicked', () => {
-      const TestComponent = () => {
-        const [shouldError, setShouldError] = vi.mocked(() => [true, vi.fn()])();
-        return (
-          <ErrorBoundary>
-            <ThrowError shouldThrow={shouldError} />
-          </ErrorBoundary>
-        );
-      };
-
       // Simplified test - just verify button works
       render(
         <ErrorBoundary>

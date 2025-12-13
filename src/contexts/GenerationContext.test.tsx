@@ -160,7 +160,7 @@ describe('GenerationContext', () => {
       // Set saved state
       act(() => {
         result.current.setIsCurrentResultSaved(true);
-        result.current.setCurrentFeedback({ rating: 5, comment: 'Great' });
+        result.current.setCurrentFeedback({ id: 'fb1', rating: 5, comment: 'Great', timestamp: Date.now() });
       });
 
       expect(result.current.isCurrentResultSaved).toBe(true);
@@ -223,7 +223,7 @@ describe('GenerationContext', () => {
         ...mockRequest,
         filters: {
           language: 'TypeScript',
-          extensions: ['.ts', '.tsx'],
+          fileExtensions: '.ts,.tsx',
         },
       };
 
@@ -257,7 +257,7 @@ describe('GenerationContext', () => {
 
     it('should update currentFeedback', () => {
       const { result } = renderHook(() => useGeneration(), { wrapper });
-      const feedback = { rating: 4, comment: 'Good' };
+      const feedback = { id: 'fb1', rating: 4, comment: 'Good', timestamp: Date.now() };
 
       act(() => {
         result.current.setCurrentFeedback(feedback);
@@ -385,9 +385,9 @@ describe('GenerationContext', () => {
 
       const { result } = renderHook(() => useGeneration(), { wrapper });
 
-      // Start generation
-      act(() => {
-        result.current.handleGenerate(mockRequest);
+      // Start generation (don't await the inner promise, just the act)
+      await act(async () => {
+        void result.current.handleGenerate(mockRequest);
       });
 
       // Wait for analyzing phase

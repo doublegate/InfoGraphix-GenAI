@@ -137,7 +137,7 @@ describe('useGeneration', () => {
         ...mockRequest,
         filters: {
           language: 'TypeScript',
-          extensions: ['.ts', '.tsx'],
+          fileExtensions: '.ts,.tsx',
         },
       };
 
@@ -411,9 +411,9 @@ describe('useGeneration', () => {
 
       const { result } = renderHook(() => useGeneration());
 
-      // Start generation but don't await
-      act(() => {
-        result.current.generate(mockRequest);
+      // Start generation (don't await the inner promise, just the act)
+      await act(async () => {
+        void result.current.generate(mockRequest);
       });
 
       // Wait for the analyzing phase

@@ -413,30 +413,16 @@ describe('LogLevel enum', () => {
 });
 
 describe('log convenience object', () => {
-  let consoleSpy: {
-    log: ReturnType<typeof vi.spyOn>;
-    warn: ReturnType<typeof vi.spyOn>;
-    error: ReturnType<typeof vi.spyOn>;
-    group: ReturnType<typeof vi.spyOn>;
-    groupCollapsed: ReturnType<typeof vi.spyOn>;
-    groupEnd: ReturnType<typeof vi.spyOn>;
-    time: ReturnType<typeof vi.spyOn>;
-    timeEnd: ReturnType<typeof vi.spyOn>;
-    table: ReturnType<typeof vi.spyOn>;
-  };
-
   beforeEach(() => {
-    consoleSpy = {
-      log: vi.spyOn(console, 'log').mockImplementation(() => {}),
-      warn: vi.spyOn(console, 'warn').mockImplementation(() => {}),
-      error: vi.spyOn(console, 'error').mockImplementation(() => {}),
-      group: vi.spyOn(console, 'group').mockImplementation(() => {}),
-      groupCollapsed: vi.spyOn(console, 'groupCollapsed').mockImplementation(() => {}),
-      groupEnd: vi.spyOn(console, 'groupEnd').mockImplementation(() => {}),
-      time: vi.spyOn(console, 'time').mockImplementation(() => {}),
-      timeEnd: vi.spyOn(console, 'timeEnd').mockImplementation(() => {}),
-      table: vi.spyOn(console, 'table').mockImplementation(() => {}),
-    };
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'group').mockImplementation(() => {});
+    vi.spyOn(console, 'groupCollapsed').mockImplementation(() => {});
+    vi.spyOn(console, 'groupEnd').mockImplementation(() => {});
+    vi.spyOn(console, 'time').mockImplementation(() => {});
+    vi.spyOn(console, 'timeEnd').mockImplementation(() => {});
+    vi.spyOn(console, 'table').mockImplementation(() => {});
   });
 
   afterEach(() => {

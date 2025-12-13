@@ -153,14 +153,14 @@ describe('FeedbackForm', () => {
 
   describe('existing feedback', () => {
     it('should show thank you message with existing feedback', () => {
-      const existingFeedback = { rating: 5, comment: 'Excellent!' };
+      const existingFeedback = { id: 'fb1', rating: 5, comment: 'Excellent!', timestamp: Date.now() };
       render(<FeedbackForm onSubmit={mockOnSubmit} existingFeedback={existingFeedback} />);
 
       expect(screen.getByText("Thanks for your feedback!")).toBeInTheDocument();
     });
 
     it('should display existing rating stars', () => {
-      const existingFeedback = { rating: 4, comment: 'Good' };
+      const existingFeedback = { id: 'fb2', rating: 4, comment: 'Good', timestamp: Date.now() };
       render(<FeedbackForm onSubmit={mockOnSubmit} existingFeedback={existingFeedback} />);
 
       // Should show thank you state with stars
@@ -168,14 +168,14 @@ describe('FeedbackForm', () => {
     });
 
     it('should display existing comment', () => {
-      const existingFeedback = { rating: 3, comment: 'Could be better' };
+      const existingFeedback = { id: 'fb3', rating: 3, comment: 'Could be better', timestamp: Date.now() };
       render(<FeedbackForm onSubmit={mockOnSubmit} existingFeedback={existingFeedback} />);
 
       expect(screen.getByText(/"Could be better"/)).toBeInTheDocument();
     });
 
     it('should not display comment quotes when comment is empty', () => {
-      const existingFeedback = { rating: 4, comment: '' };
+      const existingFeedback = { id: 'fb4', rating: 4, comment: '', timestamp: Date.now() };
       render(<FeedbackForm onSubmit={mockOnSubmit} existingFeedback={existingFeedback} />);
 
       expect(screen.getByText("Thanks for your feedback!")).toBeInTheDocument();
@@ -186,7 +186,7 @@ describe('FeedbackForm', () => {
     it('should initialize form with existing feedback values when not submitted', () => {
       // When existingFeedback exists, component shows thank you state
       // This test verifies the submitted state logic
-      const existingFeedback = { rating: 5, comment: 'Great!' };
+      const existingFeedback = { id: 'fb5', rating: 5, comment: 'Great!', timestamp: Date.now() };
       render(<FeedbackForm onSubmit={mockOnSubmit} existingFeedback={existingFeedback} />);
 
       // Component should show thank you state

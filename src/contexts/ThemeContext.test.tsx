@@ -139,7 +139,7 @@ describe('ThemeContext', () => {
       const { result } = renderHook(() => useTheme(), { wrapper });
 
       act(() => {
-        result.current.i18n.changeLanguage('es');
+        void result.current.i18n.changeLanguage('es');
       });
 
       expect(mockChangeLanguage).toHaveBeenCalledWith('es');

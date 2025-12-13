@@ -15,7 +15,6 @@ import {
   testConfig,
   strictConfig,
   lenientConfig,
-  wait,
 } from '../test/fixtures/rateLimiterFixtures';
 
 describe('RateLimiter', () => {
