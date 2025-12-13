@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { log } from '../utils/logger';
 import { Upload, Palette, Loader2, AlertCircle, CheckCircle, Trash2, Save } from 'lucide-react';
+import { handleImageLoadError } from '../utils/imageErrorUtils';
 import {
   extractColorsFromImage,
   generateColorSchemes,
@@ -279,6 +280,7 @@ export function PaletteGenerator({ onPaletteGenerated, disabled = false }: Palet
               src={uploadedImage}
               alt="Uploaded"
               className="w-full h-48 object-cover rounded-lg border border-gray-200"
+              onError={handleImageLoadError}
             />
           </div>
 

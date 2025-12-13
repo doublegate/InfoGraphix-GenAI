@@ -7,9 +7,18 @@ import {
   InfographicStyle,
 } from '../types';
 import { log } from '../utils/logger';
+import {
+  getFormDraft,
+  saveFormDraft,
+  clearFormDraft as clearFormDraftFromDB,
+  migrateFormDraftFromLocalStorage,
+  FormDraft,
+} from '../services/storageService';
 
-const STORAGE_KEY = 'infographix_form_draft';
 const DEBOUNCE_MS = 1000; // Save after 1 second of inactivity
+
+// Migration flag
+let migrationComplete = false;
 
 /**
  * Form values that can be persisted
@@ -97,12 +106,14 @@ interface UseFormPersistenceReturn {
 }
 
 /**
- * Custom hook for auto-saving form state to localStorage.
+ * Custom hook for auto-saving form state to IndexedDB.
+ * v1.8.0 TD-003: Migrated from localStorage to IndexedDB
  *
  * Features:
  * - Debounced auto-save (saves after 1 second of inactivity)
  * - Type-safe validation on load
  * - Graceful handling of corrupted data
+ * - Automatic migration from localStorage
  *
  * @example
  * ```tsx
@@ -119,34 +130,76 @@ export function useFormPersistence(): UseFormPersistenceReturn {
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   /**
-   * Load saved form data on mount
+   * Ensures migration from localStorage has been performed.
    */
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        const validated = validateFormValues(parsed);
+  const ensureMigration = useCallback(async () => {
+    if (migrationComplete) return;
 
-        if (validated) {
-          setValuesState(validated);
-        } else {
-          log.warn('Invalid form draft data, using defaults');
-        }
+    try {
+      const migrated = await migrateFormDraftFromLocalStorage();
+      if (migrated) {
+        log.info('Form draft migrated from localStorage to IndexedDB');
       }
+      migrationComplete = true;
     } catch (e) {
-      log.error('Failed to load form draft:', e);
-    } finally {
-      setIsLoaded(true);
+      log.error('Form draft migration error:', e);
+      migrationComplete = true;
     }
   }, []);
 
   /**
-   * Save form values to localStorage
+   * Load saved form data on mount
    */
-  const saveToStorage = useCallback((valuesToSave: FormValues) => {
+  useEffect(() => {
+    const loadDraft = async () => {
+      try {
+        await ensureMigration();
+
+        const draft = await getFormDraft();
+        if (draft) {
+          const formValues: FormValues = {
+            topic: draft.topic,
+            size: draft.size as ImageSize,
+            aspectRatio: draft.aspectRatio as AspectRatio,
+            style: draft.style as InfographicStyle,
+            palette: draft.palette as ColorPalette,
+            filters: draft.filters as GithubFilters | undefined,
+          };
+
+          const validated = validateFormValues(formValues);
+          if (validated) {
+            setValuesState(validated);
+          } else {
+            log.warn('Invalid form draft data, using defaults');
+          }
+        }
+      } catch (e) {
+        log.error('Failed to load form draft:', e);
+      } finally {
+        setIsLoaded(true);
+      }
+    };
+
+    loadDraft();
+  }, [ensureMigration]);
+
+  /**
+   * Save form values to IndexedDB
+   */
+  const saveToStorage = useCallback(async (valuesToSave: FormValues) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(valuesToSave));
+      const draft: FormDraft = {
+        id: 'current',
+        topic: valuesToSave.topic,
+        size: valuesToSave.size as string,
+        aspectRatio: valuesToSave.aspectRatio as string,
+        style: valuesToSave.style as string,
+        palette: valuesToSave.palette as string,
+        filters: valuesToSave.filters,
+        savedAt: Date.now(),
+      };
+
+      await saveFormDraft(draft);
     } catch (e) {
       log.error('Failed to save form draft:', e);
     }
@@ -200,10 +253,10 @@ export function useFormPersistence(): UseFormPersistenceReturn {
   /**
    * Clear saved form data
    */
-  const clearDraft = useCallback(() => {
+  const clearDraft = useCallback(async () => {
     setValuesState(DEFAULT_FORM_VALUES);
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      await clearFormDraftFromDB();
     } catch (e) {
       log.error('Failed to clear form draft:', e);
     }
@@ -216,7 +269,8 @@ export function useFormPersistence(): UseFormPersistenceReturn {
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
-    saveToStorage(values);
+    // Fire and forget - don't await
+    saveToStorage(values).catch(e => log.error('Failed to save form draft:', e));
   }, [values, saveToStorage]);
 
   return {

@@ -1,22 +1,51 @@
 /**
  * Template management service for custom style configurations.
- * v1.4.0 Feature: Custom Style Templates
+ * v1.8.0 TD-003: Migrated to IndexedDB storage
  */
 
 import { TemplateConfig, InfographicStyle, ColorPalette, ImageSize, AspectRatio } from '../types';
 import { log } from '../utils/logger';
+import {
+  getTemplates as getTemplatesFromDB,
+  saveTemplate as saveTemplateToDB,
+  deleteTemplate as deleteTemplateFromDB,
+  updateTemplate as updateTemplateInDB,
+  getTemplateById as getTemplateByIdFromDB,
+  migrateTemplatesFromLocalStorage,
+} from './storageService';
 
-const STORAGE_KEY = 'infographix_templates';
+// Migration flag to ensure we only migrate once
+let migrationComplete = false;
 
 /**
- * Load all templates from localStorage
+ * Ensures migration from localStorage has been performed.
+ * Called automatically on first use.
  */
-export const loadTemplates = (): TemplateConfig[] => {
+const ensureMigration = async (): Promise<void> => {
+  if (migrationComplete) return;
+
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return getDefaultTemplates();
-    const templates = JSON.parse(stored);
-    return Array.isArray(templates) ? templates : getDefaultTemplates();
+    const migrated = await migrateTemplatesFromLocalStorage();
+    if (migrated > 0) {
+      log.info(`Template migration: ${migrated} templates migrated to IndexedDB`);
+    }
+    migrationComplete = true;
+  } catch (e) {
+    log.error('Template migration error:', e);
+    migrationComplete = true; // Mark as complete even on error to avoid infinite retries
+  }
+};
+
+/**
+ * Load all templates from IndexedDB
+ */
+export const loadTemplates = async (): Promise<TemplateConfig[]> => {
+  await ensureMigration();
+
+  try {
+    const templates = await getTemplatesFromDB();
+    // If no templates exist, return defaults
+    return templates.length > 0 ? templates : getDefaultTemplates();
   } catch (error) {
     log.error('Failed to load templates:', error);
     return getDefaultTemplates();
@@ -24,21 +53,9 @@ export const loadTemplates = (): TemplateConfig[] => {
 };
 
 /**
- * Save templates to localStorage
- */
-const saveTemplates = (templates: TemplateConfig[]): void => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(templates));
-  } catch (error) {
-    log.error('Failed to save templates:', error);
-    throw new Error('Failed to save templates. Storage might be full.');
-  }
-};
-
-/**
  * Create a new template
  */
-export const createTemplate = (
+export const createTemplate = async (
   name: string,
   style: InfographicStyle,
   palette: ColorPalette,
@@ -46,7 +63,9 @@ export const createTemplate = (
   aspectRatio: AspectRatio,
   description?: string,
   tags?: string[]
-): TemplateConfig => {
+): Promise<TemplateConfig> => {
+  await ensureMigration();
+
   const template: TemplateConfig = {
     id: crypto.randomUUID(),
     name,
@@ -61,73 +80,75 @@ export const createTemplate = (
     creator: 'User'
   };
 
-  const templates = loadTemplates();
-  templates.unshift(template);
-  saveTemplates(templates);
-
+  await saveTemplateToDB(template);
   return template;
 };
 
 /**
  * Update an existing template
  */
-export const updateTemplate = (
+export const updateTemplate = async (
   id: string,
   updates: Partial<Omit<TemplateConfig, 'id' | 'createdAt'>>
-): TemplateConfig | null => {
-  const templates = loadTemplates();
-  const index = templates.findIndex(t => t.id === id);
+): Promise<TemplateConfig | null> => {
+  await ensureMigration();
 
-  if (index === -1) {
-    log.error(`Template with id ${id} not found`);
+  try {
+    const updated = await updateTemplateInDB(id, updates);
+    return updated;
+  } catch (error) {
+    log.error(`Failed to update template ${id}:`, error);
     return null;
   }
-
-  templates[index] = {
-    ...templates[index],
-    ...updates,
-    updatedAt: Date.now()
-  };
-
-  saveTemplates(templates);
-  return templates[index];
 };
 
 /**
  * Delete a template
  */
-export const deleteTemplate = (id: string): boolean => {
-  const templates = loadTemplates();
-  const filtered = templates.filter(t => t.id !== id);
+export const deleteTemplate = async (id: string): Promise<boolean> => {
+  await ensureMigration();
 
-  if (filtered.length === templates.length) {
-    return false; // Template not found
+  try {
+    return await deleteTemplateFromDB(id);
+  } catch (error) {
+    log.error(`Failed to delete template ${id}:`, error);
+    return false;
   }
-
-  saveTemplates(filtered);
-  return true;
 };
 
 /**
  * Get a single template by ID
  */
-export const getTemplate = (id: string): TemplateConfig | null => {
-  const templates = loadTemplates();
-  return templates.find(t => t.id === id) || null;
+export const getTemplate = async (id: string): Promise<TemplateConfig | null> => {
+  await ensureMigration();
+
+  try {
+    return await getTemplateByIdFromDB(id);
+  } catch (error) {
+    log.error(`Failed to get template ${id}:`, error);
+    return null;
+  }
 };
 
 /**
  * Search templates by name, description, or tags
  */
-export const searchTemplates = (query: string): TemplateConfig[] => {
-  const templates = loadTemplates();
-  const lowerQuery = query.toLowerCase();
+export const searchTemplates = async (query: string): Promise<TemplateConfig[]> => {
+  await ensureMigration();
 
-  return templates.filter(t =>
-    t.name.toLowerCase().includes(lowerQuery) ||
-    t.description?.toLowerCase().includes(lowerQuery) ||
-    t.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
-  );
+  try {
+    const templates = await getTemplatesFromDB();
+    const lowerQuery = query.toLowerCase();
+
+    return templates.filter(t =>
+      t.name.toLowerCase().includes(lowerQuery) ||
+      t.description?.toLowerCase().includes(lowerQuery) ||
+      t.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
+    );
+  } catch (error) {
+    log.error('Failed to search templates:', error);
+    return [];
+  }
 };
 
 /**
@@ -139,7 +160,7 @@ export const exportTemplate = (template: TemplateConfig): void => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `${template.name.replace(/[^a-z0-9_\-]/gi, '_')}_template.json`;
+  a.download = `${template.name.replace(/[^a-z0-9_-]/gi, '_')}_template.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -149,11 +170,13 @@ export const exportTemplate = (template: TemplateConfig): void => {
 /**
  * Import template from JSON file
  */
-export const importTemplate = (file: File): Promise<TemplateConfig> => {
+export const importTemplate = async (file: File): Promise<TemplateConfig> => {
+  await ensureMigration();
+
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const json = e.target?.result as string;
         const imported = JSON.parse(json) as TemplateConfig;
@@ -171,10 +194,7 @@ export const importTemplate = (file: File): Promise<TemplateConfig> => {
           updatedAt: Date.now()
         };
 
-        const templates = loadTemplates();
-        templates.unshift(template);
-        saveTemplates(templates);
-
+        await saveTemplateToDB(template);
         resolve(template);
       } catch (error) {
         reject(new Error('Failed to parse template file: ' + (error as Error).message));
@@ -955,13 +975,20 @@ export const getDefaultTemplates = (): TemplateConfig[] => {
  * Get templates by category
  * v1.6.0 Enhancement: Category-based filtering
  */
-export const getTemplatesByCategory = (category: string): TemplateConfig[] => {
-  const templates = loadTemplates();
-  const categoryLower = category.toLowerCase();
+export const getTemplatesByCategory = async (category: string): Promise<TemplateConfig[]> => {
+  await ensureMigration();
 
-  return templates.filter(t =>
-    t.tags?.some(tag => tag.toLowerCase() === categoryLower)
-  );
+  try {
+    const templates = await getTemplatesFromDB();
+    const categoryLower = category.toLowerCase();
+
+    return templates.filter(t =>
+      t.tags?.some(tag => tag.toLowerCase() === categoryLower)
+    );
+  } catch (error) {
+    log.error('Failed to get templates by category:', error);
+    return [];
+  }
 };
 
 /**
@@ -996,26 +1023,54 @@ export const getTemplateCategory = (template: TemplateConfig): string => {
 /**
  * Get template count by category
  */
-export const getTemplateCounts = (): Record<string, number> => {
-  const templates = loadTemplates();
-  const counts: Record<string, number> = {};
+export const getTemplateCounts = async (): Promise<Record<string, number>> => {
+  await ensureMigration();
 
-  TEMPLATE_CATEGORIES.forEach(category => {
-    counts[category] = 0;
-  });
-  counts['Other'] = 0;
+  try {
+    const templates = await getTemplatesFromDB();
+    const counts: Record<string, number> = {};
 
-  templates.forEach(template => {
-    const category = getTemplateCategory(template);
-    counts[category] = (counts[category] || 0) + 1;
-  });
+    TEMPLATE_CATEGORIES.forEach(category => {
+      counts[category] = 0;
+    });
+    counts['Other'] = 0;
 
-  return counts;
+    templates.forEach(template => {
+      const category = getTemplateCategory(template);
+      counts[category] = (counts[category] || 0) + 1;
+    });
+
+    return counts;
+  } catch (error) {
+    log.error('Failed to get template counts:', error);
+    return {};
+  }
 };
 
 /**
  * Reset templates to defaults
  */
-export const resetToDefaults = (): void => {
-  saveTemplates(getDefaultTemplates());
+export const resetToDefaults = async (): Promise<void> => {
+  await ensureMigration();
+
+  try {
+    // Get all existing templates
+    const existing = await getTemplatesFromDB();
+
+    // Delete all existing templates
+    for (const template of existing) {
+      await deleteTemplateFromDB(template.id);
+    }
+
+    // Add default templates
+    const defaults = getDefaultTemplates();
+    for (const template of defaults) {
+      await saveTemplateToDB(template);
+    }
+
+    log.info('Templates reset to defaults');
+  } catch (error) {
+    log.error('Failed to reset templates:', error);
+    throw new Error('Failed to reset templates to defaults');
+  }
 };

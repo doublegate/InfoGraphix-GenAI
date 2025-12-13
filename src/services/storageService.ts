@@ -1,21 +1,61 @@
 /**
- * IndexedDB Storage Service for InfoGraphix AI
+ * IndexedDB Storage Service for InfoGraphix AI - v1.8.0 TD-003
  *
- * Provides persistent storage for generated infographics with:
- * - Large image storage (bypasses localStorage 5MB limit)
- * - Image compression to reduce storage footprint
- * - Quota management with warnings
- * - Auto-cleanup of old versions
+ * Unified storage for all application data:
+ * - Versions: Generated infographics with large images
+ * - Templates: User-created style configurations
+ * - Batch Queues: Batch generation job queues
+ * - Form Drafts: Auto-saved form state
+ *
+ * Benefits over localStorage:
+ * - No 5MB limit (can store hundreds of MB)
+ * - Asynchronous operations (non-blocking)
+ * - Structured data with indexes
+ * - Automatic quota management
  */
 
-import { SavedVersion } from '../types';
+import { SavedVersion, TemplateConfig } from '../types';
 import { log } from '../utils/logger';
 
 const DB_NAME = 'infographix_db';
-const DB_VERSION = 1;
-const STORE_NAME = 'versions';
+const DB_VERSION = 2; // v1.8.0 TD-003: Added templates, batchQueues, formDrafts stores
+const STORE_VERSIONS = 'versions';
+const STORE_TEMPLATES = 'templates';
+const STORE_BATCH_QUEUES = 'batchQueues';
+const STORE_FORM_DRAFTS = 'formDrafts';
 const MAX_VERSIONS = 50; // Auto-cleanup threshold
 const QUOTA_WARNING_THRESHOLD = 0.8; // Warn at 80% capacity
+
+/**
+ * Batch queue item interface
+ */
+export interface BatchQueueItem {
+  id: string;
+  topic: string;
+  size: string;
+  aspectRatio: string;
+  style: string;
+  palette: string;
+  status: 'pending' | 'processing' | 'complete' | 'error';
+  createdAt: number;
+  completedAt?: number;
+  result?: unknown;
+  error?: string;
+}
+
+/**
+ * Form draft interface
+ */
+export interface FormDraft {
+  id: 'current'; // Single draft entry
+  topic: string;
+  size: string;
+  aspectRatio: string;
+  style: string;
+  palette: string;
+  filters?: unknown;
+  savedAt: number;
+}
 
 /**
  * Database connection singleton
@@ -47,12 +87,35 @@ export const openDatabase = (): Promise<IDBDatabase> => {
 
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
+      const oldVersion = event.oldVersion;
 
-      // Create versions store with indexes
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-        store.createIndex('timestamp', 'timestamp', { unique: false });
-        store.createIndex('topic', 'topic', { unique: false });
+      // v1: Create versions store
+      if (oldVersion < 1 && !db.objectStoreNames.contains(STORE_VERSIONS)) {
+        const versionsStore = db.createObjectStore(STORE_VERSIONS, { keyPath: 'id' });
+        versionsStore.createIndex('timestamp', 'timestamp', { unique: false });
+        versionsStore.createIndex('topic', 'topic', { unique: false });
+      }
+
+      // v2: Create templates, batchQueues, formDrafts stores (v1.8.0 TD-003)
+      if (oldVersion < 2) {
+        // Templates store
+        if (!db.objectStoreNames.contains(STORE_TEMPLATES)) {
+          const templatesStore = db.createObjectStore(STORE_TEMPLATES, { keyPath: 'id' });
+          templatesStore.createIndex('name', 'name', { unique: false });
+          templatesStore.createIndex('createdAt', 'createdAt', { unique: false });
+        }
+
+        // Batch queues store
+        if (!db.objectStoreNames.contains(STORE_BATCH_QUEUES)) {
+          const batchStore = db.createObjectStore(STORE_BATCH_QUEUES, { keyPath: 'id' });
+          batchStore.createIndex('status', 'status', { unique: false });
+          batchStore.createIndex('createdAt', 'createdAt', { unique: false });
+        }
+
+        // Form drafts store (single entry)
+        if (!db.objectStoreNames.contains(STORE_FORM_DRAFTS)) {
+          db.createObjectStore(STORE_FORM_DRAFTS, { keyPath: 'id' });
+        }
       }
     };
   });
@@ -141,8 +204,8 @@ export const saveVersion = async (
   }
 
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
+    const transaction = db.transaction([STORE_VERSIONS], 'readwrite');
+    const store = transaction.objectStore(STORE_VERSIONS);
 
     const request = store.put(versionToSave);
 
@@ -166,8 +229,8 @@ export const getAllVersions = async (): Promise<SavedVersion[]> => {
   const db = await openDatabase();
 
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readonly');
-    const store = transaction.objectStore(STORE_NAME);
+    const transaction = db.transaction([STORE_VERSIONS], 'readonly');
+    const store = transaction.objectStore(STORE_VERSIONS);
     const index = store.index('timestamp');
 
     const request = index.openCursor(null, 'prev'); // Descending order
@@ -197,8 +260,8 @@ export const getVersion = async (id: string): Promise<SavedVersion | null> => {
   const db = await openDatabase();
 
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readonly');
-    const store = transaction.objectStore(STORE_NAME);
+    const transaction = db.transaction([STORE_VERSIONS], 'readonly');
+    const store = transaction.objectStore(STORE_VERSIONS);
     const request = store.get(id);
 
     request.onsuccess = () => {
@@ -218,8 +281,8 @@ export const deleteVersion = async (id: string): Promise<void> => {
   const db = await openDatabase();
 
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
+    const transaction = db.transaction([STORE_VERSIONS], 'readwrite');
+    const store = transaction.objectStore(STORE_VERSIONS);
     const request = store.delete(id);
 
     request.onsuccess = () => resolve();
@@ -234,8 +297,8 @@ export const clearAllVersions = async (): Promise<void> => {
   const db = await openDatabase();
 
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
+    const transaction = db.transaction([STORE_VERSIONS], 'readwrite');
+    const store = transaction.objectStore(STORE_VERSIONS);
     const request = store.clear();
 
     request.onsuccess = () => resolve();
@@ -352,4 +415,441 @@ export const updateVersionFeedback = async (
   };
 
   await saveVersion(updated, false); // Don't re-compress
+};
+
+// ============================================================================
+// TEMPLATE CRUD OPERATIONS (v1.8.0 TD-003)
+// ============================================================================
+
+/**
+ * Saves a template to IndexedDB.
+ * Returns the template ID.
+ */
+export const saveTemplate = async (template: TemplateConfig): Promise<string> => {
+  const db = await openDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_TEMPLATES], 'readwrite');
+    const store = transaction.objectStore(STORE_TEMPLATES);
+    const request = store.put(template);
+
+    request.onsuccess = () => resolve(template.id);
+    request.onerror = () => {
+      log.error('Failed to save template:', request.error);
+      reject(new Error('Failed to save template.'));
+    };
+  });
+};
+
+/**
+ * Retrieves all templates, sorted by createdAt (newest first).
+ */
+export const getTemplates = async (): Promise<TemplateConfig[]> => {
+  const db = await openDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_TEMPLATES], 'readonly');
+    const store = transaction.objectStore(STORE_TEMPLATES);
+    const index = store.index('createdAt');
+    const request = index.openCursor(null, 'prev');
+    const templates: TemplateConfig[] = [];
+
+    request.onsuccess = (event) => {
+      const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
+      if (cursor) {
+        templates.push(cursor.value);
+        cursor.continue();
+      } else {
+        resolve(templates);
+      }
+    };
+
+    request.onerror = () => {
+      log.error('Failed to load templates:', request.error);
+      reject(new Error('Failed to load templates.'));
+    };
+  });
+};
+
+/**
+ * Retrieves a single template by ID.
+ */
+export const getTemplateById = async (id: string): Promise<TemplateConfig | null> => {
+  const db = await openDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_TEMPLATES], 'readonly');
+    const store = transaction.objectStore(STORE_TEMPLATES);
+    const request = store.get(id);
+
+    request.onsuccess = () => resolve(request.result || null);
+    request.onerror = () => reject(new Error('Failed to retrieve template.'));
+  });
+};
+
+/**
+ * Updates an existing template.
+ * Returns the updated template.
+ */
+export const updateTemplate = async (
+  id: string,
+  updates: Partial<TemplateConfig>
+): Promise<TemplateConfig> => {
+  const existing = await getTemplateById(id);
+  if (!existing) {
+    throw new Error('Template not found');
+  }
+
+  const updated: TemplateConfig = {
+    ...existing,
+    ...updates,
+    id, // Ensure ID doesn't change
+    updatedAt: Date.now(),
+  };
+
+  await saveTemplate(updated);
+  return updated;
+};
+
+/**
+ * Deletes a template by ID.
+ */
+export const deleteTemplate = async (id: string): Promise<boolean> => {
+  const db = await openDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_TEMPLATES], 'readwrite');
+    const store = transaction.objectStore(STORE_TEMPLATES);
+    const request = store.delete(id);
+
+    request.onsuccess = () => resolve(true);
+    request.onerror = () => {
+      log.error('Failed to delete template:', request.error);
+      reject(new Error('Failed to delete template.'));
+    };
+  });
+};
+
+// ============================================================================
+// BATCH QUEUE CRUD OPERATIONS (v1.8.0 TD-003)
+// ============================================================================
+
+/**
+ * Saves a batch queue item to IndexedDB.
+ * Returns the item ID.
+ */
+export const saveBatchQueue = async (item: BatchQueueItem): Promise<string> => {
+  const db = await openDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_BATCH_QUEUES], 'readwrite');
+    const store = transaction.objectStore(STORE_BATCH_QUEUES);
+    const request = store.put(item);
+
+    request.onsuccess = () => resolve(item.id);
+    request.onerror = () => {
+      log.error('Failed to save batch item:', request.error);
+      reject(new Error('Failed to save batch item.'));
+    };
+  });
+};
+
+/**
+ * Retrieves all batch queue items, sorted by createdAt (newest first).
+ */
+export const getBatchQueue = async (): Promise<BatchQueueItem[]> => {
+  const db = await openDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_BATCH_QUEUES], 'readonly');
+    const store = transaction.objectStore(STORE_BATCH_QUEUES);
+    const index = store.index('createdAt');
+    const request = index.openCursor(null, 'prev');
+    const items: BatchQueueItem[] = [];
+
+    request.onsuccess = (event) => {
+      const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
+      if (cursor) {
+        items.push(cursor.value);
+        cursor.continue();
+      } else {
+        resolve(items);
+      }
+    };
+
+    request.onerror = () => {
+      log.error('Failed to load batch queue:', request.error);
+      reject(new Error('Failed to load batch queue.'));
+    };
+  });
+};
+
+/**
+ * Updates a batch queue item.
+ */
+export const updateBatchItem = async (
+  id: string,
+  updates: Partial<BatchQueueItem>
+): Promise<void> => {
+  const db = await openDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_BATCH_QUEUES], 'readwrite');
+    const store = transaction.objectStore(STORE_BATCH_QUEUES);
+    const getRequest = store.get(id);
+
+    getRequest.onsuccess = () => {
+      const existing = getRequest.result;
+      if (!existing) {
+        reject(new Error('Batch item not found'));
+        return;
+      }
+
+      const updated = { ...existing, ...updates, id };
+      const putRequest = store.put(updated);
+
+      putRequest.onsuccess = () => resolve();
+      putRequest.onerror = () => {
+        log.error('Failed to update batch item:', putRequest.error);
+        reject(new Error('Failed to update batch item.'));
+      };
+    };
+
+    getRequest.onerror = () => {
+      reject(new Error('Failed to retrieve batch item.'));
+    };
+  });
+};
+
+/**
+ * Deletes a batch queue item by ID.
+ */
+export const deleteBatchItem = async (id: string): Promise<boolean> => {
+  const db = await openDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_BATCH_QUEUES], 'readwrite');
+    const store = transaction.objectStore(STORE_BATCH_QUEUES);
+    const request = store.delete(id);
+
+    request.onsuccess = () => resolve(true);
+    request.onerror = () => {
+      log.error('Failed to delete batch item:', request.error);
+      reject(new Error('Failed to delete batch item.'));
+    };
+  });
+};
+
+/**
+ * Clears all batch queue items.
+ */
+export const clearBatchQueue = async (): Promise<void> => {
+  const db = await openDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_BATCH_QUEUES], 'readwrite');
+    const store = transaction.objectStore(STORE_BATCH_QUEUES);
+    const request = store.clear();
+
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(new Error('Failed to clear batch queue.'));
+  });
+};
+
+// ============================================================================
+// FORM DRAFT OPERATIONS (v1.8.0 TD-003)
+// ============================================================================
+
+/**
+ * Saves form draft to IndexedDB (single entry with id='current').
+ */
+export const saveFormDraft = async (draft: FormDraft): Promise<void> => {
+  const db = await openDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_FORM_DRAFTS], 'readwrite');
+    const store = transaction.objectStore(STORE_FORM_DRAFTS);
+    const request = store.put({ ...draft, id: 'current' });
+
+    request.onsuccess = () => resolve();
+    request.onerror = () => {
+      log.error('Failed to save form draft:', request.error);
+      reject(new Error('Failed to save form draft.'));
+    };
+  });
+};
+
+/**
+ * Retrieves the current form draft.
+ */
+export const getFormDraft = async (): Promise<FormDraft | null> => {
+  const db = await openDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_FORM_DRAFTS], 'readonly');
+    const store = transaction.objectStore(STORE_FORM_DRAFTS);
+    const request = store.get('current');
+
+    request.onsuccess = () => resolve(request.result || null);
+    request.onerror = () => reject(new Error('Failed to retrieve form draft.'));
+  });
+};
+
+/**
+ * Clears the current form draft.
+ */
+export const clearFormDraft = async (): Promise<void> => {
+  const db = await openDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_FORM_DRAFTS], 'readwrite');
+    const store = transaction.objectStore(STORE_FORM_DRAFTS);
+    const request = store.delete('current');
+
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(new Error('Failed to clear form draft.'));
+  });
+};
+
+// ============================================================================
+// MIGRATION UTILITIES (v1.8.0 TD-003)
+// ============================================================================
+
+/**
+ * Migrates templates from localStorage to IndexedDB.
+ * Returns count of migrated templates.
+ */
+export const migrateTemplatesFromLocalStorage = async (): Promise<number> => {
+  const stored = localStorage.getItem('infographix_templates');
+  if (!stored) return 0;
+
+  try {
+    const templates: TemplateConfig[] = JSON.parse(stored);
+    if (!Array.isArray(templates)) return 0;
+
+    let migrated = 0;
+    for (const template of templates) {
+      try {
+        await saveTemplate(template);
+        migrated++;
+      } catch (e) {
+        log.error('Failed to migrate template:', e);
+      }
+    }
+
+    if (migrated > 0) {
+      localStorage.removeItem('infographix_templates');
+      log.info(`Migrated ${migrated} templates from localStorage to IndexedDB`);
+    }
+
+    return migrated;
+  } catch (e) {
+    log.error('Template migration failed:', e);
+    return 0;
+  }
+};
+
+/**
+ * Migrates batch queue from localStorage to IndexedDB.
+ * Returns count of migrated items.
+ */
+export const migrateBatchQueueFromLocalStorage = async (): Promise<number> => {
+  const stored = localStorage.getItem('infographix_batch_queues');
+  if (!stored) return 0;
+
+  try {
+    const queues = JSON.parse(stored);
+    if (!Array.isArray(queues)) return 0;
+
+    let migrated = 0;
+    // Flatten queue items from all queues
+    for (const queue of queues) {
+      if (queue.items && Array.isArray(queue.items)) {
+        for (const item of queue.items) {
+          try {
+            const batchItem: BatchQueueItem = {
+              id: item.id || crypto.randomUUID(),
+              topic: item.topic,
+              size: item.size,
+              aspectRatio: item.aspectRatio,
+              style: item.style,
+              palette: item.palette,
+              status: item.status || 'pending',
+              createdAt: item.createdAt || Date.now(),
+              completedAt: item.completedAt,
+              result: item.result,
+              error: item.error,
+            };
+            await saveBatchQueue(batchItem);
+            migrated++;
+          } catch (e) {
+            log.error('Failed to migrate batch item:', e);
+          }
+        }
+      }
+    }
+
+    if (migrated > 0) {
+      localStorage.removeItem('infographix_batch_queues');
+      log.info(`Migrated ${migrated} batch items from localStorage to IndexedDB`);
+    }
+
+    return migrated;
+  } catch (e) {
+    log.error('Batch queue migration failed:', e);
+    return 0;
+  }
+};
+
+/**
+ * Migrates form draft from localStorage to IndexedDB.
+ * Returns true if migration succeeded.
+ */
+export const migrateFormDraftFromLocalStorage = async (): Promise<boolean> => {
+  const stored = localStorage.getItem('infographix_form_draft');
+  if (!stored) return false;
+
+  try {
+    const draft = JSON.parse(stored);
+    const formDraft: FormDraft = {
+      id: 'current',
+      topic: draft.topic || '',
+      size: draft.size,
+      aspectRatio: draft.aspectRatio,
+      style: draft.style,
+      palette: draft.palette,
+      filters: draft.filters,
+      savedAt: Date.now(),
+    };
+
+    await saveFormDraft(formDraft);
+    localStorage.removeItem('infographix_form_draft');
+    log.info('Migrated form draft from localStorage to IndexedDB');
+    return true;
+  } catch (e) {
+    log.error('Form draft migration failed:', e);
+    return false;
+  }
+};
+
+/**
+ * Migrates all data from localStorage to IndexedDB.
+ * Returns migration statistics.
+ */
+export const migrateAllFromLocalStorage = async (): Promise<{
+  versions: number;
+  templates: number;
+  batches: number;
+  formDraft: boolean;
+}> => {
+  const [versions, templates, batches, formDraft] = await Promise.all([
+    migrateFromLocalStorage(), // Already exists for versions
+    migrateTemplatesFromLocalStorage(),
+    migrateBatchQueueFromLocalStorage(),
+    migrateFormDraftFromLocalStorage(),
+  ]);
+
+  const stats = { versions, templates, batches, formDraft };
+  log.info('Migration complete:', stats);
+  return stats;
 };

@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { History, Clock, ArrowRight, Trash2, Calendar, Palette, Paintbrush, ArrowLeftRight, CheckSquare, Square, Search, X, ArrowDownAZ, ArrowUpAZ, CalendarClock, CalendarArrowDown, Filter, ChevronLeft, ChevronRight, BarChart3 } from 'lucide-react';
+import { History, Clock, ArrowRight, Trash2, Palette, Paintbrush, ArrowLeftRight, CheckSquare, Square, Search, X, ArrowDownAZ, ArrowUpAZ, CalendarClock, CalendarArrowDown, Filter, ChevronLeft, ChevronRight, BarChart3 } from 'lucide-react';
 import { SavedVersion, ImageSize, AspectRatio, InfographicStyle, ColorPalette } from '../types';
 import VersionComparison from './VersionComparison';
+import { handleImageLoadError } from '../utils/imageErrorUtils';
 
 interface VersionHistoryProps {
   isOpen: boolean;
@@ -523,7 +524,13 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
 
                       <div className="flex gap-3">
                         <div className="w-16 h-16 bg-slate-900 rounded-lg overflow-hidden shrink-0 border border-slate-700">
-                          <img src={version.data.imageUrl} alt={`Thumbnail of ${version.data.analysis.title}`} className="w-full h-full object-cover" />
+                          <img
+                            src={version.data.imageUrl}
+                            alt={`Thumbnail of ${version.data.analysis.title}`}
+                            className="w-full h-full object-cover"
+                            onError={handleImageLoadError}
+                            loading="lazy"
+                          />
                         </div>
                         <div className="flex-1 flex flex-col justify-center">
                             <p className="text-xs text-slate-500 line-clamp-2 mb-2">{version.data.analysis.summary}</p>

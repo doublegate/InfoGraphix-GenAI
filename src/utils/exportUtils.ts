@@ -203,7 +203,7 @@ export const exportInfographic = async (
   multiResImages?: Array<{ size: ImageSize; dataURL: string }>
 ): Promise<void> => {
   // Sanitize filename
-  const safeFilename = filename.replace(/[^a-z0-9_\-]/gi, '_');
+  const safeFilename = filename.replace(/[^a-z0-9_-]/gi, '_');
 
   switch (format) {
     case ExportFormat.PNG:
@@ -238,7 +238,7 @@ export const exportBatchAsZip = async (
   // Add each infographic to the ZIP
   for (const { filename, dataURL } of items) {
     const blob = dataURLtoBlob(dataURL);
-    const safeFilename = filename.replace(/[^a-z0-9_\-]/gi, '_');
+    const safeFilename = filename.replace(/[^a-z0-9_-]/gi, '_');
     zip.file(`${safeFilename}.png`, blob);
   }
 

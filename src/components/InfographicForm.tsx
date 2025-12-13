@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { log } from '../utils/logger';
 import ReactDOM from 'react-dom';
 import { Search, Monitor, Image as ImageIcon, FileText, Cpu, ChevronDown, ChevronUp, Filter, Palette, Paintbrush, RefreshCw, Upload, X, Sparkles, List } from 'lucide-react';
@@ -193,7 +193,8 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
     return () => clearTimeout(timer);
   }, [topic, size, ratio, style, palette, language, extensions, date]);
 
-  const restoreDraft = () => {
+  // v1.8.0 - TD-015: Memoize event handlers
+  const restoreDraft = useCallback(() => {
     try {
       const storedDraft = localStorage.getItem(STORAGE_KEY_DRAFT);
       if (storedDraft) {
@@ -206,15 +207,15 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
         setLanguage(data.language || '');
         setExtensions(data.extensions || '');
         setDate(data.date || '');
-        setHasDraft(false); 
+        setHasDraft(false);
         if (data.language || data.extensions || data.date) setShowFilters(true);
       }
     } catch (e) {
       log.error("Failed to restore draft", e);
     }
-  };
+  }, []);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (!file.name.endsWith('.md')) {
@@ -236,50 +237,50 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
       };
       reader.readAsText(file);
     }
-  };
+  }, []);
 
-  const clearFile = () => {
+  const clearFile = useCallback(() => {
     setFileName(null);
     setFileContent(null);
     setTopic('');
-  };
+  }, []);
 
-  const handleTemplateSelect = (template: TemplateConfig) => {
+  const handleTemplateSelect = useCallback((template: TemplateConfig) => {
     setStyle(template.style);
     setPalette(template.palette);
     setSize(template.size);
     setRatio(template.aspectRatio);
     setActiveTemplate(template);
     setShowTemplateBrowser(false);
-  };
+  }, []);
 
-  const clearTemplate = () => {
+  const clearTemplate = useCallback(() => {
     setActiveTemplate(null);
-  };
+  }, []);
 
-  const handleRequestSuggestions = async () => {
+  const handleRequestSuggestions = useCallback(async () => {
     if (topic.trim()) {
       await getSuggestions(topic, undefined, fileContent || undefined);
     }
-  };
+  }, [topic, fileContent, getSuggestions]);
 
-  const handleApplySuggestion = (styleIndex: number, paletteIndex: number) => {
+  const handleApplySuggestion = useCallback((styleIndex: number, paletteIndex: number) => {
     const result = applySuggestion(styleIndex, paletteIndex);
     if (result) {
       setStyle(result.style);
       setPalette(result.palette);
     }
-  };
+  }, [applySuggestion]);
 
-  const handlePaletteGenerated = (colors: string[]) => {
+  const handlePaletteGenerated = useCallback((colors: string[]) => {
     // For now, we can't directly use custom colors in the ColorPalette enum
     // But we can suggest the closest match or save to localStorage for future use
     log.info('Generated palette colors:', colors);
     // This would require extending the palette system to support custom palettes
     // For v1.6.0, we save to localStorage and user can manually select closest match
-  };
+  }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (topic.trim() && !isProcessing) {
       // Save to recent topics if it's not a file (or even if it is, the name might be useful)
@@ -309,7 +310,7 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
         fileContent: fileContent || undefined
       });
     }
-  };
+  }, [topic, isProcessing, recentTopics, language, extensions, date, onSubmit, size, ratio, style, palette, fileContent]);
 
   return (
     <div className="w-full max-w-4xl mx-auto bg-slate-800/50 rounded-2xl border border-slate-700 p-6 backdrop-blur-md shadow-xl animate-in slide-in-from-bottom-5 duration-500 relative">
@@ -707,4 +708,5 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
   );
 };
 
-export default InfographicForm;
+// Memoize component to prevent unnecessary re-renders (v1.8.0 - TD-015)
+export default React.memo(InfographicForm);

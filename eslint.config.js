@@ -10,9 +10,9 @@ export default [
     ignores: ['dist/', 'node_modules/', '*.config.js', '*.config.ts'],
   },
   js.configs.recommended,
-  // Allow console in logger.ts
+  // Allow console in logger.ts and errorTrackingService.ts
   {
-    files: ['src/utils/logger.ts'],
+    files: ['src/utils/logger.ts', 'src/services/errorTrackingService.ts'],
     rules: {
       'no-console': 'off',
     },
@@ -27,6 +27,7 @@ export default [
         ecmaFeatures: {
           jsx: true,
         },
+        project: './tsconfig.json', // Required for type-aware rules
       },
       globals: {
         // Browser globals
@@ -89,9 +90,9 @@ export default [
       'react/jsx-uses-react': 'off',
       'react/jsx-uses-vars': 'error',
 
-      // TypeScript rules
+      // TypeScript rules (stricter in v1.8.0)
       '@typescript-eslint/no-unused-vars': [
-        'warn',
+        'error', // Upgraded from 'warn' to 'error'
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
@@ -100,10 +101,13 @@ export default [
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-floating-promises': 'error', // New in v1.8.0
+      '@typescript-eslint/await-thenable': 'error', // New in v1.8.0
+      '@typescript-eslint/no-misused-promises': 'error', // New in v1.8.0
 
       // General rules
       'no-console': [
-        'warn',
+        'error', // Upgraded from 'warn' to 'error'
         {
           allow: ['warn', 'error'],
         },
@@ -112,10 +116,11 @@ export default [
       'no-var': 'error',
       'eqeqeq': ['error', 'always'],
       'curly': ['error', 'all'],
+      'complexity': ['warn', 20], // New in v1.8.0 - warn on functions with cyclomatic complexity > 20
 
       // React Hooks rules
       'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/exhaustive-deps': 'error', // Upgraded from 'warn' to 'error'
 
       // Unused imports (handled by @typescript-eslint/no-unused-vars)
       'no-unused-vars': 'off', // Disable base rule as it conflicts with TypeScript rule

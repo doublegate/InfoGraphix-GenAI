@@ -30,14 +30,14 @@ const ApiKeySelector: React.FC<ApiKeySelectorProps> = ({ onReady }) => {
   };
 
   useEffect(() => {
-    checkKey();
-  }, [onReady]);
+    void checkKey();
+  }, [checkKey]);
 
   const handleSelectKey = async () => {
     if (window.aistudio && window.aistudio.openSelectKey) {
       await window.aistudio.openSelectKey();
       // Assume success after dialog interaction or re-check
-      checkKey();
+      void checkKey();
     }
   };
 
@@ -57,7 +57,7 @@ const ApiKeySelector: React.FC<ApiKeySelectorProps> = ({ onReady }) => {
         </p>
         
         <button
-          onClick={handleSelectKey}
+          onClick={() => void handleSelectKey()}
           className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-lg transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 mb-4"
         >
           <Lock className="w-4 h-4" />

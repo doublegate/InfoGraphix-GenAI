@@ -107,7 +107,7 @@ export function useVersionHistory(): UseVersionHistoryReturn {
         log.error('Migration error:', e);
       }
 
-      await loadVersions();
+      await void loadVersions();
     };
 
     init();
@@ -120,7 +120,7 @@ export function useVersionHistory(): UseVersionHistoryReturn {
     try {
       setError(null);
       await saveVersion(version, true); // Enable compression
-      await loadVersions(); // Refresh list
+      await void loadVersions(); // Refresh list
       return true;
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to save version';
@@ -206,7 +206,7 @@ export function useVersionHistory(): UseVersionHistoryReturn {
    */
   const refresh = useCallback(async () => {
     setIsLoading(true);
-    await loadVersions();
+    await void loadVersions();
   }, [loadVersions]);
 
   return {

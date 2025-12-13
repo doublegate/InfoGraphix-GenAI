@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
+import { GenerationProvider, ThemeProvider } from './contexts';
 import './i18n'; // Initialize i18n
 import './styles/main.css';
 import { validateEnvironment } from './utils/env';
@@ -30,7 +31,11 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <ErrorBoundary onError={handleGlobalError}>
-      <App />
+      <ThemeProvider>
+        <GenerationProvider>
+          <App />
+        </GenerationProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   </React.StrictMode>
 );

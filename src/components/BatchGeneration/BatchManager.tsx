@@ -107,13 +107,13 @@ const BatchManager: React.FC<BatchManagerProps> = ({ isOpen, onClose, onStartQue
     }
 
     const items = completed.map((item) => ({
-      filename: item.topic.replace(/[^a-z0-9_\-]/gi, '_'),
+      filename: item.topic.replace(/[^a-z0-9_-]/gi, '_'),
       dataURL: item.result!.imageUrl
     }));
 
     // Dynamic import to only load export libraries when needed
     const { exportBatchAsZip } = await import('../../utils/exportUtils');
-    exportBatchAsZip(items, queue.name.replace(/[^a-z0-9_\-]/gi, '_'));
+    exportBatchAsZip(items, queue.name.replace(/[^a-z0-9_-]/gi, '_'));
   };
 
   if (!isOpen) return null;

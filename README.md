@@ -2,7 +2,7 @@
 
 > Transform any topic into stunning, AI-generated infographics using Google Gemini
 
-[![Version](https://img.shields.io/badge/version-1.7.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.8.0-blue.svg)](CHANGELOG.md)
 [![CI](https://github.com/parobek/InfoGraphix-GenAI/workflows/CI/badge.svg)](https://github.com/parobek/InfoGraphix-GenAI/actions/workflows/ci.yml)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)

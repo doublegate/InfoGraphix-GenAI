@@ -49,8 +49,8 @@ export function useStyleSuggestions(): UseStyleSuggestionsReturn {
    */
   const getSuggestions = useCallback(async (
     topic: string,
-    url?: string,
-    context?: string
+    _url?: string,
+    _context?: string
   ): Promise<void> => {
     if (!topic.trim()) {
       setError('Topic is required for suggestions');

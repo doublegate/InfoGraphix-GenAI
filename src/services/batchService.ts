@@ -1,6 +1,6 @@
 /**
  * Batch generation queue management service.
- * v1.4.0 Feature: Batch Generation Mode
+ * v1.8.0 TD-003: Migrated to IndexedDB storage
  */
 
 import {
@@ -14,19 +14,85 @@ import {
   GithubFilters
 } from '../types';
 import { log } from '../utils/logger';
+import {
+  getBatchQueue as getBatchQueueFromDB,
+  saveBatchQueue as saveBatchQueueToDB,
+  deleteBatchItem as deleteBatchItemFromDB,
+  updateBatchItem as updateBatchItemInDB,
+  clearBatchQueue as clearBatchQueueFromDB,
+  migrateBatchQueueFromLocalStorage,
+  BatchQueueItem,
+} from './storageService';
 
-const STORAGE_KEY = 'infographix_batch_queues';
 const CONFIG_STORAGE_KEY = 'infographix_batch_configs';
 
+// Migration flag
+let migrationComplete = false;
+
 /**
- * Load all batch queues from localStorage
+ * Ensures migration from localStorage has been performed.
  */
-export const loadQueues = (): BatchQueue[] => {
+const ensureMigration = async (): Promise<void> => {
+  if (migrationComplete) return;
+
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return [];
-    const queues = JSON.parse(stored);
-    return Array.isArray(queues) ? queues : [];
+    const migrated = await migrateBatchQueueFromLocalStorage();
+    if (migrated > 0) {
+      log.info(`Batch queue migration: ${migrated} items migrated to IndexedDB`);
+    }
+    migrationComplete = true;
+  } catch (e) {
+    log.error('Batch queue migration error:', e);
+    migrationComplete = true;
+  }
+};
+
+/**
+ * Convert IndexedDB BatchQueueItem to app BatchQueue format
+ * Note: IndexedDB stores flattened items, we reconstruct queues as needed
+ */
+const convertToQueue = (items: BatchQueueItem[]): BatchQueue => {
+  // Create a synthetic queue from items
+  const batchItems: BatchItem[] = items.map(item => ({
+    id: item.id,
+    topic: item.topic,
+    status: item.status as BatchStatus,
+    style: item.style as InfographicStyle,
+    palette: item.palette as ColorPalette,
+    size: item.size as ImageSize,
+    aspectRatio: item.aspectRatio as AspectRatio,
+    createdAt: item.createdAt,
+    startedAt: undefined,
+    completedAt: item.completedAt,
+    result: item.result,
+    error: item.error,
+  }));
+
+  return {
+    id: crypto.randomUUID(),
+    name: 'Current Queue',
+    items: batchItems,
+    status: deriveQueueStatus(batchItems),
+    createdAt: Date.now(),
+    config: {
+      delayBetweenItems: 2000,
+      stopOnError: false,
+    },
+  };
+};
+
+/**
+ * Load all batch queues from IndexedDB
+ */
+export const loadQueues = async (): Promise<BatchQueue[]> => {
+  await ensureMigration();
+
+  try {
+    const items = await getBatchQueueFromDB();
+    if (items.length === 0) return [];
+
+    // Return a single queue containing all items
+    return [convertToQueue(items)];
   } catch (error) {
     log.error('Failed to load batch queues:', error);
     return [];
@@ -34,21 +100,9 @@ export const loadQueues = (): BatchQueue[] => {
 };
 
 /**
- * Save queues to localStorage
- */
-const saveQueues = (queues: BatchQueue[]): void => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(queues));
-  } catch (error) {
-    log.error('Failed to save batch queues:', error);
-    throw new Error('Failed to save batch queue. Storage might be full.');
-  }
-};
-
-/**
  * Create a new batch queue
  */
-export const createQueue = (
+export const createQueue = async (
   name: string,
   topics: string[],
   style: InfographicStyle,
@@ -58,7 +112,9 @@ export const createQueue = (
   filters?: GithubFilters,
   delayBetweenItems: number = 2000,
   stopOnError: boolean = false
-): BatchQueue => {
+): Promise<BatchQueue> => {
+  await ensureMigration();
+
   const now = Date.now();
 
   const items: BatchItem[] = topics.map(topic => ({
@@ -73,6 +129,24 @@ export const createQueue = (
     createdAt: now
   }));
 
+  // Save each item to IndexedDB
+  for (const item of items) {
+    const queueItem: BatchQueueItem = {
+      id: item.id,
+      topic: item.topic,
+      size: item.size as string,
+      aspectRatio: item.aspectRatio as string,
+      style: item.style as string,
+      palette: item.palette as string,
+      status: item.status as 'pending' | 'processing' | 'complete' | 'error',
+      createdAt: item.createdAt,
+      completedAt: item.completedAt,
+      result: item.result,
+      error: item.error,
+    };
+    await saveBatchQueueToDB(queueItem);
+  }
+
   const queue: BatchQueue = {
     id: crypto.randomUUID(),
     name,
@@ -85,86 +159,96 @@ export const createQueue = (
     }
   };
 
-  const queues = loadQueues();
-  queues.unshift(queue);
-  saveQueues(queues);
-
   return queue;
 };
 
 /**
  * Get a queue by ID
+ * Note: In IndexedDB mode, we reconstruct queues from items
  */
-export const getQueue = (id: string): BatchQueue | null => {
-  const queues = loadQueues();
-  return queues.find(q => q.id === id) || null;
+export const getQueue = async (id: string): Promise<BatchQueue | null> => {
+  await ensureMigration();
+
+  try {
+    const queues = await loadQueues();
+    return queues.find(q => q.id === id) || null;
+  } catch (error) {
+    log.error('Failed to get queue:', error);
+    return null;
+  }
 };
 
 /**
  * Update a queue
+ * Note: Only updates items in IndexedDB, queue metadata is ephemeral
  */
-export const updateQueue = (id: string, updates: Partial<BatchQueue>): BatchQueue | null => {
-  const queues = loadQueues();
-  const index = queues.findIndex(q => q.id === id);
+export const updateQueue = async (id: string, updates: Partial<BatchQueue>): Promise<BatchQueue | null> => {
+  await ensureMigration();
 
-  if (index === -1) {
+  try {
+    const queues = await loadQueues();
+    const queue = queues.find(q => q.id === id);
+
+    if (!queue) {
+      return null;
+    }
+
+    // Update queue in memory
+    const updated = {
+      ...queue,
+      ...updates
+    };
+
+    return updated;
+  } catch (error) {
+    log.error('Failed to update queue:', error);
     return null;
   }
-
-  queues[index] = {
-    ...queues[index],
-    ...updates
-  };
-
-  saveQueues(queues);
-  return queues[index];
 };
 
 /**
  * Update a specific item in a queue
  */
-export const updateQueueItem = (
+export const updateQueueItem = async (
   queueId: string,
   itemId: string,
   updates: Partial<BatchItem>
-): BatchQueue | null => {
-  const queues = loadQueues();
-  const queueIndex = queues.findIndex(q => q.id === queueId);
+): Promise<BatchQueue | null> => {
+  await ensureMigration();
 
-  if (queueIndex === -1) {
+  try {
+    // Update item in IndexedDB
+    const dbUpdates: Partial<BatchQueueItem> = {
+      status: updates.status as 'pending' | 'processing' | 'complete' | 'error' | undefined,
+      completedAt: updates.completedAt,
+      result: updates.result,
+      error: updates.error,
+    };
+
+    await updateBatchItemInDB(itemId, dbUpdates);
+
+    // Return updated queue
+    const queues = await loadQueues();
+    return queues[0] || null;
+  } catch (error) {
+    log.error('Failed to update queue item:', error);
     return null;
   }
-
-  const itemIndex = queues[queueIndex].items.findIndex(i => i.id === itemId);
-  if (itemIndex === -1) {
-    return null;
-  }
-
-  queues[queueIndex].items[itemIndex] = {
-    ...queues[queueIndex].items[itemIndex],
-    ...updates
-  };
-
-  // Update queue status based on items
-  queues[queueIndex].status = deriveQueueStatus(queues[queueIndex].items);
-
-  saveQueues(queues);
-  return queues[queueIndex];
 };
 
 /**
- * Delete a queue
+ * Delete a queue (clears all items)
  */
-export const deleteQueue = (id: string): boolean => {
-  const queues = loadQueues();
-  const filtered = queues.filter(q => q.id !== id);
+export const deleteQueue = async (id: string): Promise<boolean> => {
+  await ensureMigration();
 
-  if (filtered.length === queues.length) {
+  try {
+    await clearBatchQueueFromDB();
+    return true;
+  } catch (error) {
+    log.error('Failed to delete queue:', error);
     return false;
   }
-
-  saveQueues(filtered);
-  return true;
 };
 
 /**
@@ -225,8 +309,8 @@ const deriveQueueStatus = (items: BatchItem[]): 'idle' | 'running' | 'paused' | 
 /**
  * Retry a failed item
  */
-export const retryItem = (queueId: string, itemId: string): BatchQueue | null => {
-  return updateQueueItem(queueId, itemId, {
+export const retryItem = async (queueId: string, itemId: string): Promise<BatchQueue | null> => {
+  return await updateQueueItem(queueId, itemId, {
     status: BatchStatus.Pending,
     error: undefined,
     startedAt: undefined,
@@ -238,8 +322,8 @@ export const retryItem = (queueId: string, itemId: string): BatchQueue | null =>
 /**
  * Cancel a pending or processing item
  */
-export const cancelItem = (queueId: string, itemId: string): BatchQueue | null => {
-  return updateQueueItem(queueId, itemId, {
+export const cancelItem = async (queueId: string, itemId: string): Promise<BatchQueue | null> => {
+  return await updateQueueItem(queueId, itemId, {
     status: BatchStatus.Cancelled,
     completedAt: Date.now()
   });
@@ -248,39 +332,44 @@ export const cancelItem = (queueId: string, itemId: string): BatchQueue | null =
 /**
  * Pause a queue (mark all pending items as paused by setting queue status)
  */
-export const pauseQueue = (queueId: string): BatchQueue | null => {
-  return updateQueue(queueId, { status: 'paused' });
+export const pauseQueue = async (queueId: string): Promise<BatchQueue | null> => {
+  return await updateQueue(queueId, { status: 'paused' });
 };
 
 /**
  * Resume a paused queue
  */
-export const resumeQueue = (queueId: string): BatchQueue | null => {
-  return updateQueue(queueId, { status: 'idle' });
+export const resumeQueue = async (queueId: string): Promise<BatchQueue | null> => {
+  return await updateQueue(queueId, { status: 'idle' });
 };
 
 /**
  * Cancel all pending items in a queue
  */
-export const cancelQueue = (queueId: string): BatchQueue | null => {
-  const queue = getQueue(queueId);
-  if (!queue) return null;
+export const cancelQueue = async (queueId: string): Promise<BatchQueue | null> => {
+  await ensureMigration();
 
-  const updatedItems = queue.items.map(item => {
-    if (item.status === BatchStatus.Pending || item.status === BatchStatus.Processing) {
-      return {
-        ...item,
-        status: BatchStatus.Cancelled,
-        completedAt: Date.now()
-      };
+  try {
+    const queue = await getQueue(queueId);
+    if (!queue) return null;
+
+    // Update all pending/processing items to cancelled
+    for (const item of queue.items) {
+      if (item.status === BatchStatus.Pending || item.status === BatchStatus.Processing) {
+        await updateQueueItem(queueId, item.id, {
+          status: BatchStatus.Cancelled,
+          completedAt: Date.now()
+        });
+      }
     }
-    return item;
-  });
 
-  return updateQueue(queueId, {
-    items: updatedItems,
-    status: 'complete'
-  });
+    // Return updated queue
+    const updated = await getQueue(queueId);
+    return updated ? { ...updated, status: 'complete' } : null;
+  } catch (error) {
+    log.error('Failed to cancel queue:', error);
+    return null;
+  }
 };
 
 /**

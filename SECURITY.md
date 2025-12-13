@@ -328,4 +328,4 @@ For **vulnerability reports**, follow the [Vulnerability Reporting](#vulnerabili
 
 ---
 
-**Last Updated:** 2025-12-12 (v1.7.0)
+**Last Updated:** 2025-12-12 (v1.8.0)

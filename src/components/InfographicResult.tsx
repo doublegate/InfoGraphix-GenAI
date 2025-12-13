@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { log } from '../utils/logger';
-import { Download, Info, CheckCircle2, Link as LinkIcon, Save, Loader2, FileImage, FileText, FileStack } from 'lucide-react';
+import { Download, Info, CheckCircle2, Link as LinkIcon, Save, Loader2 } from 'lucide-react';
 import { GeneratedInfographic, Feedback, ExportFormat, ImageSize, AspectRatio } from '../types';
 import FeedbackForm from './FeedbackForm';
+import { useImageErrorHandling } from '../hooks/useImageErrorHandling';
 
 interface InfographicResultProps {
   data: GeneratedInfographic | null;
@@ -23,6 +24,11 @@ const InfographicResult: React.FC<InfographicResultProps> = ({
   currentSize = ImageSize.Resolution_2K,
   currentRatio = AspectRatio.Portrait
 }) => {
+  // Image error handling with retry logic
+  const { imageSrc, hasError, handleImageError } = useImageErrorHandling(
+    data?.imageUrl || '',
+    { maxRetries: 2 }
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [exportFormat, setExportFormat] = useState<ExportFormat>(ExportFormat.PNG);
   const [isExporting, setIsExporting] = useState(false);
@@ -175,11 +181,18 @@ const InfographicResult: React.FC<InfographicResultProps> = ({
           <div className="relative group rounded-2xl overflow-hidden shadow-2xl border border-slate-700 bg-slate-900 animate-in zoom-in-95 fade-in duration-1000 delay-100 fill-mode-backwards">
              {/* Image Container */}
              <div className="relative aspect-auto min-h-[400px] flex items-center justify-center bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')]">
-                <img 
-                  src={data.imageUrl} 
+                <img
+                  src={imageSrc}
                   alt={data.analysis.title}
                   className="w-full h-auto object-contain max-h-[800px]"
+                  onError={handleImageError}
+                  loading="lazy"
                 />
+                {hasError && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-900/90">
+                    <p className="text-slate-400 text-sm">Failed to load image</p>
+                  </div>
+                )}
              </div>
 
              {/* Overlay Actions */}
@@ -239,4 +252,5 @@ const InfographicResult: React.FC<InfographicResultProps> = ({
   );
 };
 
-export default InfographicResult;
+// Memoize component to prevent unnecessary re-renders (v1.8.0 - TD-015)
+export default React.memo(InfographicResult);

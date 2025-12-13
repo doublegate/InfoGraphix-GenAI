@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, ArrowLeftRight, Calendar, Palette, Paintbrush, Monitor, FileText, CheckCircle2, Filter } from 'lucide-react';
 import { SavedVersion } from '../types';
+import { handleImageLoadErrorWithRetry } from '../utils/imageErrorUtils';
 
 interface VersionComparisonProps {
   v1: SavedVersion;
@@ -59,12 +60,26 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({ v1, v2, onClose }
             <div className="grid grid-cols-2 border-b border-slate-700">
               <div className="p-4 border-r border-slate-700 bg-slate-900">
                 <div className="aspect-video bg-slate-800 rounded-lg overflow-hidden border border-slate-700 flex items-center justify-center">
-                  <img src={v1.data.imageUrl} alt="Version A" className="max-w-full max-h-full object-contain" />
+                  <img
+                    src={v1.data.imageUrl}
+                    alt="Version A"
+                    className="max-w-full max-h-full object-contain"
+                    onError={(e) => handleImageLoadErrorWithRetry(e, 2)}
+                    data-retry-count="0"
+                    loading="lazy"
+                  />
                 </div>
               </div>
               <div className="p-4 bg-slate-900">
                  <div className="aspect-video bg-slate-800 rounded-lg overflow-hidden border border-slate-700 flex items-center justify-center">
-                  <img src={v2.data.imageUrl} alt="Version B" className="max-w-full max-h-full object-contain" />
+                  <img
+                    src={v2.data.imageUrl}
+                    alt="Version B"
+                    className="max-w-full max-h-full object-contain"
+                    onError={(e) => handleImageLoadErrorWithRetry(e, 2)}
+                    data-retry-count="0"
+                    loading="lazy"
+                  />
                 </div>
               </div>
             </div>
@@ -189,4 +204,5 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({ v1, v2, onClose }
   );
 };
 
-export default VersionComparison;
+// Memoize component to prevent unnecessary re-renders (v1.8.0 - TD-015)
+export default React.memo(VersionComparison);

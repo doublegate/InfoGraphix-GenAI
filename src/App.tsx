@@ -1,6 +1,6 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Layers, Github, Globe, History as HistoryIcon, Info, List as ListIcon, BookTemplate, Contrast } from 'lucide-react';
+import { Layers, History as HistoryIcon, Info, List as ListIcon, BookTemplate, Contrast, HelpCircle } from 'lucide-react';
 import ApiKeySelector from './components/ApiKeySelector';
 import InfographicForm from './components/InfographicForm';
 import ProcessingState from './components/ProcessingState';
@@ -11,11 +11,13 @@ import LanguageSelector from './components/LanguageSelector';
 import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import { TemplateBrowser } from './components/TemplateManager';
-import { analyzeTopic, generateInfographicImage } from './services/geminiService';
 import { AspectRatio, GeneratedInfographic, ImageSize, GithubFilters, SavedVersion, Feedback, InfographicStyle, ColorPalette, TemplateConfig, InfographicRequest } from './types';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useAnnouncer } from './hooks/useAnnouncer';
 import { useHighContrast } from './hooks/useHighContrast';
+import { useModals } from './hooks/useModals';
+import { useSavedVersions } from './hooks/useSavedVersions';
+import { useGeneration } from './contexts';
 import { log } from './utils/logger';
 
 // Lazy load heavy modal components for better code splitting
@@ -28,104 +30,73 @@ function App() {
   const { announce } = useAnnouncer();
   const { isHighContrast, toggle: toggleHighContrast } = useHighContrast();
 
+  // v1.8.0 - TD-006: Use Generation Context for shared state
+  const {
+    processingStep,
+    result,
+    error,
+    currentTopic,
+    currentSize,
+    currentRatio,
+    currentStyle,
+    currentPalette,
+    currentFilters,
+    isCurrentResultSaved,
+    currentFeedback,
+    formInitialValues,
+    handleGenerate,
+    setIsCurrentResultSaved,
+    setCurrentFeedback,
+    setFormInitialValues,
+    setError,
+    setResult,
+    setProcessingStep,
+    setCurrentTopic,
+    setCurrentSize,
+    setCurrentRatio,
+    setCurrentStyle,
+    setCurrentPalette,
+    setCurrentFilters
+  } = useGeneration();
+
+  // v1.8.0 - TD-009: Use custom hooks for state management
+  const {
+    showHistory,
+    showAbout,
+    showBatchManager,
+    showTemplateManager,
+    showKeyboardShortcuts,
+    openHistory,
+    closeHistory,
+    toggleHistory,
+    openAbout,
+    closeAbout,
+    openBatchManager,
+    closeBatchManager,
+    toggleBatchManager,
+    openTemplateManager,
+    closeTemplateManager,
+    toggleTemplateManager,
+    openKeyboardShortcuts,
+    closeKeyboardShortcuts,
+    closeAll: closeAllModals
+  } = useModals();
+
+  const {
+    versions: savedVersions,
+    isLoading: isLoadingVersions,
+    saveVersion,
+    deleteVersion,
+    clearHistory
+  } = useSavedVersions();
+
   const [isApiKeyReady, setIsApiKeyReady] = useState(false);
-  const [processingStep, setProcessingStep] = useState<'idle' | 'analyzing' | 'generating' | 'complete'>('idle');
-  const [result, setResult] = useState<GeneratedInfographic | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  // Current request state
-  const [currentTopic, setCurrentTopic] = useState('');
-  const [currentSize, setCurrentSize] = useState<ImageSize>(ImageSize.Resolution_1K);
-  const [currentRatio, setCurrentRatio] = useState<AspectRatio>(AspectRatio.Portrait);
-  const [currentStyle, setCurrentStyle] = useState<InfographicStyle>(InfographicStyle.Modern);
-  const [currentPalette, setCurrentPalette] = useState<ColorPalette>(ColorPalette.BlueWhite);
-  const [currentFilters, setCurrentFilters] = useState<GithubFilters | undefined>(undefined);
-
-  // Used for reloading form state
-  const [formInitialValues, setFormInitialValues] = useState<any>(undefined);
-
-  // UI State
-  const [savedVersions, setSavedVersions] = useState<SavedVersion[]>([]);
-  const [showHistory, setShowHistory] = useState(false);
-  const [showAbout, setShowAbout] = useState(false);
-  const [showBatchManager, setShowBatchManager] = useState(false);
-  const [showTemplateManager, setShowTemplateManager] = useState(false);
-  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
-  const [isCurrentResultSaved, setIsCurrentResultSaved] = useState(false);
-  const [isLoadingInitialData, setIsLoadingInitialData] = useState(true);
-
-  // Feedback for current session view
-  const [currentFeedback, setCurrentFeedback] = useState<Feedback | undefined>(undefined);
 
   // Active mode ('single' or 'batch')
-  const [activeMode, setActiveMode] = useState<'single' | 'batch'>('single');
+  const [_activeMode, setActiveMode] = useState<'single' | 'batch'>('single');
 
-  // Load versions from localStorage on mount
-  useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        const stored = localStorage.getItem('infographix_versions');
-        if (stored) {
-          setSavedVersions(JSON.parse(stored));
-        }
-      } catch (e) {
-        log.error("Failed to load history", e);
-      } finally {
-        setIsLoadingInitialData(false);
-      }
-    };
-    loadInitialData();
-  }, []);
-
-  const handleGenerate = async (request: InfographicRequest) => {
-    setError(null);
-    setResult(null);
-    setCurrentFeedback(undefined);
-    setIsCurrentResultSaved(false);
-
-    // Update current context
-    setCurrentTopic(request.topic);
-    setCurrentSize(request.size);
-    setCurrentRatio(request.aspectRatio);
-    setCurrentStyle(request.style);
-    setCurrentPalette(request.palette);
-    setCurrentFilters(request.filters);
-
-    setProcessingStep('analyzing');
-
-    try {
-      // Step 1: Deep Analysis with Thinking Model
-      const analysis = await analyzeTopic(
-        request.topic,
-        request.style,
-        request.palette,
-        request.filters,
-        request.fileContent
-      );
-      
-      setProcessingStep('generating');
-
-      // Step 2: Image Generation with Nano Banana Pro
-      const imageUrl = await generateInfographicImage(
-        analysis.visualPlan,
-        request.size,
-        request.aspectRatio
-      );
-
-      setResult({
-        imageUrl,
-        analysis
-      });
-      setProcessingStep('complete');
-    } catch (err: unknown) {
-      log.error(err);
-      const message = err instanceof Error ? err.message : "An unexpected error occurred. Please try again.";
-      setError(message);
-      setProcessingStep('idle');
-    }
-  };
-
-  const handleSaveVersion = () => {
+  // v1.8.0 - TD-009: Refactored handlers to use custom hooks
+  const handleSaveVersion = useCallback(async () => {
     if (!result) return;
 
     const newVersion: SavedVersion = {
@@ -141,31 +112,23 @@ function App() {
       feedback: currentFeedback
     };
 
-    const updated = [newVersion, ...savedVersions];
-    
     try {
-      localStorage.setItem('infographix_versions', JSON.stringify(updated));
-      setSavedVersions(updated);
+      await saveVersion(newVersion);
       setIsCurrentResultSaved(true);
     } catch (e) {
-      setError("Failed to save to history. Local storage might be full (Base64 images are large).");
+      setError((e as Error).message);
     }
-  };
+  }, [result, currentTopic, currentSize, currentRatio, currentStyle, currentPalette, currentFilters, currentFeedback, saveVersion, setIsCurrentResultSaved, setError]);
 
-  const handleDeleteVersion = (id: string) => {
-    const updated = savedVersions.filter(v => v.id !== id);
-    setSavedVersions(updated);
-    localStorage.setItem('infographix_versions', JSON.stringify(updated));
-  };
+  const handleDeleteVersion = useCallback((id: string) => {
+    deleteVersion(id);
+  }, [deleteVersion]);
 
-  const handleClearHistory = () => {
-    if (window.confirm("Are you sure you want to delete all history? This cannot be undone.")) {
-      setSavedVersions([]);
-      localStorage.removeItem('infographix_versions');
-    }
-  };
+  const handleClearHistory = useCallback(() => {
+    clearHistory();
+  }, [clearHistory]);
 
-  const handleLoadVersion = (version: SavedVersion) => {
+  const handleLoadVersion = useCallback((version: SavedVersion) => {
     setResult(version.data);
     setCurrentTopic(version.topic);
     setCurrentSize(version.size);
@@ -175,7 +138,7 @@ function App() {
     setCurrentFilters(version.filters);
     setCurrentFeedback(version.feedback);
     setIsCurrentResultSaved(true); // Since it came from storage
-    
+
     // Pass values down to form to repopulate
     setFormInitialValues({
       topic: version.topic,
@@ -187,9 +150,9 @@ function App() {
     });
 
     setProcessingStep('complete');
-  };
+  }, []);
 
-  const handleFeedback = (rating: number, comment: string) => {
+  const handleFeedback = useCallback((rating: number, comment: string) => {
     const feedback: Feedback = {
       id: crypto.randomUUID(),
       rating,
@@ -202,9 +165,9 @@ function App() {
     if (isCurrentResultSaved && result) {
        // Ideally we would update the saved version here, but keeping it simple for now
     }
-  };
+  }, [isCurrentResultSaved, result]);
 
-  const handleApplyTemplate = (template: TemplateConfig) => {
+  const handleApplyTemplate = useCallback((template: TemplateConfig) => {
     // Apply template to form
     setFormInitialValues({
       style: template.style,
@@ -212,18 +175,18 @@ function App() {
       size: template.size,
       aspectRatio: template.aspectRatio
     });
-    setShowTemplateManager(false);
-  };
+    closeTemplateManager();
+  }, [setFormInitialValues, closeTemplateManager]);
 
-  const handleSwitchMode = (mode: 'single' | 'batch') => {
+  const handleSwitchMode = useCallback((mode: 'single' | 'batch') => {
     setActiveMode(mode);
     if (mode === 'batch') {
-      setShowBatchManager(true);
+      openBatchManager();
     }
-  };
+  }, [openBatchManager]);
 
   // Handle keyboard shortcut to trigger new generation
-  const handleKeyboardGenerate = () => {
+  const handleKeyboardGenerate = useCallback(() => {
     // Trigger form submission if not processing
     if (processingStep === 'idle' || processingStep === 'complete') {
       const form = document.querySelector('form');
@@ -231,16 +194,12 @@ function App() {
         form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
       }
     }
-  };
+  }, [processingStep]);
 
   // Close any open modals
-  const handleEscape = () => {
-    if (showHistory) setShowHistory(false);
-    else if (showAbout) setShowAbout(false);
-    else if (showBatchManager) setShowBatchManager(false);
-    else if (showTemplateManager) setShowTemplateManager(false);
-    else if (showKeyboardShortcuts) setShowKeyboardShortcuts(false);
-  };
+  const handleEscape = useCallback(() => {
+    closeAllModals();
+  }, [closeAllModals]);
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
@@ -261,19 +220,19 @@ function App() {
       announce(t('form.newGeneration'));
     },
     onToggleHistory: () => {
-      setShowHistory(prev => !prev);
+      toggleHistory();
       announce(showHistory ? 'History closed' : 'History opened');
     },
     onToggleTemplates: () => {
-      setShowTemplateManager(prev => !prev);
+      toggleTemplateManager();
       announce(showTemplateManager ? 'Templates closed' : 'Templates opened');
     },
     onToggleBatch: () => {
-      setShowBatchManager(prev => !prev);
+      toggleBatchManager();
       announce(showBatchManager ? 'Batch manager closed' : 'Batch manager opened');
     },
     onShowHelp: () => {
-      setShowKeyboardShortcuts(true);
+      openKeyboardShortcuts();
       announce('Keyboard shortcuts help opened');
     },
     onEscape: handleEscape,
@@ -326,7 +285,7 @@ function App() {
           
           <nav className="flex gap-3 flex-wrap justify-center md:justify-end items-center" aria-label="Main navigation">
             <button
-              onClick={() => setShowTemplateManager(true)}
+              onClick={openTemplateManager}
               className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-all text-slate-300 shadow-sm hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               aria-label={t('nav.templates')}
             >
@@ -342,7 +301,7 @@ function App() {
               {t('nav.batch')}
             </button>
             <button
-              onClick={() => setShowHistory(true)}
+              onClick={openHistory}
               className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-all text-slate-300 shadow-sm hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               aria-label={`${t('nav.history')}${savedVersions.length > 0 ? `, ${savedVersions.length} saved versions` : ''}`}
             >
@@ -359,7 +318,15 @@ function App() {
             </button>
             <LanguageSelector />
             <button
-              onClick={() => setShowAbout(true)}
+              onClick={openKeyboardShortcuts}
+              className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
+              aria-label={t('nav.keyboardShortcuts', 'Keyboard shortcuts')}
+              title={t('nav.keyboardShortcutsHint', 'Press ? for keyboard shortcuts')}
+            >
+              <HelpCircle className="w-5 h-5 text-slate-400" aria-hidden="true" />
+            </button>
+            <button
+              onClick={openAbout}
               className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-all text-slate-300 shadow-sm hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               aria-label={t('nav.about')}
             >
@@ -371,7 +338,7 @@ function App() {
 
         {/* Main Interface */}
         <main id="main-content" className="flex-grow" role="main">
-          {isLoadingInitialData ? (
+          {isLoadingVersions ? (
             <div className="flex items-center justify-center py-20">
               <div className="text-center">
                 <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
@@ -421,7 +388,7 @@ function App() {
             <div className="bg-slate-800 rounded-lg p-6 max-w-md border border-slate-700">
               <p className="text-white mb-4">Failed to load Version History</p>
               <button
-                onClick={() => setShowHistory(false)}
+                onClick={closeHistory}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
                 Close
@@ -433,7 +400,7 @@ function App() {
         <Suspense fallback={null}>
           <VersionHistory
             isOpen={showHistory}
-            onClose={() => setShowHistory(false)}
+            onClose={closeHistory}
             versions={savedVersions}
             onLoadVersion={handleLoadVersion}
             onDeleteVersion={handleDeleteVersion}
@@ -444,7 +411,7 @@ function App() {
 
       <AboutModal
         isOpen={showAbout}
-        onClose={() => setShowAbout(false)}
+        onClose={closeAbout}
       />
 
       <ErrorBoundary
@@ -453,7 +420,7 @@ function App() {
             <div className="bg-slate-800 rounded-lg p-6 max-w-md border border-slate-700">
               <p className="text-white mb-4">Failed to load Batch Manager</p>
               <button
-                onClick={() => setShowBatchManager(false)}
+                onClick={closeBatchManager}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
                 Close
@@ -466,7 +433,7 @@ function App() {
           <BatchManager
             isOpen={showBatchManager}
             onClose={() => {
-              setShowBatchManager(false);
+              closeBatchManager();
               setActiveMode('single');
             }}
           />
@@ -475,13 +442,13 @@ function App() {
 
       <TemplateBrowser
         isOpen={showTemplateManager}
-        onClose={() => setShowTemplateManager(false)}
+        onClose={closeTemplateManager}
         onApplyTemplate={handleApplyTemplate}
       />
 
       <KeyboardShortcutsModal
         isOpen={showKeyboardShortcuts}
-        onClose={() => setShowKeyboardShortcuts(false)}
+        onClose={closeKeyboardShortcuts}
       />
     </div>
   );
