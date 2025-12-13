@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2025-12-13
+
 ### Fixed
 - **Image Rendering Bug** - Fixed infographic preview image failing to render after generation or when loading from history
   - Root cause: `useImageErrorHandling` hook's internal state not updating when `src` prop changed
@@ -1111,7 +1113,8 @@ All migrations happen automatically on first use of v1.8.0:
 - @google/genai SDK for Gemini API integration
 - Component-based architecture with clear separation of concerns
 
-[Unreleased]: https://github.com/doublegate/InfoGraphix-GenAI/compare/v1.4.6...HEAD
+[Unreleased]: https://github.com/doublegate/InfoGraphix-GenAI/compare/v2.0.1...HEAD
+[2.0.1]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v2.0.1
 [2.0.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v2.0.0
 [1.9.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.9.0
 [1.8.0]: https://github.com/doublegate/InfoGraphix-GenAI/releases/tag/v1.8.0

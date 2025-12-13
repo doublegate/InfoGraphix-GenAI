@@ -1,5 +1,5 @@
 {
-  "name": "InfoGraphix GenAI - v2.0.0",
-  "description": "Generate professional, high-resolution infographics from Wikipedia URLs, GitHub repositories, or any topic using advanced Gemini reasoning and image generation models -- v2.0.0 with Testing Infrastructure, CI/CD Pipeline, and Advanced Features",
+  "name": "InfoGraphix GenAI - v2.0.1",
+  "description": "Generate professional, high-resolution infographics from Wikipedia URLs, GitHub repositories, or any topic using advanced Gemini reasoning and image generation models -- v2.0.1 with Image Rendering Bug Fix",
   "requestFramePermissions": []
 }

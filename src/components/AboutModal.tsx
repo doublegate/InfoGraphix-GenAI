@@ -89,7 +89,7 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
         {/* Footer */}
         <div className="bg-slate-900 p-4 border-t border-slate-700 flex justify-between items-center">
           <p className="text-xs text-slate-500">
-            Version 2.0.0 • Built with React & Google GenAI SDK
+            Version 2.0.1 • Built with React & Google GenAI SDK
           </p>
           <a 
             href="https://ai.google.dev/gemini-api/docs" 
