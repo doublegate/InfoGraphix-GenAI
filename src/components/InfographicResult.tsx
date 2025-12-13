@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { log } from '../utils/logger';
 import { Download, Info, CheckCircle2, Link as LinkIcon, Save, Loader2, FileImage, FileText, FileStack } from 'lucide-react';
 import { GeneratedInfographic, Feedback, ExportFormat, ImageSize, AspectRatio } from '../types';
 import FeedbackForm from './FeedbackForm';
@@ -52,7 +53,7 @@ const InfographicResult: React.FC<InfographicResultProps> = ({
         currentRatio
       );
     } catch (error) {
-      console.error('Export failed:', error);
+      log.error('Export failed:', error);
       alert(`Export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsExporting(false);

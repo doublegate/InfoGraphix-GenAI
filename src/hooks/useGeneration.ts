@@ -8,6 +8,7 @@ import {
   InfographicStyle,
 } from '../types';
 import { analyzeTopic, generateInfographicImage } from '../services/geminiService';
+import { log } from '../utils/logger';
 
 /**
  * Processing step states
@@ -152,7 +153,7 @@ export function useGeneration(): UseGenerationReturn {
         ? err.message
         : 'An unexpected error occurred. Please try again.';
 
-      console.error('Generation error:', err);
+      log.error('Generation error:', err);
       setError(message);
       setProcessingStep('idle');
     }

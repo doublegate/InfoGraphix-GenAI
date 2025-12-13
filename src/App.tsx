@@ -9,12 +9,14 @@ import AboutModal from './components/AboutModal';
 import SkipLink from './components/SkipLink';
 import LanguageSelector from './components/LanguageSelector';
 import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
+import ErrorBoundary from './components/ErrorBoundary';
 import { TemplateBrowser } from './components/TemplateManager';
 import { analyzeTopic, generateInfographicImage } from './services/geminiService';
-import { AspectRatio, GeneratedInfographic, ImageSize, GithubFilters, SavedVersion, Feedback, InfographicStyle, ColorPalette, TemplateConfig } from './types';
+import { AspectRatio, GeneratedInfographic, ImageSize, GithubFilters, SavedVersion, Feedback, InfographicStyle, ColorPalette, TemplateConfig, InfographicRequest } from './types';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useAnnouncer } from './hooks/useAnnouncer';
 import { useHighContrast } from './hooks/useHighContrast';
+import { log } from './utils/logger';
 
 // Lazy load heavy modal components for better code splitting
 // Note: TemplateBrowser is statically imported (used by InfographicForm)
@@ -50,6 +52,7 @@ function App() {
   const [showTemplateManager, setShowTemplateManager] = useState(false);
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
   const [isCurrentResultSaved, setIsCurrentResultSaved] = useState(false);
+  const [isLoadingInitialData, setIsLoadingInitialData] = useState(true);
 
   // Feedback for current session view
   const [currentFeedback, setCurrentFeedback] = useState<Feedback | undefined>(undefined);
@@ -59,57 +62,65 @@ function App() {
 
   // Load versions from localStorage on mount
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('infographix_versions');
-      if (stored) {
-        setSavedVersions(JSON.parse(stored));
+    const loadInitialData = async () => {
+      try {
+        const stored = localStorage.getItem('infographix_versions');
+        if (stored) {
+          setSavedVersions(JSON.parse(stored));
+        }
+      } catch (e) {
+        log.error("Failed to load history", e);
+      } finally {
+        setIsLoadingInitialData(false);
       }
-    } catch (e) {
-      console.error("Failed to load history", e);
-    }
+    };
+    loadInitialData();
   }, []);
 
-  const handleGenerate = async (
-    topic: string, 
-    size: ImageSize, 
-    aspectRatio: AspectRatio, 
-    style: InfographicStyle,
-    palette: ColorPalette,
-    filters?: GithubFilters,
-    fileContent?: string
-  ) => {
+  const handleGenerate = async (request: InfographicRequest) => {
     setError(null);
     setResult(null);
     setCurrentFeedback(undefined);
     setIsCurrentResultSaved(false);
-    
+
     // Update current context
-    setCurrentTopic(topic);
-    setCurrentSize(size);
-    setCurrentRatio(aspectRatio);
-    setCurrentStyle(style);
-    setCurrentPalette(palette);
-    setCurrentFilters(filters);
-    
+    setCurrentTopic(request.topic);
+    setCurrentSize(request.size);
+    setCurrentRatio(request.aspectRatio);
+    setCurrentStyle(request.style);
+    setCurrentPalette(request.palette);
+    setCurrentFilters(request.filters);
+
     setProcessingStep('analyzing');
 
     try {
       // Step 1: Deep Analysis with Thinking Model
-      const analysis = await analyzeTopic(topic, style, palette, filters, fileContent);
+      const analysis = await analyzeTopic(
+        request.topic,
+        request.style,
+        request.palette,
+        request.filters,
+        request.fileContent
+      );
       
       setProcessingStep('generating');
 
       // Step 2: Image Generation with Nano Banana Pro
-      const imageUrl = await generateInfographicImage(analysis.visualPlan, size, aspectRatio);
+      const imageUrl = await generateInfographicImage(
+        analysis.visualPlan,
+        request.size,
+        request.aspectRatio
+      );
 
       setResult({
         imageUrl,
         analysis
       });
       setProcessingStep('complete');
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message || "An unexpected error occurred. Please try again.");
+    } catch (err: unknown) {
+      log.error(err);
+      const message = err instanceof Error ? err.message : "An unexpected error occurred. Please try again.";
+      setError(message);
       setProcessingStep('idle');
     }
   };
@@ -360,11 +371,18 @@ function App() {
 
         {/* Main Interface */}
         <main id="main-content" className="flex-grow" role="main">
-          {isApiKeyReady ? (
+          {isLoadingInitialData ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="text-center">
+                <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-slate-400">{t('loadingData', 'Loading application data...')}</p>
+              </div>
+            </div>
+          ) : isApiKeyReady ? (
             <>
-              <InfographicForm 
-                onSubmit={handleGenerate} 
-                isProcessing={processingStep !== 'idle' && processingStep !== 'complete'} 
+              <InfographicForm
+                onSubmit={handleGenerate}
+                isProcessing={processingStep !== 'idle' && processingStep !== 'complete'}
                 initialValues={formInitialValues}
               />
               
@@ -396,32 +414,64 @@ function App() {
         </footer>
       </div>
 
-      {/* Overlays - wrapped in Suspense for lazy loading */}
-      <Suspense fallback={null}>
-        <VersionHistory
-          isOpen={showHistory}
-          onClose={() => setShowHistory(false)}
-          versions={savedVersions}
-          onLoadVersion={handleLoadVersion}
-          onDeleteVersion={handleDeleteVersion}
-          onClearHistory={handleClearHistory}
-        />
-      </Suspense>
+      {/* Overlays - wrapped in Suspense and ErrorBoundary for lazy loading */}
+      <ErrorBoundary
+        fallback={
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-slate-800 rounded-lg p-6 max-w-md border border-slate-700">
+              <p className="text-white mb-4">Failed to load Version History</p>
+              <button
+                onClick={() => setShowHistory(false)}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        }
+      >
+        <Suspense fallback={null}>
+          <VersionHistory
+            isOpen={showHistory}
+            onClose={() => setShowHistory(false)}
+            versions={savedVersions}
+            onLoadVersion={handleLoadVersion}
+            onDeleteVersion={handleDeleteVersion}
+            onClearHistory={handleClearHistory}
+          />
+        </Suspense>
+      </ErrorBoundary>
 
       <AboutModal
         isOpen={showAbout}
         onClose={() => setShowAbout(false)}
       />
 
-      <Suspense fallback={null}>
-        <BatchManager
-          isOpen={showBatchManager}
-          onClose={() => {
-            setShowBatchManager(false);
-            setActiveMode('single');
-          }}
-        />
-      </Suspense>
+      <ErrorBoundary
+        fallback={
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-slate-800 rounded-lg p-6 max-w-md border border-slate-700">
+              <p className="text-white mb-4">Failed to load Batch Manager</p>
+              <button
+                onClick={() => setShowBatchManager(false)}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        }
+      >
+        <Suspense fallback={null}>
+          <BatchManager
+            isOpen={showBatchManager}
+            onClose={() => {
+              setShowBatchManager(false);
+              setActiveMode('single');
+            }}
+          />
+        </Suspense>
+      </ErrorBoundary>
 
       <TemplateBrowser
         isOpen={showTemplateManager}

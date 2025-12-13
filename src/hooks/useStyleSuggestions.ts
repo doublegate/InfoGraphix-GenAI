@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { suggestStyleAndPalette } from '../services/geminiService';
 import { StyleSuggestion, InfographicStyle, ColorPalette } from '../types';
+import { log } from '../utils/logger';
 
 interface UseStyleSuggestionsReturn {
   suggestions: StyleSuggestion | null;
@@ -68,7 +69,7 @@ export function useStyleSuggestions(): UseStyleSuggestionsReturn {
       const errorMessage = err instanceof Error ? err.message : 'Failed to get suggestions';
       setError(errorMessage);
       setSuggestions(null);
-      console.error('Style suggestion error:', err);
+      log.error('Style suggestion error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -86,17 +87,17 @@ export function useStyleSuggestions(): UseStyleSuggestionsReturn {
     paletteIndex: number
   ): { style: InfographicStyle; palette: ColorPalette } | null => {
     if (!suggestions) {
-      console.warn('No suggestions available to apply');
+      log.warn('No suggestions available to apply');
       return null;
     }
 
     if (styleIndex < 0 || styleIndex >= suggestions.suggestedStyles.length) {
-      console.warn('Invalid style index:', styleIndex);
+      log.warn('Invalid style index:', styleIndex);
       return null;
     }
 
     if (paletteIndex < 0 || paletteIndex >= suggestions.suggestedPalettes.length) {
-      console.warn('Invalid palette index:', paletteIndex);
+      log.warn('Invalid palette index:', paletteIndex);
       return null;
     }
 

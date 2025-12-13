@@ -13,7 +13,7 @@ import {
   FileText,
   X
 } from 'lucide-react';
-import { TemplateConfig, InfographicStyle, ColorPalette } from '../../types';
+import { TemplateConfig, InfographicStyle, ColorPalette, ImageSize, AspectRatio } from '../../types';
 import {
   loadTemplates,
   createTemplate,
@@ -92,8 +92,8 @@ const TemplateBrowser: React.FC<TemplateBrowserProps> = ({
     name: string,
     style: InfographicStyle,
     palette: ColorPalette,
-    size: any,
-    aspectRatio: any,
+    size: ImageSize,
+    aspectRatio: AspectRatio,
     description?: string,
     tags?: string[]
   ) => {

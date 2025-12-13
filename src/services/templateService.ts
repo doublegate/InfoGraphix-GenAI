@@ -4,6 +4,7 @@
  */
 
 import { TemplateConfig, InfographicStyle, ColorPalette, ImageSize, AspectRatio } from '../types';
+import { log } from '../utils/logger';
 
 const STORAGE_KEY = 'infographix_templates';
 
@@ -17,7 +18,7 @@ export const loadTemplates = (): TemplateConfig[] => {
     const templates = JSON.parse(stored);
     return Array.isArray(templates) ? templates : getDefaultTemplates();
   } catch (error) {
-    console.error('Failed to load templates:', error);
+    log.error('Failed to load templates:', error);
     return getDefaultTemplates();
   }
 };
@@ -29,7 +30,7 @@ const saveTemplates = (templates: TemplateConfig[]): void => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(templates));
   } catch (error) {
-    console.error('Failed to save templates:', error);
+    log.error('Failed to save templates:', error);
     throw new Error('Failed to save templates. Storage might be full.');
   }
 };
@@ -78,7 +79,7 @@ export const updateTemplate = (
   const index = templates.findIndex(t => t.id === id);
 
   if (index === -1) {
-    console.error(`Template with id ${id} not found`);
+    log.error(`Template with id ${id} not found`);
     return null;
   }
 

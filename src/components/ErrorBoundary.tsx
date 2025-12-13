@@ -1,5 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { log } from '../utils/logger';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+// import { captureError } from '../services/errorTrackingService';  // Uncomment when Sentry is configured
 
 /**
  * Props for the ErrorBoundary component.
@@ -59,8 +61,14 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     this.setState({ errorInfo });
 
     // Log to console in development
-    console.error('ErrorBoundary caught an error:', error);
-    console.error('Component stack:', errorInfo.componentStack);
+    log.error('ErrorBoundary caught an error:', error);
+    log.error('Component stack:', errorInfo.componentStack);
+
+    // Send to error tracking service (v1.7.0)
+    // Uncomment when Sentry is configured
+    // captureError(error, {
+    //   componentStack: errorInfo.componentStack,
+    // });
 
     // Call optional error callback for external logging
     if (this.props.onError) {

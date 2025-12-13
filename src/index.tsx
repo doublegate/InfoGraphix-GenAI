@@ -4,6 +4,11 @@ import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
 import './i18n'; // Initialize i18n
 import './styles/main.css';
+import { validateEnvironment } from './utils/env';
+import { log } from './utils/logger';
+
+// Validate environment variables in development
+validateEnvironment();
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -15,8 +20,8 @@ if (!rootElement) {
  */
 const handleGlobalError = (error: Error, errorInfo: React.ErrorInfo) => {
   // Log to console in development
-  console.error('Application error:', error);
-  console.error('Component stack:', errorInfo.componentStack);
+  log.error('Application error:', error);
+  log.error('Component stack:', errorInfo.componentStack);
 
   // TODO: Send to error tracking service (Sentry, LogRocket, etc.)
 };

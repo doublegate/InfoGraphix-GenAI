@@ -9,6 +9,7 @@ import {
   ColorPalette,
   StyleSuggestion,
 } from "../types";
+import { log } from "../utils/logger";
 
 // Helper to ensure API Key is ready
 const getAI = () => {
@@ -49,9 +50,10 @@ const isGitHubRepo = (topic: string): boolean => {
 /**
  * Centralized error handler for Gemini API errors
  */
-const handleGeminiError = (error: any): never => {
-  console.error("Gemini API Error:", error);
-  const msg = (error.message || error.toString()).toLowerCase();
+const handleGeminiError = (error: unknown): never => {
+  log.error("Gemini API Error:", error);
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  const msg = errorMessage.toLowerCase();
 
   if (msg.includes("403") || msg.includes("permission_denied")) {
     throw new Error("Permission denied. Please ensure you have selected a valid API Key for the paid tier project.");
@@ -71,8 +73,8 @@ const handleGeminiError = (error: any): never => {
   if (msg.includes("candidate")) {
     throw new Error("The model could not generate a valid response for this prompt. Please try again.");
   }
-  
-  throw new Error(`An error occurred: ${error.message || "Unknown error"}`);
+
+  throw new Error(`An error occurred: ${errorMessage || "Unknown error"}`);
 };
 
 /**
@@ -290,9 +292,9 @@ export const analyzeTopic = async (
     analysis.webSources = webSources;
     return analysis;
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof SyntaxError) {
-      console.error("JSON Parse Error. Raw text:", error.message);
+      log.error("JSON Parse Error. Raw text:", error.message);
       throw new Error("Failed to parse the AI's response. The model output was not valid JSON. Please try again.");
     }
     return handleGeminiError(error);
@@ -432,9 +434,9 @@ export const suggestStyleAndPalette = async (topic: string): Promise<StyleSugges
     const suggestion = JSON.parse(text) as StyleSuggestion;
     return suggestion;
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof SyntaxError) {
-      console.error("JSON Parse Error for suggestions. Raw text:", error.message);
+      log.error("JSON Parse Error for suggestions. Raw text:", error.message);
       throw new Error("Failed to parse AI suggestions. Please try again.");
     }
     return handleGeminiError(error);
@@ -476,7 +478,7 @@ export const generateInfographicImage = async (
     }
     
     throw new Error("No image data found in response.");
-  } catch (error: any) {
+  } catch (error: unknown) {
     return handleGeminiError(error);
   }
 };

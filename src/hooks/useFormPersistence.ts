@@ -6,6 +6,7 @@ import {
   ImageSize,
   InfographicStyle,
 } from '../types';
+import { log } from '../utils/logger';
 
 const STORAGE_KEY = 'infographix_form_draft';
 const DEBOUNCE_MS = 1000; // Save after 1 second of inactivity
@@ -130,11 +131,11 @@ export function useFormPersistence(): UseFormPersistenceReturn {
         if (validated) {
           setValuesState(validated);
         } else {
-          console.warn('Invalid form draft data, using defaults');
+          log.warn('Invalid form draft data, using defaults');
         }
       }
     } catch (e) {
-      console.error('Failed to load form draft:', e);
+      log.error('Failed to load form draft:', e);
     } finally {
       setIsLoaded(true);
     }
@@ -147,7 +148,7 @@ export function useFormPersistence(): UseFormPersistenceReturn {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(valuesToSave));
     } catch (e) {
-      console.error('Failed to save form draft:', e);
+      log.error('Failed to save form draft:', e);
     }
   }, []);
 
@@ -204,7 +205,7 @@ export function useFormPersistence(): UseFormPersistenceReturn {
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch (e) {
-      console.error('Failed to clear form draft:', e);
+      log.error('Failed to clear form draft:', e);
     }
   }, []);
 

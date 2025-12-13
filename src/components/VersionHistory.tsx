@@ -44,9 +44,12 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
   const [itemsPerPage, setItemsPerPage] = useState(25);
   const [currentPage, setCurrentPage] = useState(1);
 
+  // v1.7.0 Loading states
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
+
   // Enhanced filtering with advanced filters
   const filteredVersions = useMemo(() => {
-    let result = versions.filter(v => {
+    const result = versions.filter(v => {
       // Text search
       const matchesSearch = searchQuery === '' ||
         v.topic.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -450,17 +453,31 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
                         </h3>
                         {!isCompareMode && (
                           <button
-                            onClick={(e) => {
+                            onClick={async (e) => {
                               e.stopPropagation();
                               if (window.confirm("Delete this version?")) {
-                                onDeleteVersion(version.id);
+                                setDeletingIds(prev => new Set(prev).add(version.id));
+                                try {
+                                  await onDeleteVersion(version.id);
+                                } finally {
+                                  setDeletingIds(prev => {
+                                    const next = new Set(prev);
+                                    next.delete(version.id);
+                                    return next;
+                                  });
+                                }
                               }
                             }}
-                            className="text-slate-500 hover:text-red-400 transition-opacity absolute top-4 right-4 focus:outline-none focus:ring-2 focus:ring-red-500 rounded"
+                            disabled={deletingIds.has(version.id)}
+                            className="text-slate-500 hover:text-red-400 transition-opacity absolute top-4 right-4 focus:outline-none focus:ring-2 focus:ring-red-500 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Delete Version"
                             aria-label={`Delete version: ${version.data.analysis.title}`}
                           >
-                            <Trash2 className="w-4 h-4" aria-hidden="true" />
+                            {deletingIds.has(version.id) ? (
+                              <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" aria-hidden="true" />
+                            )}
                           </button>
                         )}
                       </div>

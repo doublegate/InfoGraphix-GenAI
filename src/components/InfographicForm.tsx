@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { log } from '../utils/logger';
 import ReactDOM from 'react-dom';
 import { Search, Monitor, Image as ImageIcon, FileText, Cpu, ChevronDown, ChevronUp, Filter, Palette, Paintbrush, RefreshCw, Upload, X, Sparkles, List } from 'lucide-react';
-import { ImageSize, AspectRatio, GithubFilters, InfographicStyle, ColorPalette, TemplateConfig } from '../types';
+import { ImageSize, AspectRatio, GithubFilters, InfographicStyle, ColorPalette, TemplateConfig, InfographicRequest } from '../types';
 import RichSelect, { RichOption } from './RichSelect';
 import { TemplateBrowser } from './TemplateManager';
 import { StyleSuggestions } from './StyleSuggestions';
@@ -9,7 +10,7 @@ import { PaletteGenerator } from './PaletteGenerator';
 import { useStyleSuggestions } from '../hooks/useStyleSuggestions';
 
 interface InfographicFormProps {
-  onSubmit: (topic: string, size: ImageSize, aspectRatio: AspectRatio, style: InfographicStyle, palette: ColorPalette, filters?: GithubFilters, fileContent?: string) => void;
+  onSubmit: (request: InfographicRequest) => void;
   isProcessing: boolean;
   initialValues?: {
     topic: string;
@@ -118,7 +119,8 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
   // File Upload State
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState<string | null>(null);
-  
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
+
   // Filter State
   const [showFilters, setShowFilters] = useState(false);
   const [language, setLanguage] = useState('');
@@ -171,7 +173,7 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
         setHasDraft(true);
       }
     } catch (e) {
-      console.error("Error accessing local storage", e);
+      log.error("Error accessing local storage", e);
     }
   }, []);
 
@@ -208,7 +210,7 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
         if (data.language || data.extensions || data.date) setShowFilters(true);
       }
     } catch (e) {
-      console.error("Failed to restore draft", e);
+      log.error("Failed to restore draft", e);
     }
   };
 
@@ -219,12 +221,18 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
         alert('Please select a valid Markdown (.md) file.');
         return;
       }
+      setIsUploadingFile(true);
       const reader = new FileReader();
       reader.onload = (event) => {
         const content = event.target?.result as string;
         setFileContent(content);
         setFileName(file.name);
         setTopic(file.name.replace(/\.md$/i, '')); // Auto-fill topic with filename
+        setIsUploadingFile(false);
+      };
+      reader.onerror = () => {
+        alert('Error reading file. Please try again.');
+        setIsUploadingFile(false);
       };
       reader.readAsText(file);
     }
@@ -266,7 +274,7 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
   const handlePaletteGenerated = (colors: string[]) => {
     // For now, we can't directly use custom colors in the ColorPalette enum
     // But we can suggest the closest match or save to localStorage for future use
-    console.log('Generated palette colors:', colors);
+    log.info('Generated palette colors:', colors);
     // This would require extending the palette system to support custom palettes
     // For v1.6.0, we save to localStorage and user can manually select closest match
   };
@@ -290,8 +298,16 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
         lastUpdatedAfter: date || undefined
       } : undefined;
 
-      // Pass fileContent if available
-      onSubmit(topic, size, ratio, style, palette, filters, fileContent || undefined);
+      // Create request object and submit
+      onSubmit({
+        topic,
+        size,
+        aspectRatio: ratio,
+        style,
+        palette,
+        filters,
+        fileContent: fileContent || undefined
+      });
     }
   };
 
@@ -336,15 +352,19 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
                 </button>
               )}
               {!fileName && (
-                <label className="text-xs text-blue-400 hover:text-blue-300 cursor-pointer flex items-center gap-1 transition-colors">
-                  <Upload className="w-3 h-3" />
-                  Upload .md file
+                <label className={`text-xs text-blue-400 hover:text-blue-300 cursor-pointer flex items-center gap-1 transition-colors ${isUploadingFile || isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  {isUploadingFile ? (
+                    <div className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Upload className="w-3 h-3" />
+                  )}
+                  {isUploadingFile ? 'Uploading...' : 'Upload .md file'}
                   <input
                     type="file"
                     accept=".md"
                     onChange={handleFileChange}
                     className="hidden"
-                    disabled={isProcessing}
+                    disabled={isProcessing || isUploadingFile}
                   />
                 </label>
               )}

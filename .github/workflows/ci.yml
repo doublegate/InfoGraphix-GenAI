@@ -60,7 +60,31 @@ jobs:
           path: node_modules
           key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
-  # Job 2: TypeScript type checking (parallel with lint if added)
+  # Job 2: ESLint code quality check
+  lint:
+    name: ESLint Check
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Restore node_modules cache
+        uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          fail-on-cache-miss: true
+
+      - name: Run ESLint
+        run: npm run lint
+
+  # Job 3: TypeScript type checking
   typecheck:
     name: TypeScript Type Check
     needs: install
@@ -84,10 +108,40 @@ jobs:
       - name: TypeScript Check
         run: npx tsc --noEmit
 
-  # Job 3: Production build with Vite caching
+  # Job 4: Security audit
+  security:
+    name: Security Audit
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Restore node_modules cache
+        uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          fail-on-cache-miss: true
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Report audit results
+        if: failure()
+        run: |
+          echo "::warning::Security vulnerabilities detected. Run 'npm audit' locally for details."
+
+  # Job 5: Production build with Vite caching
   build:
     name: Build Production
-    needs: typecheck
+    needs: [lint, typecheck, security]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -127,7 +181,7 @@ jobs:
           retention-days: 7
           compression-level: 9
 
-  # Job 4: Bundle size analysis
+  # Job 6: Bundle size analysis
   size-check:
     name: Bundle Size Analysis
     needs: build
@@ -171,7 +225,7 @@ jobs:
             done
           fi
 
-  # Job 5: Build verification
+  # Job 7: Build verification
   verify-build:
     name: Verify Build Output
     needs: build

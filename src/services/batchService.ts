@@ -13,6 +13,7 @@ import {
   AspectRatio,
   GithubFilters
 } from '../types';
+import { log } from '../utils/logger';
 
 const STORAGE_KEY = 'infographix_batch_queues';
 const CONFIG_STORAGE_KEY = 'infographix_batch_configs';
@@ -27,7 +28,7 @@ export const loadQueues = (): BatchQueue[] => {
     const queues = JSON.parse(stored);
     return Array.isArray(queues) ? queues : [];
   } catch (error) {
-    console.error('Failed to load batch queues:', error);
+    log.error('Failed to load batch queues:', error);
     return [];
   }
 };
@@ -39,7 +40,7 @@ const saveQueues = (queues: BatchQueue[]): void => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(queues));
   } catch (error) {
-    console.error('Failed to save batch queues:', error);
+    log.error('Failed to save batch queues:', error);
     throw new Error('Failed to save batch queue. Storage might be full.');
   }
 };
@@ -327,7 +328,7 @@ export const saveBatchConfig = (
     configs.unshift(preset);
     localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(configs));
   } catch (error) {
-    console.error('Failed to save batch config:', error);
+    log.error('Failed to save batch config:', error);
   }
 
   return preset;
@@ -343,7 +344,7 @@ export const loadBatchConfigs = (): BatchConfigPreset[] => {
     const configs = JSON.parse(stored);
     return Array.isArray(configs) ? configs : [];
   } catch (error) {
-    console.error('Failed to load batch configs:', error);
+    log.error('Failed to load batch configs:', error);
     return [];
   }
 };
@@ -363,7 +364,7 @@ export const deleteBatchConfig = (id: string): boolean => {
     localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(filtered));
     return true;
   } catch (error) {
-    console.error('Failed to delete batch config:', error);
+    log.error('Failed to delete batch config:', error);
     return false;
   }
 };

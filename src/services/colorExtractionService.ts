@@ -84,7 +84,7 @@ export async function extractColorsFromImage(
         const colors: ExtractedColor[] = [];
 
         // Extract colors in priority order
-        const swatches: Array<{ key: string; swatch: any }> = [
+        const swatches: Array<{ key: string; swatch: unknown }> = [
           { key: 'Vibrant', swatch: palette.Vibrant },
           { key: 'DarkVibrant', swatch: palette.DarkVibrant },
           { key: 'LightVibrant', swatch: palette.LightVibrant },

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { log } from '../utils/logger';
 import { Key, Lock, ExternalLink } from 'lucide-react';
 
 interface ApiKeySelectorProps {
@@ -19,7 +20,7 @@ const ApiKeySelector: React.FC<ApiKeySelectorProps> = ({ onReady }) => {
     } else {
       // Fallback for environments where aistudio object might not be present (e.g. local dev mock)
       // For this specific challenge, we assume the environment supports it, but safety check:
-      console.warn("window.aistudio not detected. Assuming API_KEY is set in env for development.");
+      log.warn("window.aistudio not detected. Assuming API_KEY is set in env for development.");
       if (process.env.API_KEY) {
         setHasKey(true);
         onReady();

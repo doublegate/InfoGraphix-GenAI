@@ -156,8 +156,14 @@ export interface InfographicRequest {
   size: ImageSize;
   /** Output image aspect ratio */
   aspectRatio: AspectRatio;
+  /** Visual style for the infographic */
+  style: InfographicStyle;
+  /** Color palette for the infographic */
+  palette: ColorPalette;
   /** Optional GitHub-specific filters */
   filters?: GithubFilters;
+  /** Optional file content for analysis (markdown, CSV, etc.) */
+  fileContent?: string;
 }
 
 /**

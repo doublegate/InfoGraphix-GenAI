@@ -9,6 +9,7 @@ import {
   migrateFromLocalStorage,
   checkStorageQuota,
 } from '../services/storageService';
+import { log } from '../utils/logger';
 
 /**
  * Storage quota information
@@ -88,7 +89,7 @@ export function useVersionHistory(): UseVersionHistoryReturn {
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to load versions';
       setError(message);
-      console.error('useVersionHistory load error:', e);
+      log.error('useVersionHistory load error:', e);
     } finally {
       setIsLoading(false);
     }
@@ -103,7 +104,7 @@ export function useVersionHistory(): UseVersionHistoryReturn {
         // One-time migration from localStorage
         await migrateFromLocalStorage();
       } catch (e) {
-        console.error('Migration error:', e);
+        log.error('Migration error:', e);
       }
 
       await loadVersions();
@@ -124,7 +125,7 @@ export function useVersionHistory(): UseVersionHistoryReturn {
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to save version';
       setError(message);
-      console.error('useVersionHistory save error:', e);
+      log.error('useVersionHistory save error:', e);
       return false;
     }
   }, [loadVersions]);
@@ -148,7 +149,7 @@ export function useVersionHistory(): UseVersionHistoryReturn {
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to delete version';
       setError(message);
-      console.error('useVersionHistory delete error:', e);
+      log.error('useVersionHistory delete error:', e);
       return false;
     }
   }, []);
@@ -170,7 +171,7 @@ export function useVersionHistory(): UseVersionHistoryReturn {
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to clear versions';
       setError(message);
-      console.error('useVersionHistory clearAll error:', e);
+      log.error('useVersionHistory clearAll error:', e);
       return false;
     }
   }, []);
@@ -195,7 +196,7 @@ export function useVersionHistory(): UseVersionHistoryReturn {
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to update feedback';
       setError(message);
-      console.error('useVersionHistory updateFeedback error:', e);
+      log.error('useVersionHistory updateFeedback error:', e);
       return false;
     }
   }, []);

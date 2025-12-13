@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { log } from '../utils/logger';
 import { Upload, Palette, Loader2, AlertCircle, CheckCircle, Trash2, Save } from 'lucide-react';
 import {
   extractColorsFromImage,
@@ -84,7 +85,7 @@ export function PaletteGenerator({ onPaletteGenerated, disabled = false }: Palet
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to process image';
       setError(errorMessage);
-      console.error('Image processing error:', err);
+      log.error('Image processing error:', err);
     } finally {
       setIsProcessing(false);
     }
@@ -157,7 +158,7 @@ export function PaletteGenerator({ onPaletteGenerated, disabled = false }: Palet
       setPaletteName('');
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
-      console.error('Failed to save palette:', err);
+      log.error('Failed to save palette:', err);
       setError('Failed to save custom palette');
     }
   };

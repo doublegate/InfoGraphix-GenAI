@@ -9,6 +9,7 @@
  */
 
 import { SavedVersion } from '../types';
+import { log } from '../utils/logger';
 
 const DB_NAME = 'infographix_db';
 const DB_VERSION = 1;
@@ -35,7 +36,7 @@ export const openDatabase = (): Promise<IDBDatabase> => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
     request.onerror = () => {
-      console.error('IndexedDB error:', request.error);
+      log.error('IndexedDB error:', request.error);
       reject(new Error('Failed to open database. Please check browser storage permissions.'));
     };
 
@@ -147,12 +148,12 @@ export const saveVersion = async (
 
     request.onsuccess = () => {
       // Check if cleanup needed
-      cleanupOldVersions().catch(console.error);
+      cleanupOldVersions().catch(log.error);
       resolve();
     };
 
     request.onerror = () => {
-      console.error('Failed to save version:', request.error);
+      log.error('Failed to save version:', request.error);
       reject(new Error('Failed to save to storage. Storage may be full.'));
     };
   });
@@ -183,7 +184,7 @@ export const getAllVersions = async (): Promise<SavedVersion[]> => {
     };
 
     request.onerror = () => {
-      console.error('Failed to load versions:', request.error);
+      log.error('Failed to load versions:', request.error);
       reject(new Error('Failed to load saved versions.'));
     };
   });
@@ -260,11 +261,11 @@ export const cleanupOldVersions = async (): Promise<number> => {
       await deleteVersion(version.id);
       deleted++;
     } catch (e) {
-      console.error('Failed to delete old version:', e);
+      log.error('Failed to delete old version:', e);
     }
   }
 
-  console.log(`Auto-cleaned ${deleted} old versions`);
+  log.info(`Auto-cleaned ${deleted} old versions`);
   return deleted;
 };
 
@@ -316,19 +317,19 @@ export const migrateFromLocalStorage = async (): Promise<number> => {
         await saveVersion(version, true); // Compress during migration
         migrated++;
       } catch (e) {
-        console.error('Failed to migrate version:', e);
+        log.error('Failed to migrate version:', e);
       }
     }
 
     // Clear localStorage after successful migration
     if (migrated > 0) {
       localStorage.removeItem('infographix_versions');
-      console.log(`Migrated ${migrated} versions from localStorage to IndexedDB`);
+      log.info(`Migrated ${migrated} versions from localStorage to IndexedDB`);
     }
 
     return migrated;
   } catch (e) {
-    console.error('Migration failed:', e);
+    log.error('Migration failed:', e);
     return 0;
   }
 };
