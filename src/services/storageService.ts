@@ -70,6 +70,14 @@ export interface FormDraft {
 let dbInstance: IDBDatabase | null = null;
 
 /**
+ * Resets the database connection singleton.
+ * @internal - For testing purposes only
+ */
+export const resetDatabaseForTesting = (): void => {
+  dbInstance = null;
+};
+
+/**
  * Opens or creates the IndexedDB database.
  * Uses singleton pattern to reuse connections.
  */
