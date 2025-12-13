@@ -631,34 +631,78 @@ const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessin
           {/* Aspect Ratio Selection */}
           <div className="space-y-3">
             <span className="text-sm font-medium text-slate-300 ml-1 flex items-center gap-2">
-              <ImageIcon className="w-4 h-4" /> Orientation
+              <ImageIcon className="w-4 h-4" /> Aspect Ratio
             </span>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-5 gap-2">
+              <button
+                type="button"
+                onClick={() => setRatio(AspectRatio.Square)}
+                disabled={isProcessing}
+                title="1:1 Square"
+                className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all border flex flex-col items-center justify-center gap-1 ${
+                  ratio === AspectRatio.Square
+                    ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/25'
+                    : 'bg-slate-900 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                }`}
+              >
+                <div className="w-4 h-4 border-2 border-current rounded-sm"></div>
+                <span>1:1</span>
+              </button>
               <button
                 type="button"
                 onClick={() => setRatio(AspectRatio.Portrait)}
                 disabled={isProcessing}
-                className={`py-2 px-3 rounded-lg text-sm font-semibold transition-all border flex items-center justify-center gap-2 ${
+                title="9:16 Portrait"
+                className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all border flex flex-col items-center justify-center gap-1 ${
                   ratio === AspectRatio.Portrait
                     ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/25'
                     : 'bg-slate-900 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
                 }`}
               >
-                <div className="w-3 h-4 border-2 border-current rounded-sm"></div>
-                Portrait
+                <div className="w-2.5 h-4 border-2 border-current rounded-sm"></div>
+                <span>9:16</span>
               </button>
               <button
                 type="button"
                 onClick={() => setRatio(AspectRatio.Landscape)}
                 disabled={isProcessing}
-                className={`py-2 px-3 rounded-lg text-sm font-semibold transition-all border flex items-center justify-center gap-2 ${
+                title="16:9 Landscape"
+                className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all border flex flex-col items-center justify-center gap-1 ${
                   ratio === AspectRatio.Landscape
                     ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/25'
                     : 'bg-slate-900 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
                 }`}
               >
-                <div className="w-4 h-3 border-2 border-current rounded-sm"></div>
-                Landscape
+                <div className="w-5 h-3 border-2 border-current rounded-sm"></div>
+                <span>16:9</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setRatio(AspectRatio.StandardPortrait)}
+                disabled={isProcessing}
+                title="3:4 Standard Portrait"
+                className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all border flex flex-col items-center justify-center gap-1 ${
+                  ratio === AspectRatio.StandardPortrait
+                    ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/25'
+                    : 'bg-slate-900 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                }`}
+              >
+                <div className="w-3 h-4 border-2 border-current rounded-sm"></div>
+                <span>3:4</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setRatio(AspectRatio.StandardLandscape)}
+                disabled={isProcessing}
+                title="4:3 Standard Landscape"
+                className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all border flex flex-col items-center justify-center gap-1 ${
+                  ratio === AspectRatio.StandardLandscape
+                    ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/25'
+                    : 'bg-slate-900 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                }`}
+              >
+                <div className="w-5 h-4 border-2 border-current rounded-sm"></div>
+                <span>4:3</span>
               </button>
             </div>
           </div>

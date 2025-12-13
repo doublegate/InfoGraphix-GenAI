@@ -11,7 +11,10 @@ import LanguageSelector from './components/LanguageSelector';
 import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import { TemplateBrowser } from './components/TemplateManager';
-import { SavedVersion, Feedback, InfographicStyle, ColorPalette, TemplateConfig } from './types';
+import { SavedVersion, Feedback, InfographicStyle, ColorPalette, TemplateConfig, BatchQueue, BatchStatus } from './types';
+import { analyzeTopic, generateInfographicImage } from './services/geminiService';
+import { updateQueueItem, getNextPendingItem, isQueueActive } from './services/batchService';
+import { DELAY_BETWEEN_ITEMS } from './constants/performance';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useAnnouncer } from './hooks/useAnnouncer';
 import { useHighContrast } from './hooks/useHighContrast';
@@ -186,6 +189,76 @@ function App() {
     }
   }, [openBatchManager]);
 
+  // Batch queue processing handler
+  const handleStartBatchQueue = useCallback(async (queue: BatchQueue) => {
+    if (!queue || !isQueueActive(queue)) return;
+
+    let currentQueue = queue;
+    let nextItem = getNextPendingItem(currentQueue);
+
+    while (nextItem) {
+      try {
+        // Mark item as processing
+        await updateQueueItem(queue.id, nextItem.id, {
+          status: BatchStatus.Processing,
+          startedAt: Date.now()
+        });
+
+        // Step 1: Analyze topic
+        const analysis = await analyzeTopic(
+          nextItem.topic,
+          nextItem.style,
+          nextItem.palette,
+          nextItem.filters
+        );
+
+        // Step 2: Generate image
+        const imageUrl = await generateInfographicImage(
+          analysis.visualPlan,
+          nextItem.size,
+          nextItem.aspectRatio
+        );
+
+        // Mark item as complete with result
+        const updatedQueue = await updateQueueItem(queue.id, nextItem.id, {
+          status: BatchStatus.Complete,
+          completedAt: Date.now(),
+          result: { imageUrl, analysis }
+        });
+
+        if (updatedQueue) {
+          currentQueue = updatedQueue;
+        }
+      } catch (err) {
+        // Mark item as failed
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        const updatedQueue = await updateQueueItem(queue.id, nextItem.id, {
+          status: BatchStatus.Failed,
+          completedAt: Date.now(),
+          error: errorMessage
+        });
+
+        if (updatedQueue) {
+          currentQueue = updatedQueue;
+        }
+
+        // Stop on error if configured
+        if (queue.config?.stopOnError) {
+          break;
+        }
+      }
+
+      // Delay between items to avoid rate limiting
+      const delay = queue.config?.delayBetweenItems ?? DELAY_BETWEEN_ITEMS;
+      if (delay > 0) {
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+
+      // Get next pending item
+      nextItem = getNextPendingItem(currentQueue);
+    }
+  }, []);
+
   // Handle keyboard shortcut to trigger new generation
   const handleKeyboardGenerate = useCallback(() => {
     // Trigger form submission if not processing
@@ -280,7 +353,7 @@ function App() {
               </h1>
             </div>
             <p className="text-slate-400 max-w-xl">
-              Generative infographics from Wikipedia & GitHub using Gemini 3 Pro.
+              Generate Infographics - Wikipedia &amp; GitHub w/ Gemini 3 Pro
             </p>
           </div>
           
@@ -437,6 +510,7 @@ function App() {
               closeBatchManager();
               setActiveMode('single');
             }}
+            onStartQueue={handleStartBatchQueue}
           />
         </Suspense>
       </ErrorBoundary>
