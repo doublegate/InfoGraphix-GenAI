@@ -14,8 +14,7 @@ import {
   migrateFormDraftFromLocalStorage,
   FormDraft,
 } from '../services/storageService';
-
-const DEBOUNCE_MS = 1000; // Save after 1 second of inactivity
+import { DEBOUNCE_MS } from '../constants/ui';
 
 // Migration flag
 let migrationComplete = false;

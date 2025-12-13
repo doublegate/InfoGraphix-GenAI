@@ -16,15 +16,21 @@
 
 import { SavedVersion, TemplateConfig } from '../types';
 import { log } from '../utils/logger';
+import {
+  MAX_VERSIONS,
+  QUOTA_WARNING_THRESHOLD,
+  COMPRESSION_THRESHOLD,
+  INDEXED_DB,
+  STORAGE_KEYS,
+} from '../constants/storage';
+import { MAX_WIDTH, IMAGE_QUALITY } from '../constants/performance';
 
-const DB_NAME = 'infographix_db';
-const DB_VERSION = 2; // v1.8.0 TD-003: Added templates, batchQueues, formDrafts stores
-const STORE_VERSIONS = 'versions';
-const STORE_TEMPLATES = 'templates';
-const STORE_BATCH_QUEUES = 'batchQueues';
-const STORE_FORM_DRAFTS = 'formDrafts';
-const MAX_VERSIONS = 50; // Auto-cleanup threshold
-const QUOTA_WARNING_THRESHOLD = 0.8; // Warn at 80% capacity
+const DB_NAME = INDEXED_DB.NAME;
+const DB_VERSION = INDEXED_DB.VERSION;
+const STORE_VERSIONS = INDEXED_DB.STORES.VERSIONS;
+const STORE_TEMPLATES = INDEXED_DB.STORES.TEMPLATES;
+const STORE_BATCH_QUEUES = INDEXED_DB.STORES.BATCH_QUEUES;
+const STORE_FORM_DRAFTS = INDEXED_DB.STORES.FORM_DRAFTS;
 
 /**
  * Batch queue item interface
@@ -131,12 +137,12 @@ export const openDatabase = (): Promise<IDBDatabase> => {
  */
 export const compressImage = async (
   dataUrl: string,
-  maxWidth = 1920,
-  quality = 0.8
+  maxWidth = MAX_WIDTH,
+  quality = IMAGE_QUALITY
 ): Promise<string> => {
   return new Promise((resolve) => {
     // Skip if already small
-    if (dataUrl.length < 100000) {
+    if (dataUrl.length < COMPRESSION_THRESHOLD) {
       resolve(dataUrl);
       return;
     }
@@ -368,7 +374,7 @@ export const checkStorageQuota = async (): Promise<{
  * Call this on app startup to handle upgrades from older versions.
  */
 export const migrateFromLocalStorage = async (): Promise<number> => {
-  const stored = localStorage.getItem('infographix_versions');
+  const stored = localStorage.getItem(STORAGE_KEYS.VERSIONS);
   if (!stored) return 0;
 
   try {
@@ -386,7 +392,7 @@ export const migrateFromLocalStorage = async (): Promise<number> => {
 
     // Clear localStorage after successful migration
     if (migrated > 0) {
-      localStorage.removeItem('infographix_versions');
+      localStorage.removeItem(STORAGE_KEYS.VERSIONS);
       log.info(`Migrated ${migrated} versions from localStorage to IndexedDB`);
     }
 
@@ -720,7 +726,7 @@ export const clearFormDraft = async (): Promise<void> => {
  * Returns count of migrated templates.
  */
 export const migrateTemplatesFromLocalStorage = async (): Promise<number> => {
-  const stored = localStorage.getItem('infographix_templates');
+  const stored = localStorage.getItem(STORAGE_KEYS.TEMPLATES);
   if (!stored) return 0;
 
   try {
@@ -738,7 +744,7 @@ export const migrateTemplatesFromLocalStorage = async (): Promise<number> => {
     }
 
     if (migrated > 0) {
-      localStorage.removeItem('infographix_templates');
+      localStorage.removeItem(STORAGE_KEYS.TEMPLATES);
       log.info(`Migrated ${migrated} templates from localStorage to IndexedDB`);
     }
 
@@ -754,7 +760,7 @@ export const migrateTemplatesFromLocalStorage = async (): Promise<number> => {
  * Returns count of migrated items.
  */
 export const migrateBatchQueueFromLocalStorage = async (): Promise<number> => {
-  const stored = localStorage.getItem('infographix_batch_queues');
+  const stored = localStorage.getItem(STORAGE_KEYS.BATCH_QUEUES);
   if (!stored) return 0;
 
   try {
@@ -790,7 +796,7 @@ export const migrateBatchQueueFromLocalStorage = async (): Promise<number> => {
     }
 
     if (migrated > 0) {
-      localStorage.removeItem('infographix_batch_queues');
+      localStorage.removeItem(STORAGE_KEYS.BATCH_QUEUES);
       log.info(`Migrated ${migrated} batch items from localStorage to IndexedDB`);
     }
 
@@ -806,7 +812,7 @@ export const migrateBatchQueueFromLocalStorage = async (): Promise<number> => {
  * Returns true if migration succeeded.
  */
 export const migrateFormDraftFromLocalStorage = async (): Promise<boolean> => {
-  const stored = localStorage.getItem('infographix_form_draft');
+  const stored = localStorage.getItem(STORAGE_KEYS.FORM_DRAFT);
   if (!stored) return false;
 
   try {
@@ -823,7 +829,7 @@ export const migrateFormDraftFromLocalStorage = async (): Promise<boolean> => {
     };
 
     await saveFormDraft(formDraft);
-    localStorage.removeItem('infographix_form_draft');
+    localStorage.removeItem(STORAGE_KEYS.FORM_DRAFT);
     log.info('Migrated form draft from localStorage to IndexedDB');
     return true;
   } catch (e) {

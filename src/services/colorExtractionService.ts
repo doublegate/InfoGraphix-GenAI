@@ -1,11 +1,22 @@
 /**
  * Color Extraction Service
+ * v1.9.0 - TD-020: Extracted magic numbers to constants
  *
  * Provides color extraction from images, color theory algorithms,
  * and WCAG contrast ratio checking - all client-side.
  */
 
 import { Vibrant } from 'node-vibrant/browser';
+import {
+  MAX_COLORS,
+  WCAG_AA,
+  WCAG_AAA,
+  LUMINANCE_THRESHOLD,
+  COLOR_THEORY,
+  DEFAULT_SCHEME_COUNT,
+} from '../constants/colors';
+import { STORAGE_KEYS } from '../constants/storage';
+import { safeLocalStorageGet, safeLocalStorageSet } from '../utils/storageHelpers';
 
 /**
  * Represents an extracted color with metadata
@@ -70,7 +81,7 @@ export interface ColorScheme {
  */
 export async function extractColorsFromImage(
   file: File,
-  maxColors: number = 6
+  maxColors: number = MAX_COLORS
 ): Promise<ExtractedColor[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -223,7 +234,7 @@ export function hslToRgb(hsl: [number, number, number]): [number, number, number
 export function generateColorScheme(
   baseColor: string,
   type: ColorSchemeType,
-  count: number = 5
+  count: number = DEFAULT_SCHEME_COUNT
 ): string[] {
   const rgb = hexToRgb(baseColor);
   const [h, s, l] = rgbToHsl(rgb);
@@ -233,34 +244,34 @@ export function generateColorScheme(
   switch (type) {
     case 'complementary':
       // 180 degrees opposite
-      colors.push(rgbToHex(hslToRgb([(h + 180) % 360, s, l])));
+      colors.push(rgbToHex(hslToRgb([(h + COLOR_THEORY.COMPLEMENTARY) % 360, s, l])));
       break;
 
     case 'triadic':
       // 120 degrees apart
-      colors.push(rgbToHex(hslToRgb([(h + 120) % 360, s, l])));
-      colors.push(rgbToHex(hslToRgb([(h + 240) % 360, s, l])));
+      colors.push(rgbToHex(hslToRgb([(h + COLOR_THEORY.TRIADIC[0]) % 360, s, l])));
+      colors.push(rgbToHex(hslToRgb([(h + COLOR_THEORY.TRIADIC[1]) % 360, s, l])));
       break;
 
     case 'analogous':
       // Adjacent colors (30 degrees apart)
       for (let i = 1; i < count; i++) {
-        const offset = i * 30;
+        const offset = i * COLOR_THEORY.ANALOGOUS_STEP;
         colors.push(rgbToHex(hslToRgb([(h + offset) % 360, s, l])));
       }
       break;
 
     case 'split-complementary':
       // Complementary color split into two adjacent
-      colors.push(rgbToHex(hslToRgb([(h + 150) % 360, s, l])));
-      colors.push(rgbToHex(hslToRgb([(h + 210) % 360, s, l])));
+      colors.push(rgbToHex(hslToRgb([(h + COLOR_THEORY.SPLIT_COMPLEMENTARY[0]) % 360, s, l])));
+      colors.push(rgbToHex(hslToRgb([(h + COLOR_THEORY.SPLIT_COMPLEMENTARY[1]) % 360, s, l])));
       break;
 
     case 'tetradic':
       // Rectangle/square (90 degrees apart)
-      colors.push(rgbToHex(hslToRgb([(h + 90) % 360, s, l])));
-      colors.push(rgbToHex(hslToRgb([(h + 180) % 360, s, l])));
-      colors.push(rgbToHex(hslToRgb([(h + 270) % 360, s, l])));
+      colors.push(rgbToHex(hslToRgb([(h + COLOR_THEORY.TETRADIC[0]) % 360, s, l])));
+      colors.push(rgbToHex(hslToRgb([(h + COLOR_THEORY.TETRADIC[1]) % 360, s, l])));
+      colors.push(rgbToHex(hslToRgb([(h + COLOR_THEORY.TETRADIC[2]) % 360, s, l])));
       break;
   }
 
@@ -316,7 +327,7 @@ export function meetsWCAG_AA(
   isLargeText: boolean = false
 ): boolean {
   const ratio = checkContrastRatio(fgColor, bgColor);
-  return isLargeText ? ratio >= 3 : ratio >= 4.5;
+  return isLargeText ? ratio >= WCAG_AA.LARGE : ratio >= WCAG_AA.NORMAL;
 }
 
 /**
@@ -366,7 +377,7 @@ export function meetsWCAG_AAA(
   isLargeText: boolean = false
 ): boolean {
   const ratio = checkContrastRatio(fgColor, bgColor);
-  return isLargeText ? ratio >= 4.5 : ratio >= 7;
+  return isLargeText ? ratio >= WCAG_AAA.LARGE : ratio >= WCAG_AAA.NORMAL;
 }
 
 /**
@@ -380,7 +391,7 @@ export function getAccessibleTextColor(bgColor: string): string {
   const luminance = getRelativeLuminance(bgRgb);
 
   // Use white text for dark backgrounds, black for light
-  return luminance > 0.5 ? '#000000' : '#FFFFFF';
+  return luminance > LUMINANCE_THRESHOLD ? '#000000' : '#FFFFFF';
 }
 
 /**
@@ -398,7 +409,7 @@ export function saveCustomPalette(palette: CustomPalette): void {
     palettes.push(palette);
   }
 
-  localStorage.setItem('infographix_custom_palettes', JSON.stringify(palettes));
+  safeLocalStorageSet(STORAGE_KEYS.CUSTOM_PALETTES, palettes);
 }
 
 /**
@@ -407,8 +418,7 @@ export function saveCustomPalette(palette: CustomPalette): void {
  * @returns Array of custom palettes
  */
 export function getCustomPalettes(): CustomPalette[] {
-  const stored = localStorage.getItem('infographix_custom_palettes');
-  return stored ? JSON.parse(stored) : [];
+  return safeLocalStorageGet<CustomPalette[]>(STORAGE_KEYS.CUSTOM_PALETTES, []);
 }
 
 /**
@@ -419,7 +429,7 @@ export function getCustomPalettes(): CustomPalette[] {
 export function deleteCustomPalette(paletteId: string): void {
   const palettes = getCustomPalettes();
   const filtered = palettes.filter((p) => p.id !== paletteId);
-  localStorage.setItem('infographix_custom_palettes', JSON.stringify(filtered));
+  safeLocalStorageSet(STORAGE_KEYS.CUSTOM_PALETTES, filtered);
 }
 
 /**

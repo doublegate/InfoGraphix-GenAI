@@ -1,7 +1,17 @@
 /**
  * Validation utilities for form inputs
- * v1.8.0 - TD-031
+ * v1.9.0 - TD-020: Extracted magic numbers to constants
  */
+
+import {
+  MIN_TOPIC_LENGTH,
+  MAX_TOPIC_LENGTH,
+  VALID_PROTOCOLS,
+  GITHUB_DOMAIN,
+  FILE_EXTENSION_PATTERN,
+  GITHUB_REPO_PATTERN,
+  VALIDATION_ERRORS as ERRORS,
+} from '../constants/validation';
 
 /**
  * Validates a URL string
@@ -16,7 +26,7 @@ export function isValidURL(url: string): boolean {
   try {
     const urlObj = new URL(url);
     // Must have http or https protocol
-    return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+    return VALID_PROTOCOLS.includes(urlObj.protocol as typeof VALID_PROTOCOLS[number]);
   } catch {
     return false;
   }
@@ -39,14 +49,11 @@ export function isValidGitHubRepo(repo: string): boolean {
 
   const trimmed = repo.trim();
 
-  // Pattern for owner/repo format
-  const ownerRepoPattern = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/;
-
   // If it's a URL, extract owner/repo
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
     try {
       const url = new URL(trimmed);
-      if (url.hostname !== 'github.com') {
+      if (url.hostname !== GITHUB_DOMAIN) {
         return false;
       }
 
@@ -60,14 +67,14 @@ export function isValidGitHubRepo(repo: string): boolean {
       const repo = pathParts[1].replace(/\.git$/, '');
       const ownerRepo = `${pathParts[0]}/${repo}`;
 
-      return ownerRepoPattern.test(ownerRepo);
+      return GITHUB_REPO_PATTERN.test(ownerRepo);
     } catch {
       return false;
     }
   }
 
   // Direct owner/repo format
-  return ownerRepoPattern.test(trimmed);
+  return GITHUB_REPO_PATTERN.test(trimmed);
 }
 
 /**
@@ -122,7 +129,11 @@ export function isValidDate(date: string): boolean {
  * @param maxLength - Maximum allowed length (default: 1000)
  * @returns True if valid topic, false otherwise
  */
-export function isValidTopic(topic: string, minLength = 3, maxLength = 1000): boolean {
+export function isValidTopic(
+  topic: string,
+  minLength = MIN_TOPIC_LENGTH,
+  maxLength = MAX_TOPIC_LENGTH
+): boolean {
   if (!topic || !topic.trim()) {
     return false;
   }
@@ -141,24 +152,14 @@ export function isValidFileExtensions(extensions: string): boolean {
     return true; // Optional field
   }
 
-  // Pattern for valid file extensions (e.g., js,ts,tsx or .js,.ts,.tsx)
-  const pattern = /^\.?[a-zA-Z0-9]+(,\s*\.?[a-zA-Z0-9]+)*$/;
-  return pattern.test(extensions.trim());
+  return FILE_EXTENSION_PATTERN.test(extensions.trim());
 }
 
 /**
  * Validation error messages
+ * Re-export from constants for backwards compatibility
  */
-export const ValidationErrors = {
-  URL_INVALID: 'Please enter a valid URL starting with http:// or https://',
-  GITHUB_REPO_INVALID: 'Please enter a valid GitHub repository (e.g., owner/repo or https://github.com/owner/repo)',
-  DATE_RANGE_INVALID: 'End date must be after or equal to start date',
-  DATE_INVALID: 'Please enter a valid date in YYYY-MM-DD format',
-  TOPIC_TOO_SHORT: 'Topic must be at least 3 characters long',
-  TOPIC_TOO_LONG: 'Topic must be less than 1000 characters',
-  TOPIC_REQUIRED: 'Topic is required',
-  FILE_EXTENSIONS_INVALID: 'Please enter valid file extensions (e.g., js,ts,tsx)',
-} as const;
+export const ValidationErrors = ERRORS;
 
 /**
  * Validation result type
@@ -186,38 +187,38 @@ export function validateInfographicForm(data: {
   // Validate topic (required)
   if (!isValidTopic(data.topic)) {
     if (!data.topic || !data.topic.trim()) {
-      errors.topic = ValidationErrors.TOPIC_REQUIRED;
-    } else if (data.topic.trim().length < 3) {
-      errors.topic = ValidationErrors.TOPIC_TOO_SHORT;
-    } else if (data.topic.trim().length > 1000) {
-      errors.topic = ValidationErrors.TOPIC_TOO_LONG;
+      errors.topic = ERRORS.TOPIC_REQUIRED;
+    } else if (data.topic.trim().length < MIN_TOPIC_LENGTH) {
+      errors.topic = ERRORS.TOPIC_TOO_SHORT;
+    } else if (data.topic.trim().length > MAX_TOPIC_LENGTH) {
+      errors.topic = ERRORS.TOPIC_TOO_LONG;
     }
   }
 
   // Validate GitHub repo (optional)
   if (data.githubRepo && !isValidGitHubRepo(data.githubRepo)) {
-    errors.githubRepo = ValidationErrors.GITHUB_REPO_INVALID;
+    errors.githubRepo = ERRORS.GITHUB_REPO_INVALID;
   }
 
   // Validate URL (optional)
   if (data.url && !isValidURL(data.url)) {
-    errors.url = ValidationErrors.URL_INVALID;
+    errors.url = ERRORS.URL_INVALID;
   }
 
   // Validate date range (optional)
   if (data.dateStart && data.dateEnd) {
     if (!isValidDateRange(data.dateStart, data.dateEnd)) {
-      errors.dateRange = ValidationErrors.DATE_RANGE_INVALID;
+      errors.dateRange = ERRORS.DATE_RANGE_INVALID;
     }
   } else if (data.dateStart && !isValidDate(data.dateStart)) {
-    errors.dateStart = ValidationErrors.DATE_INVALID;
+    errors.dateStart = ERRORS.DATE_INVALID;
   } else if (data.dateEnd && !isValidDate(data.dateEnd)) {
-    errors.dateEnd = ValidationErrors.DATE_INVALID;
+    errors.dateEnd = ERRORS.DATE_INVALID;
   }
 
   // Validate file extensions (optional)
   if (data.fileExtensions && !isValidFileExtensions(data.fileExtensions)) {
-    errors.fileExtensions = ValidationErrors.FILE_EXTENSIONS_INVALID;
+    errors.fileExtensions = ERRORS.FILE_EXTENSIONS_INVALID;
   }
 
   return {

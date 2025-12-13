@@ -23,8 +23,11 @@ import {
   migrateBatchQueueFromLocalStorage,
   BatchQueueItem,
 } from './storageService';
+import { DELAY_BETWEEN_ITEMS, BATCH_DEFAULTS } from '../constants/performance';
+import { STORAGE_KEYS } from '../constants/storage';
+import { safeLocalStorageGet, safeLocalStorageSet } from '../utils/storageHelpers';
 
-const CONFIG_STORAGE_KEY = 'infographix_batch_configs';
+const CONFIG_STORAGE_KEY = STORAGE_KEYS.BATCH_CONFIGS;
 
 // Migration flag
 let migrationComplete = false;
@@ -75,8 +78,8 @@ const convertToQueue = (items: BatchQueueItem[]): BatchQueue => {
     status: deriveQueueStatus(batchItems),
     createdAt: Date.now(),
     config: {
-      delayBetweenItems: 2000,
-      stopOnError: false,
+      delayBetweenItems: DELAY_BETWEEN_ITEMS,
+      stopOnError: BATCH_DEFAULTS.STOP_ON_ERROR,
     },
   };
 };
@@ -110,8 +113,8 @@ export const createQueue = async (
   size: ImageSize,
   aspectRatio: AspectRatio,
   filters?: GithubFilters,
-  delayBetweenItems: number = 2000,
-  stopOnError: boolean = false
+  delayBetweenItems: number = DELAY_BETWEEN_ITEMS,
+  stopOnError: boolean = BATCH_DEFAULTS.STOP_ON_ERROR
 ): Promise<BatchQueue> => {
   await ensureMigration();
 
@@ -394,8 +397,8 @@ export const saveBatchConfig = (
   palette: ColorPalette,
   size: ImageSize,
   aspectRatio: AspectRatio,
-  delayBetweenItems: number = 2000,
-  stopOnError: boolean = false,
+  delayBetweenItems: number = DELAY_BETWEEN_ITEMS,
+  stopOnError: boolean = BATCH_DEFAULTS.STOP_ON_ERROR,
   filters?: GithubFilters
 ): BatchConfigPreset => {
   const preset: BatchConfigPreset = {
@@ -411,14 +414,9 @@ export const saveBatchConfig = (
     createdAt: Date.now()
   };
 
-  try {
-    const stored = localStorage.getItem(CONFIG_STORAGE_KEY);
-    const configs = stored ? JSON.parse(stored) : [];
-    configs.unshift(preset);
-    localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(configs));
-  } catch (error) {
-    log.error('Failed to save batch config:', error);
-  }
+  const configs = safeLocalStorageGet<BatchConfigPreset[]>(CONFIG_STORAGE_KEY, []);
+  configs.unshift(preset);
+  safeLocalStorageSet(CONFIG_STORAGE_KEY, configs);
 
   return preset;
 };
@@ -427,33 +425,20 @@ export const saveBatchConfig = (
  * Load batch configuration presets
  */
 export const loadBatchConfigs = (): BatchConfigPreset[] => {
-  try {
-    const stored = localStorage.getItem(CONFIG_STORAGE_KEY);
-    if (!stored) return [];
-    const configs = JSON.parse(stored);
-    return Array.isArray(configs) ? configs : [];
-  } catch (error) {
-    log.error('Failed to load batch configs:', error);
-    return [];
-  }
+  const configs = safeLocalStorageGet<BatchConfigPreset[]>(CONFIG_STORAGE_KEY, []);
+  return Array.isArray(configs) ? configs : [];
 };
 
 /**
  * Delete a batch configuration preset
  */
 export const deleteBatchConfig = (id: string): boolean => {
-  try {
-    const configs = loadBatchConfigs();
-    const filtered = configs.filter(c => c.id !== id);
+  const configs = loadBatchConfigs();
+  const filtered = configs.filter(c => c.id !== id);
 
-    if (filtered.length === configs.length) {
-      return false;
-    }
-
-    localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(filtered));
-    return true;
-  } catch (error) {
-    log.error('Failed to delete batch config:', error);
+  if (filtered.length === configs.length) {
     return false;
   }
+
+  return safeLocalStorageSet(CONFIG_STORAGE_KEY, filtered);
 };
