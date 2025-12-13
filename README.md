@@ -1,6 +1,6 @@
 # InfoGraphix AI
 
-> Transform any topic into stunning, AI-generated infographics using Google Gemini
+> From raw ideas to publication-ready visuals in seconds: AI-powered deep research meets stunning 4K infographic generation. Feed it topics, URLs, or GitHub repos and watch Gemini's two-phase intelligence transform complex information into professionally designed, customizable visual content.
 
 <p align="center">
   <img src="images/Infographix-GenAI_sketch.jpg" alt="InfoGraphix AI Concept Sketch" width="800">
