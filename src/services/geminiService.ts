@@ -10,6 +10,21 @@ import {
   StyleSuggestion,
 } from "../types";
 import { log } from "../utils/logger";
+import { createRateLimiter, RateLimiter } from "../utils/rateLimiter";
+
+// Singleton rate limiter instance
+let rateLimiterInstance: RateLimiter | null = null;
+
+/**
+ * Get or create the rate limiter instance.
+ * Exported for UI components to access rate limit status.
+ */
+export const getRateLimiter = (): RateLimiter => {
+  if (!rateLimiterInstance) {
+    rateLimiterInstance = createRateLimiter();
+  }
+  return rateLimiterInstance;
+};
 
 // Helper to ensure API Key is ready
 const getAI = () => {
@@ -59,7 +74,10 @@ const handleGeminiError = (error: unknown): never => {
     throw new Error("Permission denied. Please ensure you have selected a valid API Key for the paid tier project.");
   }
   if (msg.includes("429") || msg.includes("resource_exhausted")) {
-    throw new Error("Rate limit exceeded. We're getting too many requests. Please wait a moment and try again.");
+    // Activate rate limiter cooldown
+    getRateLimiter().activateCooldown();
+    const waitTime = Math.ceil(getRateLimiter().getTimeUntilReset() / 1000);
+    throw new Error(`Rate limit exceeded. Please wait ${waitTime} seconds before trying again.`);
   }
   if (msg.includes("503") || msg.includes("unavailable") || msg.includes("overloaded")) {
     throw new Error("The Gemini service is currently overloaded. Please try again in a few seconds.");
@@ -81,12 +99,22 @@ const handleGeminiError = (error: unknown): never => {
  * Step 1: Analyze the topic using Gemini 3 Pro with Thinking Mode.
  */
 export const analyzeTopic = async (
-  topic: string, 
-  style: InfographicStyle, 
-  palette: ColorPalette, 
+  topic: string,
+  style: InfographicStyle,
+  palette: ColorPalette,
   filters?: GithubFilters,
   providedContent?: string
 ): Promise<AnalysisResult> => {
+  // Check rate limit before making request
+  const rateLimiter = getRateLimiter();
+  if (!rateLimiter.canMakeRequest()) {
+    const waitTime = Math.ceil(rateLimiter.getTimeUntilReset() / 1000);
+    throw new Error(`Rate limit exceeded. Please wait ${waitTime} seconds before trying again.`);
+  }
+
+  // Record the request
+  rateLimiter.recordRequest();
+
   const ai = getAI();
   
   let filterContext = "";
@@ -451,6 +479,16 @@ export const generateInfographicImage = async (
   size: ImageSize,
   aspectRatio: AspectRatio
 ): Promise<string> => {
+  // Check rate limit before making request
+  const rateLimiter = getRateLimiter();
+  if (!rateLimiter.canMakeRequest()) {
+    const waitTime = Math.ceil(rateLimiter.getTimeUntilReset() / 1000);
+    throw new Error(`Rate limit exceeded. Please wait ${waitTime} seconds before trying again.`);
+  }
+
+  // Record the request
+  rateLimiter.recordRequest();
+
   const ai = getAI();
   const model = 'gemini-3-pro-image-preview';
 

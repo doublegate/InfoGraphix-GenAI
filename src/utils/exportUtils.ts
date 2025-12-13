@@ -8,7 +8,17 @@ import JSZip from 'jszip';
 import { AspectRatio, ImageSize, ExportFormat } from '../types';
 
 /**
- * Convert base64 data URL to blob
+ * Convert a base64 data URL to a Blob object.
+ * Used for file downloads and ZIP archive creation.
+ *
+ * @param dataURL - Base64-encoded data URL (e.g., "data:image/png;base64,...")
+ * @returns Blob object with appropriate MIME type
+ *
+ * @example
+ * ```typescript
+ * const blob = dataURLtoBlob("data:image/png;base64,iVBORw0KG...");
+ * console.log(blob.type); // "image/png"
+ * ```
  */
 const dataURLtoBlob = (dataURL: string): Blob => {
   const parts = dataURL.split(',');
@@ -23,7 +33,17 @@ const dataURLtoBlob = (dataURL: string): Blob => {
 };
 
 /**
- * Get dimension in pixels based on image size
+ * Convert ImageSize enum to actual pixel dimension.
+ * Returns the base dimension used for calculating width/height with aspect ratios.
+ *
+ * @param size - ImageSize enum value (Resolution_1K, Resolution_2K, or Resolution_4K)
+ * @returns Base dimension in pixels (1024, 2048, or 4096)
+ *
+ * @example
+ * ```typescript
+ * getSizeDimension(ImageSize.Resolution_2K); // 2048
+ * getSizeDimension(ImageSize.Resolution_4K); // 4096
+ * ```
  */
 const getSizeDimension = (size: ImageSize): number => {
   switch (size) {
@@ -39,7 +59,23 @@ const getSizeDimension = (size: ImageSize): number => {
 };
 
 /**
- * Calculate width and height based on aspect ratio
+ * Calculate actual width and height dimensions based on size and aspect ratio.
+ * Maintains aspect ratio while using the size dimension as a base reference.
+ *
+ * @param size - ImageSize enum value
+ * @param aspectRatio - AspectRatio enum value (Square, Landscape, Portrait, etc.)
+ * @returns Object with width and height in pixels
+ *
+ * @example
+ * ```typescript
+ * // 2K Square image
+ * calculateDimensions(ImageSize.Resolution_2K, AspectRatio.Square);
+ * // Returns: { width: 2048, height: 2048 }
+ *
+ * // 2K Landscape (16:9) image
+ * calculateDimensions(ImageSize.Resolution_2K, AspectRatio.Landscape);
+ * // Returns: { width: 2048, height: 1152 }
+ * ```
  */
 const calculateDimensions = (size: ImageSize, aspectRatio: AspectRatio): { width: number; height: number } => {
   const dimension = getSizeDimension(size);
@@ -65,8 +101,25 @@ const calculateDimensions = (size: ImageSize, aspectRatio: AspectRatio): { width
 };
 
 /**
- * Export infographic as PDF
- * Creates a PDF document with the embedded PNG image
+ * Export infographic as a PDF file with embedded PNG image.
+ * Creates a PDF document sized exactly to match the image dimensions.
+ * Includes metadata for better document organization.
+ *
+ * @param imageDataURL - Base64-encoded PNG data URL
+ * @param filename - Base filename (without extension) for the PDF
+ * @param size - ImageSize enum value for dimension calculation
+ * @param aspectRatio - AspectRatio enum value for dimension calculation
+ *
+ * @example
+ * ```typescript
+ * exportAsPDF(
+ *   "data:image/png;base64,iVBORw0KG...",
+ *   "my-infographic",
+ *   ImageSize.Resolution_2K,
+ *   AspectRatio.Landscape
+ * );
+ * // Downloads: my-infographic.pdf
+ * ```
  */
 export const exportAsPDF = (
   imageDataURL: string,
@@ -103,8 +156,25 @@ export const exportAsPDF = (
 };
 
 /**
- * Export infographic as SVG
- * Wraps PNG in an SVG container (not true vector conversion)
+ * Export infographic as an SVG file by wrapping PNG in SVG container.
+ * Note: This creates an SVG wrapper around the raster PNG image, not a true vector conversion.
+ * The image element references the original PNG data URL.
+ *
+ * @param imageDataURL - Base64-encoded PNG data URL
+ * @param filename - Base filename (without extension) for the SVG
+ * @param size - ImageSize enum value for viewBox dimensions
+ * @param aspectRatio - AspectRatio enum value for viewBox dimensions
+ *
+ * @example
+ * ```typescript
+ * exportAsSVG(
+ *   "data:image/png;base64,iVBORw0KG...",
+ *   "my-infographic",
+ *   ImageSize.Resolution_2K,
+ *   AspectRatio.Square
+ * );
+ * // Downloads: my-infographic.svg
+ * ```
  */
 export const exportAsSVG = (
   imageDataURL: string,
@@ -136,7 +206,17 @@ export const exportAsSVG = (
 };
 
 /**
- * Export infographic as PNG (direct download)
+ * Export infographic as a PNG file (direct download).
+ * Creates a temporary anchor element to trigger the browser download.
+ *
+ * @param imageDataURL - Base64-encoded PNG data URL
+ * @param filename - Base filename (without extension) for the PNG
+ *
+ * @example
+ * ```typescript
+ * exportAsPNG("data:image/png;base64,iVBORw0KG...", "my-infographic");
+ * // Downloads: my-infographic.png
+ * ```
  */
 export const exportAsPNG = (
   imageDataURL: string,
@@ -151,8 +231,28 @@ export const exportAsPNG = (
 };
 
 /**
- * Package multiple resolutions as ZIP
- * Note: This requires regenerating the infographic at different resolutions
+ * Package multiple resolution versions of an infographic into a ZIP archive.
+ * Includes all provided resolutions plus a README.txt with metadata.
+ *
+ * Note: The caller must provide pre-generated images at different resolutions.
+ * This function packages existing images, it does not regenerate them.
+ *
+ * @param images - Array of objects containing size enum and corresponding data URL
+ * @param baseFilename - Base filename for the ZIP and individual files (without extension)
+ * @returns Promise that resolves when download is initiated
+ *
+ * @example
+ * ```typescript
+ * await exportMultiResolution(
+ *   [
+ *     { size: ImageSize.Resolution_1K, dataURL: "data:image/png;base64,..." },
+ *     { size: ImageSize.Resolution_2K, dataURL: "data:image/png;base64,..." },
+ *     { size: ImageSize.Resolution_4K, dataURL: "data:image/png;base64,..." }
+ *   ],
+ *   "infographic"
+ * );
+ * // Downloads: infographic_multi-res.zip
+ * ```
  */
 export const exportMultiResolution = async (
   images: Array<{ size: ImageSize; dataURL: string }>,
@@ -192,7 +292,40 @@ All images are in PNG format for maximum compatibility.
 };
 
 /**
- * Main export function that routes to appropriate handler
+ * Main export function that routes to the appropriate format handler.
+ * Sanitizes the filename and delegates to format-specific export functions.
+ *
+ * @param format - ExportFormat enum value (PNG, PDF, SVG, or MultiRes)
+ * @param imageDataURL - Base64-encoded PNG data URL
+ * @param filename - Base filename (will be sanitized, without extension)
+ * @param size - ImageSize enum value (ignored for PNG format)
+ * @param aspectRatio - AspectRatio enum value (ignored for PNG format)
+ * @param multiResImages - Optional array of multiple resolution images (required for MultiRes format)
+ * @returns Promise that resolves when export is complete
+ * @throws {Error} If MultiRes format is used without providing multiResImages
+ * @throws {Error} If an unsupported format is provided
+ *
+ * @example
+ * ```typescript
+ * // Export as PNG
+ * await exportInfographic(
+ *   ExportFormat.PNG,
+ *   imageDataURL,
+ *   "my infographic",
+ *   ImageSize.Resolution_2K,
+ *   AspectRatio.Landscape
+ * );
+ *
+ * // Export as multi-resolution ZIP
+ * await exportInfographic(
+ *   ExportFormat.MultiRes,
+ *   imageDataURL,
+ *   "my-infographic",
+ *   ImageSize.Resolution_2K,
+ *   AspectRatio.Landscape,
+ *   multiResImages
+ * );
+ * ```
  */
 export const exportInfographic = async (
   format: ExportFormat,
@@ -227,7 +360,25 @@ export const exportInfographic = async (
 };
 
 /**
- * Create a batch ZIP archive from multiple infographics
+ * Create a batch ZIP archive from multiple infographic images.
+ * Includes all images as PNG files plus a metadata.json file with generation details.
+ *
+ * @param items - Array of objects containing filename and data URL for each infographic
+ * @param archiveName - Name for the ZIP archive (without .zip extension)
+ * @returns Promise that resolves when download is initiated
+ *
+ * @example
+ * ```typescript
+ * await exportBatchAsZip(
+ *   [
+ *     { filename: "infographic-1", dataURL: "data:image/png;base64,..." },
+ *     { filename: "infographic-2", dataURL: "data:image/png;base64,..." },
+ *     { filename: "infographic-3", dataURL: "data:image/png;base64,..." }
+ *   ],
+ *   "my-batch-export"
+ * );
+ * // Downloads: my-batch-export.zip (containing 3 PNGs + metadata.json)
+ * ```
  */
 export const exportBatchAsZip = async (
   items: Array<{ filename: string; dataURL: string }>,

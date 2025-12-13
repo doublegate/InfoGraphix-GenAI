@@ -1,14 +1,26 @@
 /**
- * Keyboard shortcut definitions and utilities
+ * Keyboard shortcut definitions and utilities.
+ * Provides cross-platform keyboard shortcut handling with Mac/Windows compatibility.
  */
 
+/**
+ * Keyboard shortcut definition with modifier keys and action metadata.
+ * Supports cross-platform modifier keys (Ctrl/Cmd, Alt/Option, Shift).
+ */
 export interface KeyboardShortcut {
+  /** The main key to press (e.g., "Enter", "s", "?") */
   key: string;
+  /** Whether Ctrl (Windows/Linux) or Cmd (Mac) is required */
   ctrl?: boolean;
+  /** Whether Alt (Windows/Linux) or Option (Mac) is required */
   alt?: boolean;
+  /** Whether Shift is required */
   shift?: boolean;
+  /** Whether the Meta/Command key is required (primarily for Mac) */
   metaKey?: boolean;
+  /** Human-readable description of the shortcut's action */
   description: string;
+  /** Internal action identifier for routing */
   action: string;
 }
 
@@ -76,7 +88,23 @@ export const SHORTCUTS: Record<string, KeyboardShortcut> = {
 };
 
 /**
- * Check if a keyboard event matches a shortcut definition
+ * Check if a keyboard event matches a shortcut definition.
+ * Handles cross-platform modifier key differences (Cmd on Mac, Ctrl on Windows/Linux).
+ * Key comparison is case-insensitive.
+ *
+ * @param event - The keyboard event from a keydown/keyup listener
+ * @param shortcut - The shortcut definition to match against
+ * @returns True if the event matches the shortcut definition
+ *
+ * @example
+ * ```typescript
+ * const handleKeyDown = (e: KeyboardEvent) => {
+ *   if (matchesShortcut(e, SHORTCUTS.SAVE)) {
+ *     e.preventDefault();
+ *     handleSave();
+ *   }
+ * };
+ * ```
  */
 export function matchesShortcut(event: KeyboardEvent, shortcut: KeyboardShortcut): boolean {
   const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
@@ -100,7 +128,22 @@ export function matchesShortcut(event: KeyboardEvent, shortcut: KeyboardShortcut
 }
 
 /**
- * Get human-readable shortcut text for display
+ * Get human-readable shortcut text for display in UI.
+ * Automatically uses Mac symbols (⌘, ⌥, ⇧) on Mac and text (Ctrl, Alt, Shift) on Windows/Linux.
+ *
+ * @param shortcut - The shortcut definition to format
+ * @returns Formatted shortcut string (e.g., "⌘S" on Mac, "Ctrl+S" on Windows)
+ *
+ * @example
+ * ```typescript
+ * getShortcutText(SHORTCUTS.SAVE);
+ * // Mac: "⌘S"
+ * // Windows/Linux: "Ctrl+S"
+ *
+ * getShortcutText(SHORTCUTS.HELP);
+ * // Mac: "⇧?"
+ * // Windows/Linux: "Shift+?"
+ * ```
  */
 export function getShortcutText(shortcut: KeyboardShortcut): string {
   const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;

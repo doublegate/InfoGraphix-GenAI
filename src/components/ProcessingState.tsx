@@ -1,7 +1,18 @@
 import React from 'react';
 import { BrainCircuit, Loader2, Sparkles } from 'lucide-react';
 
+/**
+ * Props for ProcessingState component.
+ * Displays loading animations and status messages during infographic generation.
+ */
 interface ProcessingStateProps {
+  /**
+   * Current processing step:
+   * - 'idle': No processing (component hidden)
+   * - 'analyzing': Topic analysis in progress (Gemini 3 Pro)
+   * - 'generating': Image generation in progress (Gemini 3 Pro Image)
+   * - 'complete': Processing finished (component hidden)
+   */
   step: 'idle' | 'analyzing' | 'generating' | 'complete';
 }
 

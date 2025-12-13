@@ -1,19 +1,37 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ChevronDown, Check } from 'lucide-react';
 
+/**
+ * Rich option for dropdown menus with preview support.
+ * Used in RichSelect component for style and palette selection.
+ */
 export interface RichOption {
+  /** Unique value identifier for the option */
   value: string;
+  /** Display label shown in the dropdown */
   label: string;
+  /** Descriptive text explaining the option */
   description: string;
+  /** Optional preview component (e.g., color swatch, style thumbnail) */
   preview?: React.ReactNode;
 }
 
+/**
+ * Props for RichSelect component.
+ * A custom dropdown component with keyboard navigation, previews, and accessibility features.
+ */
 interface RichSelectProps {
+  /** Label text displayed above the dropdown */
   label: string;
+  /** Icon displayed next to the label */
   icon: React.ReactNode;
+  /** Currently selected value (must match an option's value) */
   value: string;
+  /** Array of available options */
   options: RichOption[];
+  /** Callback fired when selection changes */
   onChange: (value: string) => void;
+  /** Whether the dropdown is disabled */
   disabled?: boolean;
 }
 

@@ -73,11 +73,33 @@ export interface ColorScheme {
 }
 
 /**
- * Extract dominant colors from an image file using Vibrant.js
+ * Extract dominant colors from an image file using Vibrant.js.
+ * Analyzes the image to identify vibrant, muted, light, and dark color variations.
+ * Returns colors in priority order based on visual significance.
  *
- * @param file - Image file (JPEG, PNG, GIF, etc.)
- * @param maxColors - Maximum number of colors to extract (default: 6)
- * @returns Promise resolving to array of extracted colors
+ * @param file - Image file (JPEG, PNG, GIF, WebP, etc.)
+ * @param maxColors - Maximum number of colors to extract (default: 6, max: 6)
+ * @returns Promise resolving to array of extracted colors with hex, RGB, population, and category
+ * @throws {Error} If the image file cannot be read
+ * @throws {Error} If no colors could be extracted from the image
+ *
+ * @example
+ * ```typescript
+ * const fileInput = document.querySelector<HTMLInputElement>('#image-upload');
+ * const file = fileInput.files[0];
+ *
+ * try {
+ *   const colors = await extractColorsFromImage(file, 5);
+ *   console.log(colors);
+ *   // [
+ *   //   { hex: "#3B5998", rgb: [59, 89, 152], population: 12450, category: "Vibrant" },
+ *   //   { hex: "#8B9DC3", rgb: [139, 157, 195], population: 8320, category: "LightVibrant" },
+ *   //   ...
+ *   // ]
+ * } catch (error) {
+ *   console.error('Failed to extract colors:', error);
+ * }
+ * ```
  */
 export async function extractColorsFromImage(
   file: File,
@@ -131,10 +153,19 @@ export async function extractColorsFromImage(
 }
 
 /**
- * Convert hex color to RGB
+ * Convert hex color to RGB.
+ * Handles hex codes with or without the # prefix.
  *
  * @param hex - Hexadecimal color code (with or without #)
  * @returns RGB array [0-255, 0-255, 0-255]
+ *
+ * @example
+ * ```typescript
+ * hexToRgb("#FF5733");  // [255, 87, 51]
+ * hexToRgb("FF5733");   // [255, 87, 51] - also works without #
+ * hexToRgb("#000000");  // [0, 0, 0]
+ * hexToRgb("#FFFFFF");  // [255, 255, 255]
+ * ```
  */
 export function hexToRgb(hex: string): [number, number, number] {
   const cleanHex = hex.replace('#', '');
@@ -145,10 +176,18 @@ export function hexToRgb(hex: string): [number, number, number] {
 }
 
 /**
- * Convert RGB to hex color
+ * Convert RGB to hex color.
+ * Returns uppercase hex code with # prefix.
  *
  * @param rgb - RGB array [0-255, 0-255, 0-255]
- * @returns Hexadecimal color code with #
+ * @returns Hexadecimal color code with # prefix (uppercase)
+ *
+ * @example
+ * ```typescript
+ * rgbToHex([255, 87, 51]);   // "#FF5733"
+ * rgbToHex([0, 0, 0]);       // "#000000"
+ * rgbToHex([255, 255, 255]); // "#FFFFFF"
+ * ```
  */
 export function rgbToHex(rgb: [number, number, number]): string {
   const [r, g, b] = rgb;
@@ -156,10 +195,18 @@ export function rgbToHex(rgb: [number, number, number]): string {
 }
 
 /**
- * Convert RGB to HSL
+ * Convert RGB to HSL (Hue, Saturation, Lightness).
+ * Useful for color theory calculations and generating color schemes.
  *
  * @param rgb - RGB array [0-255, 0-255, 0-255]
- * @returns HSL array [0-360, 0-100, 0-100]
+ * @returns HSL array [hue: 0-360, saturation: 0-100, lightness: 0-100]
+ *
+ * @example
+ * ```typescript
+ * rgbToHsl([255, 87, 51]);   // [12, 100, 60] - orange hue
+ * rgbToHsl([255, 0, 0]);     // [0, 100, 50] - pure red
+ * rgbToHsl([128, 128, 128]); // [0, 0, 50] - neutral gray
+ * ```
  */
 export function rgbToHsl(rgb: [number, number, number]): [number, number, number] {
   const [r, g, b] = rgb.map((v) => v / 255);
@@ -191,10 +238,19 @@ export function rgbToHsl(rgb: [number, number, number]): [number, number, number
 }
 
 /**
- * Convert HSL to RGB
+ * Convert HSL (Hue, Saturation, Lightness) to RGB.
+ * Inverse operation of rgbToHsl, used in color scheme generation.
  *
- * @param hsl - HSL array [0-360, 0-100, 0-100]
+ * @param hsl - HSL array [hue: 0-360, saturation: 0-100, lightness: 0-100]
  * @returns RGB array [0-255, 0-255, 0-255]
+ *
+ * @example
+ * ```typescript
+ * hslToRgb([12, 100, 60]);   // [255, 87, 51] - orange
+ * hslToRgb([0, 100, 50]);    // [255, 0, 0] - pure red
+ * hslToRgb([120, 100, 50]);  // [0, 255, 0] - pure green
+ * hslToRgb([240, 100, 50]);  // [0, 0, 255] - pure blue
+ * ```
  */
 export function hslToRgb(hsl: [number, number, number]): [number, number, number] {
   const [h, s, l] = [hsl[0] / 360, hsl[1] / 100, hsl[2] / 100];
@@ -224,12 +280,36 @@ export function hslToRgb(hsl: [number, number, number]): [number, number, number
 }
 
 /**
- * Generate a color scheme based on color theory
+ * Generate a color scheme based on color theory principles.
+ * Uses HSL color space to calculate harmonious color relationships.
  *
- * @param baseColor - Base color as hex code
- * @param type - Type of color scheme to generate
- * @param count - Number of colors to generate (used for analogous)
- * @returns Array of hex color codes
+ * @param baseColor - Base color as hex code (with or without #)
+ * @param type - Type of color scheme (complementary, triadic, analogous, split-complementary, tetradic)
+ * @param count - Number of colors to generate (only used for analogous scheme, default: 5)
+ * @returns Array of hex color codes including the base color
+ *
+ * @example
+ * ```typescript
+ * // Complementary: opposite on color wheel (2 colors total)
+ * generateColorScheme("#FF5733", "complementary");
+ * // ["#FF5733", "#33DDFF"]
+ *
+ * // Triadic: 120° apart (3 colors total)
+ * generateColorScheme("#FF5733", "triadic");
+ * // ["#FF5733", "#33FF57", "#5733FF"]
+ *
+ * // Analogous: adjacent colors (5 colors total by default)
+ * generateColorScheme("#FF5733", "analogous", 4);
+ * // ["#FF5733", "#FF7A33", "#FF9D33", "#FFC033"]
+ *
+ * // Split-Complementary: complementary split into two (3 colors)
+ * generateColorScheme("#FF5733", "split-complementary");
+ * // ["#FF5733", "#33FFB8", "#33A8FF"]
+ *
+ * // Tetradic: rectangle on color wheel (4 colors total)
+ * generateColorScheme("#FF5733", "tetradic");
+ * // ["#FF5733", "#DDFF33", "#33DDFF", "#5733FF"]
+ * ```
  */
 export function generateColorScheme(
   baseColor: string,
@@ -279,10 +359,19 @@ export function generateColorScheme(
 }
 
 /**
- * Calculate relative luminance of a color (WCAG formula)
+ * Calculate relative luminance of a color using WCAG formula.
+ * Used for contrast ratio calculations and accessibility checks.
+ * Based on W3C WCAG 2.0 specification.
  *
  * @param rgb - RGB array [0-255, 0-255, 0-255]
- * @returns Relative luminance value [0-1]
+ * @returns Relative luminance value [0-1] where 0 is black and 1 is white
+ *
+ * @example
+ * ```typescript
+ * getRelativeLuminance([0, 0, 0]);       // 0.0 (black)
+ * getRelativeLuminance([255, 255, 255]); // 1.0 (white)
+ * getRelativeLuminance([128, 128, 128]); // ~0.215 (mid-gray)
+ * ```
  */
 function getRelativeLuminance(rgb: [number, number, number]): number {
   const [r, g, b] = rgb.map((c) => {
@@ -294,11 +383,22 @@ function getRelativeLuminance(rgb: [number, number, number]): number {
 }
 
 /**
- * Check contrast ratio between two colors (WCAG compliance)
+ * Check contrast ratio between two colors for WCAG compliance.
+ * Higher ratios indicate better accessibility. Minimum requirements:
+ * - WCAG AA: 4.5:1 for normal text, 3:1 for large text
+ * - WCAG AAA: 7:1 for normal text, 4.5:1 for large text
  *
- * @param fgColor - Foreground color (hex)
- * @param bgColor - Background color (hex)
- * @returns Contrast ratio (1-21)
+ * @param fgColor - Foreground color (hex, with or without #)
+ * @param bgColor - Background color (hex, with or without #)
+ * @returns Contrast ratio (1-21) where 21 is maximum (black on white)
+ *
+ * @example
+ * ```typescript
+ * checkContrastRatio("#000000", "#FFFFFF"); // 21 (maximum contrast)
+ * checkContrastRatio("#FFFFFF", "#FFFFFF"); // 1 (no contrast)
+ * checkContrastRatio("#767676", "#FFFFFF"); // 4.54 (meets WCAG AA for normal text)
+ * checkContrastRatio("#595959", "#FFFFFF"); // 7.0 (meets WCAG AAA for normal text)
+ * ```
  */
 export function checkContrastRatio(fgColor: string, bgColor: string): number {
   const fgRgb = hexToRgb(fgColor);
@@ -314,12 +414,23 @@ export function checkContrastRatio(fgColor: string, bgColor: string): number {
 }
 
 /**
- * Check if a color combination meets WCAG AA standards
+ * Check if a color combination meets WCAG AA accessibility standards.
+ * WCAG AA requires:
+ * - Normal text (< 18pt): contrast ratio >= 4.5:1
+ * - Large text (18pt+ or 14pt+ bold): contrast ratio >= 3:1
  *
- * @param fgColor - Foreground color (hex)
- * @param bgColor - Background color (hex)
+ * @param fgColor - Foreground color (hex, with or without #)
+ * @param bgColor - Background color (hex, with or without #)
  * @param isLargeText - Whether the text is large (18pt+ or 14pt+ bold)
- * @returns True if meets WCAG AA standards
+ * @returns True if the color combination meets WCAG AA standards
+ *
+ * @example
+ * ```typescript
+ * meetsWCAG_AA("#767676", "#FFFFFF");        // true (4.54:1 >= 4.5:1)
+ * meetsWCAG_AA("#767676", "#FFFFFF", true);  // true (4.54:1 >= 3:1 for large text)
+ * meetsWCAG_AA("#9E9E9E", "#FFFFFF");        // false (2.85:1 < 4.5:1)
+ * meetsWCAG_AA("#9E9E9E", "#FFFFFF", true);  // false (2.85:1 < 3:1)
+ * ```
  */
 export function meetsWCAG_AA(
   fgColor: string,
@@ -331,11 +442,25 @@ export function meetsWCAG_AA(
 }
 
 /**
- * Generate all 5 color schemes from a base color
- * Helper function for UI components
+ * Generate all 5 color schemes from a base color.
+ * Convenience function that generates complementary, triadic, analogous,
+ * split-complementary, and tetradic schemes in one call.
  *
- * @param baseColor - Base color in hex format
+ * @param baseColor - Base color in hex format (with or without #)
  * @returns Array of ColorScheme objects for all scheme types
+ *
+ * @example
+ * ```typescript
+ * const schemes = generateColorSchemes("#FF5733");
+ * console.log(schemes);
+ * // [
+ * //   { type: "complementary", colors: ["#FF5733", "#33DDFF"] },
+ * //   { type: "triadic", colors: ["#FF5733", "#33FF57", "#5733FF"] },
+ * //   { type: "analogous", colors: ["#FF5733", "#FF7A33", ...] },
+ * //   { type: "split-complementary", colors: ["#FF5733", "#33FFB8", "#33A8FF"] },
+ * //   { type: "tetradic", colors: ["#FF5733", "#DDFF33", "#33DDFF", "#5733FF"] }
+ * // ]
+ * ```
  */
 export function generateColorSchemes(baseColor: string): ColorScheme[] {
   const schemeTypes: ColorSchemeType[] = [
@@ -353,11 +478,19 @@ export function generateColorSchemes(baseColor: string): ColorScheme[] {
 }
 
 /**
- * Check if a color is accessible (meets WCAG AA with black text)
- * Helper function for quick accessibility checking
+ * Check if a color is accessible as a background with black text.
+ * Quick helper to verify if a color meets WCAG AA standards for normal text with black foreground.
  *
- * @param color - Color to check (hex)
- * @returns True if color meets WCAG AA with black text
+ * @param color - Color to check as background (hex, with or without #)
+ * @returns True if color meets WCAG AA with black text (#000000)
+ *
+ * @example
+ * ```typescript
+ * isColorAccessible("#FFFFFF"); // true (white background, black text)
+ * isColorAccessible("#F0F0F0"); // true (light gray background)
+ * isColorAccessible("#767676"); // false (medium gray, insufficient contrast)
+ * isColorAccessible("#000000"); // false (black background, black text - no contrast)
+ * ```
  */
 export function isColorAccessible(color: string): boolean {
   return meetsWCAG_AA(color, '#000000');
@@ -381,10 +514,20 @@ export function meetsWCAG_AAA(
 }
 
 /**
- * Generate an accessible text color (black or white) for a background
+ * Generate an accessible text color (black or white) for a background.
+ * Automatically chooses the text color that provides better contrast based on background luminance.
+ * Uses a luminance threshold of 0.5 to determine which text color to use.
  *
- * @param bgColor - Background color (hex)
- * @returns "#000000" or "#FFFFFF" for optimal contrast
+ * @param bgColor - Background color (hex, with or without #)
+ * @returns "#000000" (black) for light backgrounds or "#FFFFFF" (white) for dark backgrounds
+ *
+ * @example
+ * ```typescript
+ * getAccessibleTextColor("#FFFFFF"); // "#000000" (black text on white)
+ * getAccessibleTextColor("#000000"); // "#FFFFFF" (white text on black)
+ * getAccessibleTextColor("#FF5733"); // "#FFFFFF" (white text on orange)
+ * getAccessibleTextColor("#FFE5B4"); // "#000000" (black text on peach)
+ * ```
  */
 export function getAccessibleTextColor(bgColor: string): string {
   const bgRgb = hexToRgb(bgColor);
@@ -395,9 +538,24 @@ export function getAccessibleTextColor(bgColor: string): string {
 }
 
 /**
- * Save a custom palette to localStorage
+ * Save a custom palette to localStorage.
+ * If a palette with the same ID exists, it will be updated; otherwise, a new entry is created.
  *
- * @param palette - Custom palette to save
+ * @param palette - Custom palette to save (must include unique ID)
+ *
+ * @example
+ * ```typescript
+ * const palette: CustomPalette = {
+ *   id: crypto.randomUUID(),
+ *   name: "Ocean Blues",
+ *   colors: ["#003366", "#0066CC", "#3399FF", "#66CCFF"],
+ *   source: "manual",
+ *   createdAt: Date.now(),
+ *   description: "Cool ocean-inspired palette",
+ *   tags: ["blue", "ocean", "cool"]
+ * };
+ * saveCustomPalette(palette);
+ * ```
  */
 export function saveCustomPalette(palette: CustomPalette): void {
   const palettes = getCustomPalettes();
@@ -413,18 +571,39 @@ export function saveCustomPalette(palette: CustomPalette): void {
 }
 
 /**
- * Retrieve all custom palettes from localStorage
+ * Retrieve all custom palettes from localStorage.
+ * Returns an empty array if no palettes are saved.
  *
- * @returns Array of custom palettes
+ * @returns Array of custom palettes sorted by creation date (newest first)
+ *
+ * @example
+ * ```typescript
+ * const palettes = getCustomPalettes();
+ * console.log(`You have ${palettes.length} saved palettes`);
+ * palettes.forEach(palette => {
+ *   console.log(`${palette.name}: ${palette.colors.join(', ')}`);
+ * });
+ * ```
  */
 export function getCustomPalettes(): CustomPalette[] {
   return safeLocalStorageGet<CustomPalette[]>(STORAGE_KEYS.CUSTOM_PALETTES, []);
 }
 
 /**
- * Delete a custom palette from localStorage
+ * Delete a custom palette from localStorage by ID.
+ * If the palette doesn't exist, this operation silently succeeds.
  *
- * @param paletteId - ID of palette to delete
+ * @param paletteId - Unique ID of the palette to delete
+ *
+ * @example
+ * ```typescript
+ * const palettes = getCustomPalettes();
+ * const paletteToDelete = palettes.find(p => p.name === "Old Palette");
+ * if (paletteToDelete) {
+ *   deleteCustomPalette(paletteToDelete.id);
+ *   console.log("Palette deleted successfully");
+ * }
+ * ```
  */
 export function deleteCustomPalette(paletteId: string): void {
   const palettes = getCustomPalettes();
@@ -433,12 +612,28 @@ export function deleteCustomPalette(paletteId: string): void {
 }
 
 /**
- * Create a custom palette from extracted colors
+ * Create a custom palette from extracted colors.
+ * Generates a new palette with a unique ID and current timestamp.
+ * Useful after extracting colors from an uploaded image.
  *
- * @param name - Palette name
- * @param extractedColors - Colors extracted from an image
- * @param source - Source of the palette
- * @returns CustomPalette object
+ * @param name - User-friendly name for the palette
+ * @param extractedColors - Colors extracted from an image via extractColorsFromImage()
+ * @param source - Source type of the palette (default: 'uploaded-image')
+ * @returns CustomPalette object ready to be saved
+ *
+ * @example
+ * ```typescript
+ * const file = document.querySelector<HTMLInputElement>('#upload').files[0];
+ * const colors = await extractColorsFromImage(file, 6);
+ * const palette = createPaletteFromColors("Sunset Photo", colors, "uploaded-image");
+ *
+ * // Add custom metadata
+ * palette.description = "Colors from my sunset photograph";
+ * palette.tags = ["sunset", "warm", "natural"];
+ *
+ * // Save it
+ * saveCustomPalette(palette);
+ * ```
  */
 export function createPaletteFromColors(
   name: string,
