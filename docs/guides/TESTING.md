@@ -1,6 +1,6 @@
 # Testing Guide - InfoGraphix AI
 
-**Version:** 2.1.0
+**Version:** 2.1.1
 **Last Updated:** December 13, 2025
 
 ## Overview

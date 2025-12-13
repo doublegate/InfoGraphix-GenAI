@@ -13,8 +13,9 @@ Planned features and enhancements for InfoGraphix AI.
 | v1.5.0 | Released | 2025-12-12 | Accessibility & Global Reach |
 | v1.6.0 | Released | 2025-12-12 | AI Intelligence & Creativity |
 | v2.0.0 | Released | 2025-12-12 | Stability & Quality |
-| v2.0.3 | **CURRENT** | 2025-12-13 | Stability & Quality (Patch) |
-| v2.1.0 | Planned | Q1 2026 | Expanded Test Coverage |
+| v2.0.3 | Released | 2025-12-13 | Stability & Quality (Patch) |
+| v2.1.0 | Released | 2025-12-13 | Expanded Test Coverage |
+| v2.1.1 | **CURRENT** | 2025-12-13 | Project Organization |
 | v2.2.0 | Planned | Q2 2026 | Platform & API |
 | v2.3.0 | Planned | Q3 2026 | Ecosystem Integrations |
 | v2.4.0 | Planned | Q4 2026 | Enterprise & Advanced |
