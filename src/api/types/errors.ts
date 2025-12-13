@@ -181,7 +181,7 @@ export interface ValidationError {
  *
  * Used in ApiError.details for rate limit errors.
  */
-export interface RateLimitErrorDetails {
+export interface RateLimitErrorDetails extends Record<string, unknown> {
   /** Type of limit that was exceeded */
   limitType: 'rate' | 'quota';
   /** Current limit value */

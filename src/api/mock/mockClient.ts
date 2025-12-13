@@ -7,8 +7,8 @@
  * @module api/mock/mockClient
  */
 
-import type { SavedVersion, InfographicStyle, ColorPalette } from '../../types';
-import { ImageSize, AspectRatio } from '../../types';
+import type { SavedVersion } from '../../types';
+import { ImageSize, AspectRatio, InfographicStyle, ColorPalette, BatchStatus } from '../../types';
 import type {
   InfoGraphixClient,
   GenerationApi,
@@ -110,9 +110,13 @@ export class MockInfoGraphixClient implements InfoGraphixClient {
         id: jobId,
         status: JobStatus.PENDING,
         request: {
-          ...request,
+          topic: request.topic,
           size: request.size || ImageSize.Resolution_2K,
           aspectRatio: request.aspectRatio || AspectRatio.Landscape,
+          style: request.style || InfographicStyle.Modern,
+          palette: request.palette || ColorPalette.BlueWhite,
+          filters: request.filters,
+          fileContent: request.fileContent,
         },
         createdAt: new Date().toISOString(),
         userId: 'mock_user',
@@ -208,7 +212,7 @@ export class MockInfoGraphixClient implements InfoGraphixClient {
         items: request.items.map(item => ({
           id: this.generateId(),
           topic: item.topic,
-          status: JobStatus.PENDING,
+          status: BatchStatus.Pending,
           style: item.style || 'Modern Minimalist' as InfographicStyle,
           palette: item.palette || 'Professional Blue & White' as ColorPalette,
           size: item.size || ImageSize.Resolution_2K,
@@ -255,7 +259,7 @@ export class MockInfoGraphixClient implements InfoGraphixClient {
         batch,
         results: batch.items.map(item => ({
           itemId: item.id,
-          status: item.status,
+          status: item.status.toLowerCase() as 'completed' | 'failed' | 'pending' | 'processing',
           result: item.result,
           error: item.error,
         })),

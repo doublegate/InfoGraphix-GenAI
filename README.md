@@ -6,7 +6,7 @@
   <img src="images/Infographix-GenAI_sketch.jpg" alt="InfoGraphix AI Concept Sketch" width="800">
 </p>
 
-[![Version](https://img.shields.io/badge/version-2.1.1-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.2.0--foundation-blue.svg)](CHANGELOG.md)
 [![CI](https://github.com/doublegate/InfoGraphix-GenAI/actions/workflows/ci.yml/badge.svg)](https://github.com/doublegate/InfoGraphix-GenAI/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/doublegate/InfoGraphix-GenAI/branch/main/graph/badge.svg)](https://codecov.io/gh/doublegate/InfoGraphix-GenAI)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
@@ -33,13 +33,36 @@ InfoGraphix AI is a powerful web application that generates high-quality infogra
 - Export in multiple formats (PNG, PDF, SVG, ZIP)
 - Advanced version history with search and filtering
 
-**Latest Updates (v2.1.1):**
+**Latest Updates (v2.2.0-foundation):**
 
-- Project Reorganization - 5 documentation files relocated for cleaner root directory
-- CI/CD Fixes - Resolved 14 TypeScript type errors and 11 ESLint violations in test files
-- Documentation Structure - Technical docs consolidated in `docs/technical/`, CI config in `.github/`
-- Type System Improvements - Fixed Feedback, GithubFilters, and TemplateConfig type compliance
-- Code Quality - All 299 tests passing with 81.29% coverage maintained
+- API Platform Foundation - Complete TypeScript type system for REST API (25+ error codes, 13 request types)
+- SDK Interface Definitions - 7 namespaced APIs with type-safe method signatures
+- Mock API Client - Full mock implementation for testing without backend (892 lines)
+- OpenAPI 3.1 Specification - 645-line spec documenting 12 API endpoints
+- Planning Documentation - Comprehensive backend and SDK development plans for Q2 2026
+- Quality Metrics - 319/319 tests passing (+20 new), TypeScript strict mode compliant
+
+### API Platform Preview
+
+The **v2.2.0-foundation** release establishes the type system and SDK interface for a future REST API platform (planned Q2 2026). This foundation provides:
+
+**Available Now:**
+- **Type-Safe API Models** (`src/api/types/`) - Complete TypeScript definitions for all API requests, responses, and domain models
+- **Mock API Client** (`src/api/sdk/client.ts`) - Fully functional mock implementation for development and testing without a backend
+- **OpenAPI 3.1 Specification** (`src/api/openapi.yaml`) - Machine-readable API contract for tooling and validation
+- **SDK Interface Design** - Namespaced APIs (infographics, batches, templates, webhooks, users, analytics, system) ready for real implementation
+
+**Planning Documentation:**
+- [Backend Implementation Plan](docs/planning/v2.2.0/BACKEND-IMPLEMENTATION-PLAN.md) - Complete architecture including Express.js/Fastify comparison, PostgreSQL schema, Redis caching, BullMQ queues, authentication, rate limiting, webhooks, and deployment
+- [SDK Development Plan](docs/planning/v2.2.0/SDK-DEVELOPMENT-PLAN.md) - TypeScript (`@infographix/sdk`) and Python (`infographix`) SDK implementation guides with project structures, build systems, and publishing workflows
+- [Development Guide](docs/planning/v2.2.0/DEVELOPMENT-GUIDE.md) - How to use the foundation types, work with the mock client, validate against OpenAPI spec, and contribute to the API platform
+
+**Use Cases:**
+- **Developers:** Start building against the mock client today to prepare for the real API
+- **Contributors:** Review the type system and provide feedback on the API design
+- **Integrators:** Reference the OpenAPI spec for third-party tooling and client generation
+
+See [FEATURE-ROADMAP.md](docs/planning/FEATURE-ROADMAP.md) for Q2 2026 development milestones.
 
 ---
 
