@@ -191,11 +191,12 @@ function App() {
 
   // Batch queue processing handler
   const handleStartBatchQueue = useCallback(async (queue: BatchQueue) => {
-    if (!queue || !isQueueActive(queue)) return;
+    if (!queue || !isQueueActive(queue)) {
+      return;
+    }
 
     // Verify API key is ready before starting batch processing
     if (!isApiKeyReady) {
-      console.error('Batch processing: API key not ready');
       const firstItem = getNextPendingItem(queue);
       if (firstItem) {
         await updateQueueItem(queue.id, firstItem.id, {
@@ -248,8 +249,6 @@ function App() {
         let errorMessage = 'Unknown error';
         if (err instanceof Error) {
           errorMessage = err.message;
-          // Log full error for debugging
-          console.error('Batch processing error:', err.name, err.message, err.stack);
         }
 
         const updatedQueue = await updateQueueItem(queue.id, nextItem.id, {

@@ -141,7 +141,7 @@ export const createQueue = async (
       aspectRatio: item.aspectRatio as string,
       style: item.style as string,
       palette: item.palette as string,
-      status: item.status as 'pending' | 'processing' | 'complete' | 'error',
+      status: item.status as 'pending' | 'processing' | 'complete' | 'failed' | 'cancelled',
       createdAt: item.createdAt,
       completedAt: item.completedAt,
       result: item.result,
@@ -222,7 +222,7 @@ export const updateQueueItem = async (
   try {
     // Update item in IndexedDB
     const dbUpdates: Partial<BatchQueueItem> = {
-      status: updates.status as 'pending' | 'processing' | 'complete' | 'error' | undefined,
+      status: updates.status as 'pending' | 'processing' | 'complete' | 'failed' | 'cancelled' | undefined,
       completedAt: updates.completedAt,
       result: updates.result,
       error: updates.error,

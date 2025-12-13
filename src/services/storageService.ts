@@ -42,7 +42,8 @@ export interface BatchQueueItem {
   aspectRatio: string;
   style: string;
   palette: string;
-  status: 'pending' | 'processing' | 'complete' | 'error';
+  // Matches BatchStatus enum values: pending, processing, complete, failed, cancelled
+  status: 'pending' | 'processing' | 'complete' | 'failed' | 'cancelled';
   createdAt: number;
   completedAt?: number;
   result?: unknown;

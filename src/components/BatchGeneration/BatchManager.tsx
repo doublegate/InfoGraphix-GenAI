@@ -8,6 +8,7 @@ import { Plus, Download, RefreshCw, X } from 'lucide-react';
 import {
   BatchQueue,
   BatchItem,
+  BatchStatus,
   InfographicStyle,
   ColorPalette,
   ImageSize,
@@ -36,16 +37,66 @@ const BatchManager: React.FC<BatchManagerProps> = ({ isOpen, onClose, onStartQue
   const [showCreator, setShowCreator] = useState(false);
   const [selectedQueue, setSelectedQueue] = useState<BatchQueue | null>(null);
   const [runningQueueId, setRunningQueueId] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // Initial load when panel opens
   useEffect(() => {
     if (isOpen) {
       void refreshQueues();
     }
   }, [isOpen]);
 
-  const refreshQueues = async () => {
-    const loaded = await loadQueues();
-    setQueues(loaded);
+  // Auto-refresh polling when a queue is running (adaptive intervals)
+  useEffect(() => {
+    if (!isOpen || !runningQueueId) return;
+
+    let pollCount = 0;
+    const getInterval = () => {
+      // Fast polling for first few checks (likely to see progress)
+      if (pollCount < 5) return 5000;  // 5 seconds
+      if (pollCount < 10) return 10000; // 10 seconds
+      return 30000; // 30 seconds after that
+    };
+
+    const poll = () => {
+      void refreshQueues(true);
+      pollCount++;
+      timeoutId = setTimeout(poll, getInterval());
+    };
+
+    let timeoutId = setTimeout(poll, getInterval());
+    return () => clearTimeout(timeoutId);
+  }, [isOpen, runningQueueId]);
+
+  const refreshQueues = async (silent = false) => {
+    if (!silent) setIsRefreshing(true);
+    try {
+      const loaded = await loadQueues();
+      setQueues(loaded);
+
+      // Update selected queue if it exists in the loaded data
+      if (selectedQueue) {
+        const updatedSelected = loaded.find(q => q.id === selectedQueue.id);
+        if (updatedSelected) {
+          setSelectedQueue(updatedSelected);
+        }
+      }
+
+      // Check if running queue is complete
+      if (runningQueueId) {
+        const runningQueue = loaded.find(q => q.id === runningQueueId);
+        if (runningQueue) {
+          const pendingItems = runningQueue.items.filter(
+            item => item.status === BatchStatus.Pending || item.status === BatchStatus.Processing
+          );
+          if (pendingItems.length === 0) {
+            setRunningQueueId(null); // Queue finished
+          }
+        }
+      }
+    } finally {
+      if (!silent) setIsRefreshing(false);
+    }
   };
 
   const handleCreate = (
@@ -75,6 +126,7 @@ const BatchManager: React.FC<BatchManagerProps> = ({ isOpen, onClose, onStartQue
 
   const handleStart = (queueId: string) => {
     const queue = queues.find((q) => q.id === queueId);
+
     if (queue && onStartQueue) {
       setRunningQueueId(queueId);
       onStartQueue(queue);
@@ -134,10 +186,15 @@ const BatchManager: React.FC<BatchManagerProps> = ({ isOpen, onClose, onStartQue
             <div className="flex gap-2">
               <button
                 onClick={() => { void refreshQueues(); }}
-                className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
-                title="Refresh queues"
+                disabled={isRefreshing}
+                className={`p-2 rounded-lg transition-colors ${
+                  isRefreshing
+                    ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
+                    : 'bg-slate-700 hover:bg-slate-600 text-white'
+                }`}
+                title={isRefreshing ? "Refreshing..." : "Refresh queues"}
               >
-                <RefreshCw className="w-4 h-4" />
+                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               </button>
               <button
                 onClick={() => setShowCreator(true)}
