@@ -82,28 +82,29 @@ export const mockCustomTemplate = {
  * Mock Gemini API responses
  */
 export const mockGeminiAnalysisResponse = {
-  response: {
-    text: () => JSON.stringify(mockAnalysisResult),
-  },
+  text: JSON.stringify(mockAnalysisResult),
+  candidates: [{
+    groundingMetadata: {
+      groundingChunks: [],
+    },
+  }],
 };
 
 export const mockGeminiImageResponse = {
-  response: {
-    candidates: [
-      {
-        content: {
-          parts: [
-            {
-              inlineData: {
-                mimeType: 'image/png',
-                data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
-              },
+  candidates: [
+    {
+      content: {
+        parts: [
+          {
+            inlineData: {
+              mimeType: 'image/png',
+              data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
             },
-          ],
-        },
+          },
+        ],
       },
-    ],
-  },
+    },
+  ],
 };
 
 /**
@@ -113,7 +114,7 @@ export const mockApiError = new Error('API Error');
 export const mockRateLimitError = Object.assign(new Error('Rate limit exceeded'), {
   status: 429,
 });
-export const mockAuthError = Object.assign(new Error('Authentication failed'), {
+export const mockAuthError = Object.assign(new Error('403 Authentication failed'), {
   status: 403,
 });
 

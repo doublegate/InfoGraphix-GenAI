@@ -10,13 +10,17 @@ import {
   mockAuthError,
 } from '../test/mockData';
 
+// Hoist the mock functions so they can be reconfigured in tests
+const { mockGenerateContent, mockGoogleGenAI } = vi.hoisted(() => {
+  const mockGenerateContent = vi.fn();
+  const mockGoogleGenAI = vi.fn();
+
+  return { mockGenerateContent, mockGoogleGenAI };
+});
+
 // Mock the Google Gemini AI SDK
 vi.mock('@google/genai', () => ({
-  GoogleGenAI: vi.fn().mockImplementation(() => ({
-    getGenerativeModel: vi.fn().mockReturnValue({
-      generateContent: vi.fn(),
-    }),
-  })),
+  GoogleGenAI: mockGoogleGenAI,
 }));
 
 // Mock logger
@@ -45,6 +49,20 @@ describe('geminiService', () => {
     vi.clearAllMocks();
     // Set mock API key
     process.env.API_KEY = 'test-api-key';
+
+    // Reset mock implementations
+    mockGenerateContent.mockReset();
+    mockGoogleGenAI.mockReset();
+
+    // Set up default mock implementation
+    // The actual API uses ai.models.generateContent(), not ai.getGenerativeModel().generateContent()
+    mockGoogleGenAI.mockImplementation(function() {
+      return {
+        models: {
+          generateContent: mockGenerateContent,
+        },
+      };
+    });
   });
 
   afterEach(() => {
@@ -53,14 +71,7 @@ describe('geminiService', () => {
 
   describe('analyzeTopic', () => {
     it('should analyze a simple text topic', async () => {
-      const { GoogleGenAI } = await import('@google/genai');
-      const mockGenerateContent = vi.fn().mockResolvedValue(mockGeminiAnalysisResponse);
-
-      (GoogleGenAI as any).mockImplementation(() => ({
-        getGenerativeModel: vi.fn().mockReturnValue({
-          generateContent: mockGenerateContent,
-        }),
-      }));
+      mockGenerateContent.mockResolvedValue(mockGeminiAnalysisResponse);
 
       const result = await analyzeTopic('Test Topic', InfographicStyle.Modern, ColorPalette.Vibrant);
 
@@ -80,14 +91,7 @@ describe('geminiService', () => {
     });
 
     it('should handle rate limit errors', async () => {
-      const { GoogleGenAI } = await import('@google/genai');
-      const mockGenerateContent = vi.fn().mockRejectedValue(mockRateLimitError);
-
-      (GoogleGenAI as any).mockImplementation(() => ({
-        getGenerativeModel: vi.fn().mockReturnValue({
-          generateContent: mockGenerateContent,
-        }),
-      }));
+      mockGenerateContent.mockRejectedValue(mockRateLimitError);
 
       await expect(analyzeTopic('Test Topic', InfographicStyle.Modern, ColorPalette.Vibrant)).rejects.toThrow(
         /Rate limit exceeded/
@@ -95,14 +99,7 @@ describe('geminiService', () => {
     });
 
     it('should handle authentication errors', async () => {
-      const { GoogleGenAI } = await import('@google/genai');
-      const mockGenerateContent = vi.fn().mockRejectedValue(mockAuthError);
-
-      (GoogleGenAI as any).mockImplementation(() => ({
-        getGenerativeModel: vi.fn().mockReturnValue({
-          generateContent: mockGenerateContent,
-        }),
-      }));
+      mockGenerateContent.mockRejectedValue(mockAuthError);
 
       await expect(analyzeTopic('Test Topic', InfographicStyle.Modern, ColorPalette.Vibrant)).rejects.toThrow(
         /Permission denied/
@@ -110,31 +107,17 @@ describe('geminiService', () => {
     });
 
     it('should detect and handle GitHub repository URLs', async () => {
-      const { GoogleGenAI } = await import('@google/genai');
-      const mockGenerateContent = vi.fn().mockResolvedValue(mockGeminiAnalysisResponse);
-
-      (GoogleGenAI as any).mockImplementation(() => ({
-        getGenerativeModel: vi.fn().mockReturnValue({
-          generateContent: mockGenerateContent,
-        }),
-      }));
+      mockGenerateContent.mockResolvedValue(mockGeminiAnalysisResponse);
 
       await analyzeTopic('https://github.com/test/repo', InfographicStyle.Modern, ColorPalette.Vibrant);
 
       expect(mockGenerateContent).toHaveBeenCalled();
       const callArgs = mockGenerateContent.mock.calls[0][0];
-      expect(callArgs).toContain('github.com');
+      expect(callArgs.contents).toContain('github.com');
     });
 
     it('should handle multiple URLs', async () => {
-      const { GoogleGenAI } = await import('@google/genai');
-      const mockGenerateContent = vi.fn().mockResolvedValue(mockGeminiAnalysisResponse);
-
-      (GoogleGenAI as any).mockImplementation(() => ({
-        getGenerativeModel: vi.fn().mockReturnValue({
-          generateContent: mockGenerateContent,
-        }),
-      }));
+      mockGenerateContent.mockResolvedValue(mockGeminiAnalysisResponse);
 
       await analyzeTopic('https://example.com/1\nhttps://example.com/2', InfographicStyle.Modern, ColorPalette.Vibrant);
 
@@ -142,14 +125,7 @@ describe('geminiService', () => {
     });
 
     it('should pass GitHub filters when provided', async () => {
-      const { GoogleGenAI } = await import('@google/genai');
-      const mockGenerateContent = vi.fn().mockResolvedValue(mockGeminiAnalysisResponse);
-
-      (GoogleGenAI as any).mockImplementation(() => ({
-        getGenerativeModel: vi.fn().mockReturnValue({
-          generateContent: mockGenerateContent,
-        }),
-      }));
+      mockGenerateContent.mockResolvedValue(mockGeminiAnalysisResponse);
 
       const filters = {
         language: 'TypeScript',
@@ -161,20 +137,13 @@ describe('geminiService', () => {
 
       expect(mockGenerateContent).toHaveBeenCalled();
       const callArgs = mockGenerateContent.mock.calls[0][0];
-      expect(callArgs).toContain('TypeScript');
+      expect(callArgs.contents).toContain('TypeScript');
     });
   });
 
   describe('generateInfographicImage', () => {
     it('should generate an infographic image', async () => {
-      const { GoogleGenAI } = await import('@google/genai');
-      const mockGenerateContent = vi.fn().mockResolvedValue(mockGeminiImageResponse);
-
-      (GoogleGenAI as any).mockImplementation(() => ({
-        getGenerativeModel: vi.fn().mockReturnValue({
-          generateContent: mockGenerateContent,
-        }),
-      }));
+      mockGenerateContent.mockResolvedValue(mockGeminiImageResponse);
 
       const result = await generateInfographicImage(
         'Visual plan for the infographic',
@@ -187,16 +156,9 @@ describe('geminiService', () => {
     });
 
     it('should throw error when no candidates in response', async () => {
-      const { GoogleGenAI } = await import('@google/genai');
-      const mockGenerateContent = vi.fn().mockResolvedValue({
+      mockGenerateContent.mockResolvedValue({
         response: { candidates: [] },
       });
-
-      (GoogleGenAI as any).mockImplementation(() => ({
-        getGenerativeModel: vi.fn().mockReturnValue({
-          generateContent: mockGenerateContent,
-        }),
-      }));
 
       await expect(
         generateInfographicImage(
@@ -208,17 +170,10 @@ describe('geminiService', () => {
     });
 
     it('should handle service unavailable errors', async () => {
-      const { GoogleGenAI } = await import('@google/genai');
       const serviceError = Object.assign(new Error('Service unavailable'), {
         status: 503,
       });
-      const mockGenerateContent = vi.fn().mockRejectedValue(serviceError);
-
-      (GoogleGenAI as any).mockImplementation(() => ({
-        getGenerativeModel: vi.fn().mockReturnValue({
-          generateContent: mockGenerateContent,
-        }),
-      }));
+      mockGenerateContent.mockRejectedValue(serviceError);
 
       await expect(
         generateInfographicImage(

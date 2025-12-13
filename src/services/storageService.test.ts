@@ -14,13 +14,60 @@ const mockIndexedDB = {
   databases: vi.fn(),
 };
 
+// Mock Image class that triggers onload when src is set
+class MockImage {
+  onload: (() => void) | null = null;
+  onerror: (() => void) | null = null;
+  width = 100;
+  height = 100;
+  private _src = '';
+
+  get src() {
+    return this._src;
+  }
+
+  set src(value: string) {
+    this._src = value;
+    // Trigger onload asynchronously to simulate real behavior
+    setTimeout(() => {
+      if (this.onload) {
+        this.onload();
+      }
+    }, 0);
+  }
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   (globalThis as any).indexedDB = mockIndexedDB;
+  (globalThis as any).Image = MockImage as any;
 });
 
 describe('storageService', () => {
   describe('openDatabase', () => {
+    // Run error test FIRST to avoid singleton caching issues
+    it('should handle database open errors', async () => {
+      const errorRequest = {
+        ...mockIDBRequest,
+        error: new Error('Failed to open database'),
+        onsuccess: null as any,
+        onerror: null as any,
+      };
+
+      mockIndexedDB.open.mockReturnValue(errorRequest);
+
+      const dbPromise = openDatabase();
+
+      // Simulate error - use setTimeout to ensure the promise has set up handlers
+      setTimeout(() => {
+        if (errorRequest.onerror) {
+          errorRequest.onerror({ target: errorRequest } as any);
+        }
+      }, 0);
+
+      await expect(dbPromise).rejects.toThrow();
+    });
+
     it('should open the database successfully', async () => {
       const mockRequest = {
         ...mockIDBRequest,
@@ -35,36 +82,22 @@ describe('storageService', () => {
       const dbPromise = openDatabase();
 
       // Simulate success
-      if (mockRequest.onsuccess) {
-        mockRequest.onsuccess({ target: mockRequest } as any);
-      }
+      setTimeout(() => {
+        if (mockRequest.onsuccess) {
+          mockRequest.onsuccess({ target: mockRequest } as any);
+        }
+      }, 0);
 
       await expect(dbPromise).resolves.toBeDefined();
-    });
-
-    it('should handle database open errors', async () => {
-      const mockRequest = {
-        ...mockIDBRequest,
-        error: new Error('Failed to open database'),
-        onsuccess: null as any,
-        onerror: null as any,
-      };
-
-      mockIndexedDB.open.mockReturnValue(mockRequest);
-
-      const dbPromise = openDatabase();
-
-      // Simulate error
-      if (mockRequest.onerror) {
-        mockRequest.onerror({ target: mockRequest } as any);
-      }
-
-      await expect(dbPromise).rejects.toThrow();
     });
   });
 
   describe('compressImage', () => {
     it('should compress large images', async () => {
+      // Create a large image data URL (>100KB COMPRESSION_THRESHOLD)
+      const largeBase64 = 'A'.repeat(110000); // >100KB
+      const largeImage = `data:image/png;base64,${largeBase64}`;
+
       // Create a mock canvas and context
       const mockCanvas = document.createElement('canvas');
       const mockContext = {
@@ -77,15 +110,14 @@ describe('storageService', () => {
         'data:image/jpeg;base64,compressed'
       );
 
-      const mockImage = new Image();
-      mockImage.width = 4000;
-      mockImage.height = 3000;
+      // Override MockImage to return large dimensions that will be scaled down
+      class LargeMockImage extends MockImage {
+        width = 4000;
+        height = 3000;
+      }
+      (globalThis as any).Image = LargeMockImage as any;
 
-      const result = await compressImage(
-        'data:image/png;base64,original',
-        2000,
-        0.8
-      );
+      const result = await compressImage(largeImage, 2000, 0.8);
 
       expect(result).toContain('data:image/jpeg;base64,');
     });
@@ -93,12 +125,9 @@ describe('storageService', () => {
     it('should return original image if already small', async () => {
       const smallImage = 'data:image/png;base64,small';
 
-      const mockImage = new Image();
-      mockImage.width = 800;
-      mockImage.height = 600;
-
       const result = await compressImage(smallImage, 2000, 0.8);
 
+      // Returns original because length < 100KB threshold
       expect(result).toBe(smallImage);
     });
   });

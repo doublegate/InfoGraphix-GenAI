@@ -2,7 +2,7 @@
 
 > Transform any topic into stunning, AI-generated infographics using Google Gemini
 
-[![Version](https://img.shields.io/badge/version-1.8.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](CHANGELOG.md)
 [![CI](https://github.com/parobek/InfoGraphix-GenAI/workflows/CI/badge.svg)](https://github.com/parobek/InfoGraphix-GenAI/actions/workflows/ci.yml)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -63,13 +63,13 @@ InfoGraphix AI is a powerful web application that generates high-quality infogra
 - Export in multiple formats (PNG, PDF, SVG, ZIP)
 - Advanced version history with search and filtering
 
-**Latest Updates (v1.6.0):**
-- AI Design Suggestions (Beta) - Get intelligent style and palette recommendations powered by Gemini 3 Pro
-- Custom Palette Generator - Extract colors from images and create custom color schemes
-- Enhanced Template Library - Expanded from 10 to 55 professional templates across 10 categories
-- Advanced color theory algorithms - Complementary, triadic, analogous, and more
-- WCAG accessibility checking for custom palettes
-- Category-based template filtering for easier discovery
+**Latest Updates (v2.0.0):**
+- Comprehensive Testing Infrastructure - Vitest with React Testing Library, 70% coverage targets
+- Theme System - Centralized design tokens with 300+ system variables
+- Enhanced i18n - RTL support, number/date/relative time formatting, pluralization
+- Accessibility Testing - Automated WCAG 2.1 AA compliance checking
+- Developer Experience - TypeScript strict mode, ESLint strict rules, structured logging
+- Foundation for Test-Driven Development - Unit tests for services, hooks, and components
 
 ---
 
@@ -128,10 +128,23 @@ InfoGraphix AI is a powerful web application that generates high-quality infogra
 
 - **WCAG 2.1 AA Compliance** - Full keyboard navigation and screen reader support
 - **Multi-Language Support** - English and Spanish with automatic browser detection
+- **RTL Language Support** - Automatic direction switching for Arabic, Hebrew, Persian, Urdu
 - **High Contrast Mode** - Enhanced visibility with system preference detection
 - **Screen Reader Announcements** - ARIA live regions for processing states
 - **Skip Navigation** - Jump to main content with keyboard shortcut
-- **WCAG Accessibility Checking** (v1.6.0) - Custom palettes automatically checked for AA/AAA contrast ratios
+- **WCAG Accessibility Checking** - Custom palettes automatically checked for AA/AAA contrast ratios
+- **Locale-Aware Formatting** - Numbers, dates, and relative times formatted per user's locale
+
+### Code Quality & Testing
+
+- **Comprehensive Testing** - Vitest with React Testing Library, 70% coverage targets
+- **TypeScript Strict Mode** - Full type safety across the entire codebase
+- **ESLint Strict Rules** - Enforced code quality standards (no-explicit-any, no-unused-vars)
+- **CI/CD Pipeline** - Automated testing, linting, security audits on every commit
+- **Structured Logging** - Environment-aware debugging with performance timing
+- **Rate Limiting** - Client-side API rate limiter with visual countdown
+- **Error Tracking** - Integration ready for Sentry, LogRocket, or custom solutions
+- **Bundle Analysis** - Track dependency size and optimize build output
 
 ---
 
@@ -158,9 +171,19 @@ cp .env.local.example .env.local
 
 # Start the development server
 npm run dev
+
+# Optional: Run tests
+npm test
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+**Testing:**
+```bash
+npm test              # Run tests in watch mode
+npm run test:ui       # Run tests with Vitest UI
+npm run test:coverage # Generate coverage report
+```
 
 ### Google AI Studio Deployment
 
@@ -248,12 +271,20 @@ InfoGraphix-GenAI/
 │   ├── App.tsx                  # Main application orchestrator (534KB main chunk)
 │   ├── index.tsx                # React entry point
 │   ├── types.ts                 # TypeScript enums and interfaces
+│   ├── constants/               # Named constants and configuration
+│   │   ├── api.ts               # API endpoints and rate limits
+│   │   ├── storage.ts           # Storage thresholds and keys
+│   │   ├── performance.ts       # Image compression and batch settings
+│   │   ├── ui.ts                # Debounce timings and animations
+│   │   ├── validation.ts        # Input validation rules
+│   │   └── colors.ts            # Color extraction and WCAG constants
 │   ├── services/
 │   │   ├── geminiService.ts     # Gemini API integration
 │   │   ├── batchService.ts      # Batch generation queue management
 │   │   ├── templateService.ts   # Template CRUD operations (55 templates)
-│   │   ├── storageService.ts    # LocalStorage abstraction
-│   │   └── colorExtractionService.ts  # Color extraction and palette generation (445 lines)
+│   │   ├── storageService.ts    # IndexedDB abstraction with compression
+│   │   ├── colorExtractionService.ts  # Color extraction and palette generation (565 lines)
+│   │   └── errorTrackingService.ts    # Error tracking integration stub
 │   ├── components/
 │   │   ├── AboutModal.tsx       # Application information modal
 │   │   ├── ApiKeySelector.tsx   # AI Studio key management
@@ -278,21 +309,38 @@ InfoGraphix-GenAI/
 │   │       ├── TemplateGrid.tsx      # Grid view of templates
 │   │       ├── TemplateCard.tsx      # Individual template card
 │   │       └── TemplateEditor.tsx    # Template creation/editing
+│   ├── contexts/                # React Context API providers
+│   │   ├── GenerationContext.tsx # Generation state management
+│   │   ├── ThemeContext.tsx     # Theme and accessibility state
+│   │   └── index.ts             # Unified context exports
 │   ├── utils/
 │   │   ├── exportUtils.ts       # Export format utilities (lazy-loaded, 686KB)
-│   │   └── keyboardShortcuts.ts # Keyboard shortcut registry and utilities
+│   │   ├── keyboardShortcuts.ts # Keyboard shortcut registry
+│   │   ├── logger.ts            # Structured logging utility
+│   │   ├── rateLimiter.ts       # Client-side API rate limiter
+│   │   ├── storageHelpers.ts    # Type-safe storage utilities
+│   │   └── validation.ts        # Input validation utilities
 │   ├── hooks/
 │   │   ├── useKeyboardShortcuts.ts # Keyboard shortcut event handling
 │   │   ├── useAnnouncer.ts      # Screen reader announcements
 │   │   ├── useHighContrast.ts   # High contrast mode management
-│   │   ├── useStyleSuggestions.ts  # AI suggestions state management (v1.6.0)
+│   │   ├── useStyleSuggestions.ts  # AI suggestions state management
 │   │   ├── useGeneration.ts     # Generation workflow management
 │   │   ├── useFormPersistence.ts # Form draft auto-save
-│   │   └── useVersionHistory.ts # Version history state
+│   │   ├── useVersionHistory.ts # Version history state
+│   │   ├── useSavedVersions.ts  # IndexedDB version management
+│   │   └── useModals.ts         # Modal visibility state
+│   ├── theme/                   # Design system tokens
+│   │   ├── tokens.ts            # Centralized design tokens (300+ variables)
+│   │   └── index.ts             # Theme exports
 │   ├── i18n/
-│   │   ├── index.ts             # i18next configuration
+│   │   ├── index.ts             # i18next configuration with RTL support
 │   │   ├── en.json              # English translations
 │   │   └── es.json              # Spanish translations
+│   ├── test/                    # Testing infrastructure
+│   │   ├── setup.ts             # Vitest setup and mocks
+│   │   ├── testUtils.tsx        # Custom render utilities
+│   │   └── mockData.ts          # Mock data fixtures
 │   └── styles/
 │       ├── main.css             # Global styles with accessibility utilities
 │       └── high-contrast.css    # High contrast mode styles
@@ -310,26 +358,60 @@ InfoGraphix-GenAI/
 - VersionHistory: 26.10 kB (lazy-loaded when accessed)
 - Dynamic imports for export utilities to reduce initial load time
 
-**React Portal Usage:**
-- TemplateBrowser modal renders via `ReactDOM.createPortal()` for proper full-screen overlay
-- Escapes parent CSS constraints (relative positioning, max-width, overflow)
-- Ensures consistent modal behavior from both header and form buttons
+**React Architecture:**
+- Context API for state management (GenerationContext, ThemeContext)
+- Custom hooks for complex state logic (useModals, useSavedVersions)
+- React Portal for modals (TemplateBrowser)
+- React.memo for performance optimization (12+ components)
+- Error boundaries for graceful error handling
 
 **State Management:**
-- All application state in `src/App.tsx` using React hooks
-- LocalStorage persistence for templates, versions, and form drafts
-- Queue state management via `src/services/batchService.ts`
+- React Context API eliminates prop drilling
+- IndexedDB for persistent storage (100MB+ capacity)
+- Image compression (50-80% size reduction)
+- Automatic quota management and cleanup
+- Migration utilities from localStorage to IndexedDB
+
+**Testing Infrastructure (v2.0.0):**
+- Vitest testing framework with React Testing Library
+- Test setup with comprehensive mocks (IndexedDB, localStorage, window.matchMedia)
+- Custom render utilities with provider wrappers
+- Mock data fixtures for all major types
+- Coverage targets: 70% (current: ~15% foundation)
+- Test categories: Unit, integration, accessibility
+
+**Theme System (v2.0.0):**
+- Centralized design tokens (300+ variables)
+- Color palette: background, surface, border, text, interactive, semantic
+- Spacing scale (xs to 4xl)
+- Typography system: font families, sizes, weights, line heights
+- Border radius, shadows, transitions, z-index scales
+- Breakpoints for responsive design
+- Helper functions for color manipulation
+
+**Internationalization (v2.0.0):**
+- RTL language support (Arabic, Hebrew, Persian, Urdu)
+- Automatic document direction setting
+- Number formatting with Intl.NumberFormat
+- Date formatting with Intl.DateTimeFormat
+- Relative time formatting with Intl.RelativeTimeFormat
+- Pluralization support with i18next
+- Missing key warnings in development
 
 **Build Configuration:**
 - Vite 7 with optimized chunk splitting
 - 700KB chunk size warning limit for export libraries
-- Proper dependency ordering for React and its dependents
+- TypeScript strict mode enabled
+- ESLint with strict rules (no-explicit-any, no-unused-vars)
+- Bundle size analysis with rollup-plugin-visualizer
 
-**Color Extraction (v1.6.0):**
-- Client-side color extraction using Vibrant.js (node-vibrant)
-- 5 color scheme algorithms with color theory
-- WCAG contrast ratio calculations for accessibility
-- Custom palette persistence in localStorage
+**Developer Experience:**
+- Structured logging utility (environment-aware)
+- Client-side rate limiter for API calls
+- Type-safe storage helpers
+- Form validation utilities
+- Keyboard shortcut system (10 shortcuts)
+- CI/CD pipeline with GitHub Actions (ESLint, TypeScript, Security, Build)
 
 ### AI Pipeline
 
@@ -411,13 +493,55 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 | v1.3.0 | Foundation | 2025-12-11 | Core generation, 22 styles, 10 palettes, version history |
 | v1.4.0 | Productivity Enhancement | 2025-12-11 | Batch generation, custom templates, SVG/PDF export |
 | v1.5.0 | Accessibility & Global Reach | 2025-12-12 | Keyboard shortcuts, i18n (EN/ES), WCAG 2.1 AA, high contrast |
-| v1.6.0 | AI Intelligence & Creativity | 2025-12-12 (Current) | AI design suggestions, custom palette generator, 55 templates |
-| v1.7.0 | Platform & API | Q4 2026 | REST API, Python/JS SDKs, webhooks |
-| v1.8.0 | Ecosystem Integrations | Q1 2027 | Google Workspace, Notion, Figma, Slack |
-| v1.9.0 | Enterprise & Advanced | Q2 2027 | SSO/SAML, RBAC, admin dashboard |
-| v2.0.0 | Stable Release | Q3 2027 | Performance optimization, UI/UX polish |
+| v1.6.0 | AI Intelligence & Creativity | 2025-12-12 | AI design suggestions, custom palette generator, 55 templates |
+| v1.7.0 | Technical Debt Remediation | 2025-12-12 | TypeScript strict mode, CI/CD, logger utility, ESLint |
+| v1.8.0 | Architecture Improvements | 2025-12-12 | IndexedDB migration, Context API, performance optimizations |
+| v1.9.0 | Code Quality | 2025-12-12 | Named constants, storage helpers, JSDoc, rate limiting |
+| v2.0.0 | Testing & Advanced Features | 2025-12-12 (Current) | Vitest infrastructure, theme system, enhanced i18n |
+| v2.1.0 | Expanded Test Coverage | Q1 2026 | 70% test coverage, integration tests, property-based tests |
+| v2.2.0 | Platform & API | Q2 2026 | REST API, Python/JS SDKs, webhooks |
+| v2.3.0 | Ecosystem Integrations | Q3 2026 | Google Workspace, Notion, Figma, Slack |
+| v2.4.0 | Enterprise & Advanced | Q4 2026 | SSO/SAML, RBAC, admin dashboard |
+| v3.0.0 | Stable Release | Q1 2027 | Performance optimization, UI/UX polish |
 
 ### Recent Updates
+
+**v2.0.0 - Testing & Advanced Features (2025-12-12):**
+- Comprehensive testing infrastructure with Vitest and React Testing Library
+- Test setup with comprehensive mocks for IndexedDB, localStorage, window.matchMedia
+- Custom render utilities with provider wrappers for all contexts
+- Mock data fixtures for all major types (templates, versions, batches)
+- Coverage targets: 70% (current foundation: ~15%, 15 tests written)
+- Theme system with 300+ centralized design tokens
+- Enhanced i18n with RTL support (Arabic, Hebrew, Persian, Urdu)
+- Number, date, and relative time formatting with Intl APIs
+- Pluralization support with i18next
+- Accessibility testing infrastructure with @axe-core/react
+- Foundation for test-driven development workflow
+- Sprint 4 completion: 3/6 tasks (50%), ~25 hours invested
+- TypeScript strict mode, ESLint strict rules across codebase
+- Structured logging utility for environment-aware debugging
+
+**v1.9.0-1.9.1 - Code Quality Improvements (2025-12-12):**
+- Named constants system (storage, performance, UI, validation, colors)
+- Storage helper utilities (type-safe localStorage/IndexedDB operations)
+- Comprehensive JSDoc documentation for all utilities and components
+- Rate limiting system with client-side sliding window algorithm
+- Rate limit indicator UI component with real-time countdown
+- Styling conventions documentation (STYLING-CONVENTIONS.md)
+- Magic numbers eliminated, DRY storage services
+- Sprint 3 completion: 5/7 tasks (71%)
+
+**v1.7.0-1.8.0 - Technical Debt & Architecture (2025-12-12):**
+- React Context API for state management (GenerationContext, ThemeContext)
+- IndexedDB migration with image compression (50-80% reduction)
+- Custom hooks for complex state (useModals, useSavedVersions)
+- React performance optimizations (memo, useMemo, useCallback)
+- CI/CD pipeline with GitHub Actions (ESLint, TypeScript, Security, Build)
+- Logger utility replacing 53 console statements
+- Form validation utilities and image error handling
+- Bundle size analysis with rollup-plugin-visualizer
+- Sprint 1-2 completion: 21/21 tasks (100%)
 
 **v1.6.0 - AI Intelligence & Creativity (2025-12-12):**
 - AI-powered style and palette suggestions using Gemini 3 Pro with thinking mode
@@ -475,25 +599,32 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 
 ### Upcoming Features by Theme
 
-**v1.7.0 - Platform (Q4 2026):**
+**v2.1.0 - Expanded Test Coverage (Q1 2026):**
+- 70-80% test coverage across all services, hooks, and components
+- Integration tests for multi-step workflows
+- Property-based testing for edge cases
+- Runtime validation with Zod for API responses
+- Service worker for offline support
+
+**v2.2.0 - Platform & API (Q2 2026):**
 - REST API v1 with OpenAPI specification
 - JavaScript/TypeScript and Python SDKs
 - Webhook system with delivery tracking
 - Developer portal with usage analytics
 
-**v1.8.0 - Ecosystem (Q1 2027):**
+**v2.3.0 - Ecosystem Integrations (Q3 2026):**
 - Google Workspace Add-on (Slides, Docs, Drive)
 - Notion integration and Figma plugin
 - Slack and Discord bots
 - Zapier and Make automation support
 
-**v1.9.0 - Enterprise (Q2 2027):**
+**v2.4.0 - Enterprise & Advanced (Q4 2026):**
 - SSO/SAML 2.0 authentication
 - Advanced RBAC with custom roles
 - Admin dashboard with organization analytics
 - Brand guidelines enforcement system
 
-**v2.0.0 - Stable Release (Q3 2027):**
+**v3.0.0 - Stable Release (Q1 2027):**
 - 50% improvement in generation speed
 - Comprehensive monitoring and observability
 - Complete UI/UX overhaul with design system
@@ -501,10 +632,12 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 
 See [FEATURE-ROADMAP.md](to-dos/FEATURE-ROADMAP.md) for complete details and [version-plans/](to-dos/version-plans/) for sprint-level breakdowns.
 
-**Additional Resources:**
-- [Technical Debt](to-dos/TECHNICAL-DEBT.md)
-- [Documentation Tasks](to-dos/DOCUMENTATION-TASKS.md)
-- [Integration Ideas](to-dos/INTEGRATION-IDEAS.md)
+**Development Resources:**
+- [Technical Debt](to-dos/TECHNICAL-DEBT.md) - Sprint-by-sprint technical debt tracking
+- [Documentation Tasks](to-dos/DOCUMENTATION-TASKS.md) - Documentation improvement tasks
+- [Integration Ideas](to-dos/INTEGRATION-IDEAS.md) - Future integration opportunities
+- [STYLING-CONVENTIONS.md](STYLING-CONVENTIONS.md) - TailwindCSS styling guidelines
+- [ERROR-TRACKING.md](docs/ERROR-TRACKING.md) - Error tracking integration guide
 
 ---
 
@@ -515,7 +648,14 @@ See [FEATURE-ROADMAP.md](to-dos/FEATURE-ROADMAP.md) for complete details and [ve
 | `npm install` | Install dependencies |
 | `npm run dev` | Start development server (port 3000) |
 | `npm run build` | Build for production |
+| `npm run build:analyze` | Build with bundle size analysis |
 | `npm run preview` | Preview production build |
+| `npm run lint` | Run ESLint checks |
+| `npm run lint:fix` | Auto-fix ESLint issues |
+| `npm test` | Run tests in watch mode |
+| `npm run test:ui` | Run tests with Vitest UI |
+| `npm run test:run` | Run tests once (CI mode) |
+| `npm run test:coverage` | Generate test coverage report |
 
 ---
 
@@ -532,9 +672,12 @@ See [FEATURE-ROADMAP.md](to-dos/FEATURE-ROADMAP.md) for complete details and [ve
 | [react-i18next](https://react.i18next.com/) | 16.4.1 | React integration for i18next |
 | [i18next](https://www.i18next.com/) | 25.7.2 | Internationalization framework |
 | [i18next-browser-languagedetector](https://github.com/i18next/i18next-browser-languageDetector) | 8.2.0 | Browser language detection plugin |
-| [node-vibrant](https://www.npmjs.com/package/node-vibrant) | 4.0.3 | Color extraction from images (v1.6.0) |
+| [node-vibrant](https://www.npmjs.com/package/node-vibrant) | 4.0.3 | Color extraction from images |
 | [jsPDF](https://www.npmjs.com/package/jspdf) | 3.0.4 | PDF generation (lazy-loaded) |
 | [JSZip](https://www.npmjs.com/package/jszip) | 3.10.1 | ZIP archive creation (lazy-loaded) |
+| [Vitest](https://vitest.dev/) | 4.0.15 | Testing framework with React Testing Library |
+| [@testing-library/react](https://testing-library.com/react) | 16.3.0 | React component testing utilities |
+| [@axe-core/react](https://github.com/dequelabs/axe-core-npm) | 4.11.0 | Accessibility testing |
 
 ---
 
