@@ -16,7 +16,7 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useAnnouncer } from './hooks/useAnnouncer';
 import { useHighContrast } from './hooks/useHighContrast';
 import { useModals } from './hooks/useModals';
-import { useSavedVersions } from './hooks/useSavedVersions';
+import { useVersionHistory } from './hooks/useVersionHistory';
 import { useGeneration } from './contexts';
 
 // Lazy load heavy modal components for better code splitting
@@ -84,10 +84,10 @@ function App() {
   const {
     versions: savedVersions,
     isLoading: isLoadingVersions,
-    saveVersion,
-    deleteVersion,
-    clearHistory
-  } = useSavedVersions();
+    save: saveVersion,
+    remove: deleteVersion,
+    clearAll: clearHistory
+  } = useVersionHistory();
 
   const [isApiKeyReady, setIsApiKeyReady] = useState(false);
 
@@ -111,20 +111,22 @@ function App() {
       feedback: currentFeedback
     };
 
-    try {
-      await saveVersion(newVersion);
+    const success = await saveVersion(newVersion);
+    if (success) {
       setIsCurrentResultSaved(true);
-    } catch (e) {
-      setError((e as Error).message);
+    } else {
+      setError('Failed to save to history. Please try again.');
     }
   }, [result, currentTopic, currentSize, currentRatio, currentStyle, currentPalette, currentFilters, currentFeedback, saveVersion, setIsCurrentResultSaved, setError]);
 
-  const handleDeleteVersion = useCallback((id: string) => {
-    deleteVersion(id);
+  const handleDeleteVersion = useCallback(async (id: string) => {
+    await deleteVersion(id);
   }, [deleteVersion]);
 
-  const handleClearHistory = useCallback(() => {
-    clearHistory();
+  const handleClearHistory = useCallback(async () => {
+    if (window.confirm('Are you sure you want to delete all history? This cannot be undone.')) {
+      await clearHistory();
+    }
   }, [clearHistory]);
 
   const handleLoadVersion = useCallback((version: SavedVersion) => {
@@ -402,8 +404,8 @@ function App() {
             onClose={closeHistory}
             versions={savedVersions}
             onLoadVersion={handleLoadVersion}
-            onDeleteVersion={handleDeleteVersion}
-            onClearHistory={handleClearHistory}
+            onDeleteVersion={(id) => { void handleDeleteVersion(id); }}
+            onClearHistory={() => { void handleClearHistory(); }}
           />
         </Suspense>
       </ErrorBoundary>

@@ -3,7 +3,7 @@
  * v1.7.0 Technical Debt Remediation
  *
  * This is a placeholder for future error tracking integration (e.g., Sentry).
- * See docs/ERROR-TRACKING.md for full integration instructions.
+ * See docs/technical/ERROR-TRACKING.md for full integration instructions.
  *
  * To enable error tracking:
  * 1. Install Sentry: npm install --save @sentry/react

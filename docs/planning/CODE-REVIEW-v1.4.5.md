@@ -284,9 +284,9 @@ onGenerate({ topic, inputType, size, aspectRatio, style, palette });
 ### Documentation
 
 - ✅ Comprehensive inline JSDoc comments in `types.ts`
-- ✅ Well-documented API in `docs/API.md`
-- ✅ Detailed user guide in `docs/USER-GUIDE.md`
-- ✅ Extensive FAQ in `docs/FAQ.md`
+- ✅ Well-documented API in `docs/guides/API.md`
+- ✅ Detailed user guide in `docs/guides/USER-GUIDE.md`
+- ✅ Extensive FAQ in `docs/guides/FAQ.md`
 - ✅ Clear architecture documentation with diagrams
 
 ### User Experience

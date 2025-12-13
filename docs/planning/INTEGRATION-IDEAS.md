@@ -21,7 +21,7 @@ Potential integrations and extensions for InfoGraphix AI.
 | Ruby SDK | v1.9.0 | Medium | Planned |
 | Embeddable Widget | v1.9.0 | Low | Planned |
 
-See `to-dos/version-plans/` for detailed implementation plans for each version.
+See `docs/planning/version-plans/` for detailed implementation plans for each version.
 
 ---
 

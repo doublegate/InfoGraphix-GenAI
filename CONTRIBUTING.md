@@ -72,8 +72,10 @@ InfoGraphix-GenAI/
 ├── services/
 │   └── geminiService.ts    # Gemini API integration
 ├── components/             # React components
-├── docs/                   # Documentation
-└── to-dos/                 # Project roadmap
+└── docs/                   # Documentation and planning
+    ├── technical/          # Technical documentation
+    ├── guides/             # User and developer guides
+    └── planning/           # Project roadmap and sprints
 ```
 
 ---

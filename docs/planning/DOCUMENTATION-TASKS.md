@@ -16,7 +16,7 @@ Documentation improvements and additions needed.
 - [x] Add sequence diagrams for generation flow (Mermaid)
 - [x] Include authentication flow documentation
 
-**Location:** `docs/API.md`
+**Location:** `docs/guides/API.md`
 
 ---
 
@@ -50,7 +50,7 @@ Documentation improvements and additions needed.
 - [x] Address quality concerns
 - [x] Add to docs folder
 
-**Location:** `docs/FAQ.md` (~800 lines)
+**Location:** `docs/guides/FAQ.md` (~800 lines)
 
 ---
 
@@ -82,7 +82,7 @@ Documentation improvements and additions needed.
 - [x] Document data flow with diagrams (Mermaid)
 - [x] Add state management visualization (Mermaid)
 
-**Location:** `docs/ARCHITECTURE.md`
+**Location:** `docs/technical/ARCHITECTURE.md`
 
 ---
 
@@ -134,7 +134,7 @@ Documentation improvements and additions needed.
 **Locations:**
 - `README.md` - Add security considerations section
 - `docs/SECURITY.md` - New file explaining security model
-- `docs/FAQ.md` - Add API key security FAQs
+- `docs/guides/FAQ.md` - Add API key security FAQs
 
 **Rationale:**
 The application intentionally handles API keys client-side for AI Studio deployment, but this security model is not clearly documented, which could lead to user confusion or misuse.

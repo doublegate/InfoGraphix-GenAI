@@ -175,7 +175,7 @@ No ESLint errors, no TypeScript errors, no runtime issues detected.
 
 1. Update CHANGELOG.md with v1.9.0 changes
 2. Update version references in package.json
-3. Update TECHNICAL-DEBT.md to mark TD-020 and TD-021 as resolved
+3. Update docs/planning/TECHNICAL-DEBT.md to mark TD-020 and TD-021 as resolved
 4. Commit changes with conventional commit message
 5. Tag v1.9.0
 

@@ -355,8 +355,10 @@ InfoGraphix-GenAI/
 │       ├── main.css             # Global styles with accessibility utilities
 │       └── high-contrast.css    # High contrast mode styles
 ├── vite.config.ts               # Build configuration with code splitting
-├── docs/                        # Technical documentation
-└── to-dos/                      # Development roadmaps
+└── docs/                        # All documentation and planning
+    ├── technical/               # Technical documentation and architecture
+    ├── guides/                  # User and developer guides
+    └── planning/                # Sprint planning and roadmaps
 ```
 
 ### Technical Implementation
@@ -490,14 +492,14 @@ User Applies Suggestions (one-click) or Chooses Manually
 
 | Document | Description |
 |----------|-------------|
-| [User Guide](docs/USER-GUIDE.md) | Complete step-by-step usage guide |
-| [FAQ](docs/FAQ.md) | Frequently asked questions and answers |
-| [Architecture](docs/ARCHITECTURE.md) | System design, data flow, state management |
-| [API Reference](docs/API.md) | Gemini integration, service interfaces |
-| [Components](docs/COMPONENTS.md) | React component documentation |
-| [Deployment](docs/DEPLOYMENT.md) | AI Studio, Vercel, Docker deployment guides |
-| [Styling](docs/STYLING.md) | TailwindCSS patterns, design system |
-| [Troubleshooting](docs/TROUBLESHOOTING.md) | Common issues and solutions |
+| [User Guide](docs/guides/USER-GUIDE.md) | Complete step-by-step usage guide |
+| [FAQ](docs/guides/FAQ.md) | Frequently asked questions and answers |
+| [Architecture](docs/technical/ARCHITECTURE.md) | System design, data flow, state management |
+| [API Reference](docs/guides/API.md) | Gemini integration, service interfaces |
+| [Components](docs/guides/COMPONENTS.md) | React component documentation |
+| [Deployment](docs/guides/DEPLOYMENT.md) | AI Studio, Vercel, Docker deployment guides |
+| [Styling](docs/guides/STYLING.md) | TailwindCSS patterns, design system |
+| [Troubleshooting](docs/guides/TROUBLESHOOTING.md) | Common issues and solutions |
 
 ---
 
@@ -661,15 +663,15 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 - Complete UI/UX overhaul with design system
 - Multi-language documentation (5 languages)
 
-See [FEATURE-ROADMAP.md](to-dos/FEATURE-ROADMAP.md) for complete details and [version-plans/](to-dos/version-plans/) for sprint-level breakdowns.
+See [FEATURE-ROADMAP.md](docs/planning/FEATURE-ROADMAP.md) for complete details and [version-plans/](docs/planning/version-plans/) for sprint-level breakdowns.
 
 **Development Resources:**
 
-- [Technical Debt](to-dos/TECHNICAL-DEBT.md) - Sprint-by-sprint technical debt tracking
-- [Documentation Tasks](to-dos/DOCUMENTATION-TASKS.md) - Documentation improvement tasks
-- [Integration Ideas](to-dos/INTEGRATION-IDEAS.md) - Future integration opportunities
-- [STYLING-CONVENTIONS.md](STYLING-CONVENTIONS.md) - TailwindCSS styling guidelines
-- [ERROR-TRACKING.md](docs/ERROR-TRACKING.md) - Error tracking integration guide
+- [Technical Debt](docs/planning/TECHNICAL-DEBT.md) - Sprint-by-sprint technical debt tracking
+- [Documentation Tasks](docs/planning/DOCUMENTATION-TASKS.md) - Documentation improvement tasks
+- [Integration Ideas](docs/planning/INTEGRATION-IDEAS.md) - Future integration opportunities
+- [STYLING-CONVENTIONS.md](docs/guides/STYLING-CONVENTIONS.md) - TailwindCSS styling guidelines
+- [ERROR-TRACKING.md](docs/technical/ERROR-TRACKING.md) - Error tracking integration guide
 
 ---
 
@@ -774,6 +776,6 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
   <strong>InfoGraphix AI</strong> - Transform knowledge into visual stories
   <br>
   <a href="https://github.com/doublegate/InfoGraphix-GenAI">GitHub</a> |
-  <a href="docs/ARCHITECTURE.md">Docs</a> |
-  <a href="to-dos/FEATURE-ROADMAP.md">Roadmap</a>
+  <a href="docs/technical/ARCHITECTURE.md">Docs</a> |
+  <a href="docs/planning/FEATURE-ROADMAP.md">Roadmap</a>
 </p>

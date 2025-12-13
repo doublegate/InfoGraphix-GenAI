@@ -172,7 +172,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - User-friendly error messages with wait times
 
 - **Styling Conventions Documentation**
-  - `STYLING-CONVENTIONS.md` - Complete styling guide (32 sections)
+  - `docs/guides/STYLING-CONVENTIONS.md` - Complete styling guide (32 sections)
     - TailwindCSS v4 best practices and layer organization
     - When to use inline styles vs. utility classes vs. component classes
     - Animation conventions and performance guidelines
@@ -206,7 +206,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Completed:** 5/7 tasks (71%)
 - **Time Investment:** ~11 hours (JSDoc: 3-4h, Styling: 2-3h, Rate Limiting: 3-4h, v1.9.0: 2h)
 - **Deferred Tasks:** 2/7 (TD-018, TD-007) - 16-22 hours remaining
-- **Files Created:** 4 (rateLimiter.ts, RateLimitIndicator.tsx, STYLING-CONVENTIONS.md, +v1.9.0)
+- **Files Created:** 4 (rateLimiter.ts, RateLimitIndicator.tsx, docs/guides/STYLING-CONVENTIONS.md, +v1.9.0)
 - **Files Modified:** 6 (exportUtils, keyboardShortcuts, colorExtractionService, geminiService, +components)
 - **Lines Added:** +900 (primarily documentation and rate limiting)
 - **Build Status:** ✅ Zero errors, 5.65s build time
@@ -584,7 +584,7 @@ All migrations happen automatically on first use of v1.8.0:
 - New: `docs/ERROR-TRACKING.md` - Error tracking integration guide
 - Updated: README.md - CI badge, version bump
 - Updated: SECURITY.md - Latest version reference
-- Updated: TECHNICAL-DEBT.md - Sprint 1 completion
+- Updated: docs/planning/TECHNICAL-DEBT.md - Sprint 1 completion
 
 ---
 
@@ -755,7 +755,7 @@ All migrations happen automatically on first use of v1.8.0:
 
 ### Theme: Stable Release
 
-*Comprehensive performance optimization, UI/UX polish, and feature completeness. See `to-dos/version-plans/v2.0.0-PLAN.md` for details.*
+*Comprehensive performance optimization, UI/UX polish, and feature completeness. See `docs/planning/version-plans/v2.0.0-PLAN.md` for details.*
 
 ### Added
 - Comprehensive monitoring and observability stack
@@ -781,7 +781,7 @@ All migrations happen automatically on first use of v1.8.0:
 
 ### Theme: Enterprise & Advanced Features
 
-*Enterprise-grade authentication, analytics, and brand management. See `to-dos/version-plans/v1.9.0-PLAN.md` for details.*
+*Enterprise-grade authentication, analytics, and brand management. See `docs/planning/version-plans/v1.9.0-PLAN.md` for details.*
 
 ### Added
 - SSO/SAML 2.0 authentication support
@@ -804,7 +804,7 @@ All migrations happen automatically on first use of v1.8.0:
 
 ### Theme: Ecosystem Integrations
 
-*Deep integration with productivity tools and platforms. See `to-dos/version-plans/v1.8.0-PLAN.md` for details.*
+*Deep integration with productivity tools and platforms. See `docs/planning/version-plans/v1.8.0-PLAN.md` for details.*
 
 ### Added
 - Google Workspace Add-on (Slides, Docs, Drive)
@@ -826,7 +826,7 @@ All migrations happen automatically on first use of v1.8.0:
 
 ### Theme: Platform & API
 
-*Comprehensive REST API and developer platform. See `to-dos/version-plans/v1.7.0-PLAN.md` for details.*
+*Comprehensive REST API and developer platform. See `docs/planning/version-plans/v1.7.0-PLAN.md` for details.*
 
 ### Added
 - REST API v1 with OpenAPI 3.0 specification
@@ -849,7 +849,7 @@ All migrations happen automatically on first use of v1.8.0:
 
 ### Theme: AI Intelligence & Creativity
 
-*AI-powered suggestions, templates, and animation. See `to-dos/version-plans/v1.6.0-PLAN.md` for details.*
+*AI-powered suggestions, templates, and animation. See `docs/planning/version-plans/v1.6.0-PLAN.md` for details.*
 
 ### Added
 - AI-powered style and palette suggestions
@@ -1063,7 +1063,7 @@ All migrations happen automatically on first use of v1.8.0:
 
 ### Documentation
 - Comprehensive user guide (docs/USER-GUIDE.md) with step-by-step instructions
-- FAQ document (docs/FAQ.md) covering 60+ common questions across 10 categories
+- FAQ document (docs/guides/FAQ.md) covering 60+ common questions across 10 categories
 - Mermaid diagrams in ARCHITECTURE.md for system visualization
 - Enhanced API documentation with real-world examples and sequence diagrams
 - CONTRIBUTING.md with testing checklists and code style guidelines
