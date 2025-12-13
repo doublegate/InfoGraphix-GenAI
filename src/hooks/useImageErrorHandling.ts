@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { log } from '../utils/logger';
 
 interface UseImageErrorHandlingOptions {
@@ -44,6 +44,13 @@ export function useImageErrorHandling(
   const [imageSrc, setImageSrc] = useState(src);
   const [hasError, setHasError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+
+  // Update internal state when src prop changes (e.g., new generation or loading from history)
+  useEffect(() => {
+    setImageSrc(src);
+    setHasError(false);
+    setRetryCount(0);
+  }, [src]);
 
   const handleImageError = useCallback(
     (event: React.SyntheticEvent<HTMLImageElement>) => {

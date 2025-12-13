@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Image Rendering Bug** - Fixed infographic preview image failing to render after generation or when loading from history
+  - Root cause: `useImageErrorHandling` hook's internal state not updating when `src` prop changed
+  - Added `useEffect` in `src/hooks/useImageErrorHandling.ts` to sync internal state with prop changes
+  - Fixes both new generation and history loading scenarios
+  - File: `src/hooks/useImageErrorHandling.ts` (lines 48-53)
+
 ## [2.0.0] - 2025-12-12
 
 ### Theme: Testing Infrastructure & Advanced Features - Sprint 4
