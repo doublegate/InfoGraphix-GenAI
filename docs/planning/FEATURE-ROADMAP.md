@@ -11,11 +11,14 @@ Planned features and enhancements for InfoGraphix AI.
 | v1.4.5 | Released | 2025-12-12 | Productivity (Patch) |
 | v1.4.6 | Released | 2025-12-12 | Security & Documentation |
 | v1.5.0 | Released | 2025-12-12 | Accessibility & Global Reach |
-| v1.6.0 | **CURRENT** | 2025-12-12 | AI Intelligence & Creativity |
-| v1.7.0 | Planned | Q4 2026 | Platform |
-| v1.8.0 | Planned | Q1 2027 | Ecosystem |
-| v1.9.0 | Planned | Q2 2027 | Enterprise |
-| v2.0.0 | Planned | Q3 2027 | Stable Release |
+| v1.6.0 | Released | 2025-12-12 | AI Intelligence & Creativity |
+| v2.0.0 | Released | 2025-12-12 | Stability & Quality |
+| v2.0.3 | **CURRENT** | 2025-12-13 | Stability & Quality (Patch) |
+| v2.1.0 | Planned | Q1 2026 | Expanded Test Coverage |
+| v2.2.0 | Planned | Q2 2026 | Platform & API |
+| v2.3.0 | Planned | Q3 2026 | Ecosystem Integrations |
+| v2.4.0 | Planned | Q4 2026 | Enterprise & Advanced |
+| v3.0.0 | Planned | Q1 2027 | Stable Release |
 
 ---
 
@@ -129,255 +132,191 @@ The following features originally planned for v1.5.0 have been deferred to futur
 
 ---
 
-## Version 1.6.0 - AI Intelligence & Creativity (Q3 2026)
+## Version 2.1.0 - Expanded Test Coverage (Q1 2026)
 
-### Advanced Features
+**Detailed Plan:** [v2.1.0-PLAN.md](./version-plans/v2.1.0-PLAN.md)
 
-- [ ] **AI-Powered Suggestions**
-  - Style recommendations based on topic
-  - Automatic palette matching
-  - Layout optimization suggestions
+### Testing Infrastructure
+
+- [ ] **Unit Test Infrastructure**
+  - 70% code coverage target
+  - Component isolation with mocks
+  - Service layer testing
+  - Utility function coverage
   - Estimated effort: High
 
-- [ ] **Template Library**
-  - Pre-built infographic templates
-  - Category-based organization
-  - Customizable template slots
+- [ ] **Integration Test Suite**
+  - API integration tests
+  - Component interaction tests
+  - State management validation
   - Estimated effort: High
 
-- [ ] **Animation Support**
-  - Animated infographic generation
-  - GIF/MP4 export
-  - Presentation mode
-  - Estimated effort: Very High
+- [ ] **Property-Based Testing**
+  - fast-check integration
+  - Input validation invariants
+  - State transition properties
+  - Estimated effort: Medium
 
-### Integration
-
-- [ ] **API Access**
-  - REST API for programmatic generation
-  - Webhook notifications
-  - Rate limiting and quotas
+- [ ] **E2E Test Suite**
+  - Playwright test framework
+  - Critical user journey coverage
+  - Cross-browser testing
   - Estimated effort: High
-
-- [ ] **Third-Party Integrations**
-  - Notion export
-  - Google Slides integration
-  - Figma plugin
-  - Estimated effort: High per integration
 
 ---
 
-## Version 1.7.0 - Platform & API (Q4 2026)
+## Version 2.2.0 - Platform & API (Q2 2026)
+
+**Detailed Plan:** [v2.2.0-PLAN.md](./version-plans/v2.2.0-PLAN.md)
 
 ### API Foundation
 
 - [ ] **REST API v1**
-  - Programmatic infographic generation
-  - Authentication and rate limiting
-  - Comprehensive API documentation
+  - OpenAPI 3.0 specification
+  - JWT authentication
+  - Rate limiting and quotas
+  - Estimated effort: Very High
+
+- [ ] **Python SDK**
+  - PyPI package publication
+  - Async/await support
+  - Comprehensive documentation
+  - Estimated effort: High
+
+- [ ] **JavaScript/TypeScript SDK**
+  - npm package publication
+  - Full TypeScript types
+  - Browser and Node.js support
   - Estimated effort: High
 
 - [ ] **Webhook System**
-  - Event notifications (generation.complete, generation.failed)
+  - Event-driven notifications
+  - Retry logic with exponential backoff
   - Webhook management dashboard
-  - Retry logic and delivery tracking
   - Estimated effort: Medium
-
-- [ ] **SDK Development - Phase 1**
-  - JavaScript/TypeScript SDK (npm package)
-  - Python SDK (pip package)
-  - Code examples and tutorials
-  - Estimated effort: High
-
-### Developer Experience
-
-- [ ] **API Playground**
-  - Interactive API testing interface
-  - Request/response visualization
-  - Code snippet generation
-  - Estimated effort: Medium
-
-- [ ] **Developer Portal**
-  - API key management
-  - Usage analytics dashboard
-  - Billing and quota monitoring
-  - Estimated effort: High
 
 ---
 
-## Version 1.8.0 - Ecosystem Integrations (Q1 2027)
+## Version 2.3.0 - Ecosystem Integrations (Q3 2026)
+
+**Detailed Plan:** [v2.3.0-PLAN.md](./version-plans/v2.3.0-PLAN.md)
 
 ### Priority Integrations
 
 - [ ] **Google Workspace Suite**
-  - Google Slides insertion
+  - Google Slides add-on
   - Google Docs embedding
-  - Google Drive storage integration
+  - Google Drive integration
   - Estimated effort: Very High
 
 - [ ] **Notion Integration**
-  - Export as Notion pages
-  - Structured data embedding
-  - Database linking
+  - Block embedding
+  - Database integration
+  - Page content extraction
   - Estimated effort: High
 
 - [ ] **Figma Plugin**
-  - Export as Figma frames
-  - Vector property preservation
+  - Frame insertion
   - Design system integration
+  - Vector property preservation
   - Estimated effort: High
 
-### Communication Platforms
+### Communication & Automation
 
-- [ ] **Slack Bot**
-  - Slash commands for generation
+- [ ] **Slack Integration**
+  - Slash commands
+  - Interactive bot
   - Channel posting
-  - Workspace integration
   - Estimated effort: Medium
 
-- [ ] **Discord Bot**
-  - Bot commands
-  - Server integration
-  - Webhook delivery
-  - Estimated effort: Medium
-
-### Automation
-
-- [ ] **Zapier Integration**
+- [ ] **Zapier & Make Integration**
   - Triggers and actions
   - Multi-service workflows
-  - Pre-built templates
-  - Estimated effort: Medium
-
-- [ ] **Make (Integromat) Support**
-  - Custom modules
-  - Visual workflow builder
-  - Advanced routing
   - Estimated effort: Medium
 
 ---
 
-## Version 1.9.0 - Enterprise & Advanced Features (Q2 2027)
+## Version 2.4.0 - Enterprise & Advanced (Q4 2026)
+
+**Detailed Plan:** [v2.4.0-PLAN.md](./version-plans/v2.4.0-PLAN.md)
 
 ### Enterprise Authentication
 
 - [ ] **SSO/SAML Support**
-  - Single sign-on integration
   - SAML 2.0 compliance
-  - Multi-provider support
-  - Estimated effort: High
+  - Multi-provider support (Okta, Azure AD, OneLogin)
+  - JIT provisioning
+  - Estimated effort: Very High
 
-- [ ] **Advanced User Management**
-  - Role-based access control (RBAC)
-  - Team hierarchies
+- [ ] **Role-Based Access Control**
   - Permission granularity
+  - Team hierarchies
+  - Custom role creation
   - Estimated effort: High
 
-### Enterprise Analytics
+### Enterprise Management
 
 - [ ] **Admin Dashboard**
-  - Organization-wide analytics
+  - Organization analytics
   - User activity monitoring
-  - Cost allocation and reporting
+  - Cost allocation reporting
   - Estimated effort: High
 
-- [ ] **Usage Analytics**
-  - Generation metrics
-  - Style and palette trends
-  - Performance insights
-  - Estimated effort: Medium
+- [ ] **User Provisioning (SCIM 2.0)**
+  - Automated user lifecycle
+  - Group synchronization
+  - Directory integration
+  - Estimated effort: High
 
-### Brand Management
-
-- [ ] **Brand Guidelines Enforcement**
+- [ ] **Brand Management**
   - Custom brand palettes
-  - Logo and watermark placement
-  - Font and style restrictions
-  - Estimated effort: High
-
-- [ ] **Template Governance**
-  - Approved template libraries
-  - Template approval workflows
-  - Version control
-  - Estimated effort: Medium
-
-### Advanced Features
-
-- [ ] **SDK Development - Phase 2**
-  - Go SDK (module)
-  - Ruby SDK (gem)
-  - Extended language support
-  - Estimated effort: High
-
-- [ ] **Batch API Endpoints**
-  - Bulk generation API
-  - Asynchronous processing
-  - Status polling and callbacks
+  - Logo/watermark placement
+  - Template governance
   - Estimated effort: Medium
 
 ---
 
-## Version 2.0.0 - Stable Release (Q3 2027)
+## Version 3.0.0 - Stable Release (Q1 2027)
+
+**Detailed Plan:** [v3.0.0-PLAN.md](./version-plans/v3.0.0-PLAN.md)
 
 ### Performance & Polish
 
 - [ ] **Performance Optimization**
-  - Generation speed improvements
-  - Caching strategies
+  - 50% faster generation target
+  - Advanced caching strategies
   - CDN integration
   - Estimated effort: High
 
 - [ ] **UI/UX Refinement**
-  - Accessibility audit and fixes
+  - Comprehensive accessibility audit
   - Mobile responsiveness improvements
-  - Loading state enhancements
+  - Animation and transition polish
   - Estimated effort: Medium
 
-- [ ] **Error Handling Improvements**
-  - Comprehensive error messages
-  - Automatic retry logic
-  - Fallback mechanisms
-  - Estimated effort: Medium
+### Quality & Documentation
 
-### Documentation & Support
+- [ ] **80% Test Coverage**
+  - Visual regression testing
+  - Performance benchmarks
+  - Chaos testing
+  - Estimated effort: High
 
-- [ ] **Comprehensive Documentation Overhaul**
+- [ ] **Comprehensive Documentation**
   - Video tutorials
   - Interactive guides
   - Best practices library
   - Estimated effort: High
 
-- [ ] **Support Infrastructure**
-  - In-app help system
-  - Knowledge base
-  - Support ticket system
-  - Estimated effort: High
-
-### Quality Assurance
-
-- [ ] **Testing Suite**
-  - End-to-end tests
-  - Visual regression testing
-  - Performance benchmarks
-  - Estimated effort: High
-
 - [ ] **Monitoring & Observability**
-  - Application performance monitoring (APM)
-  - Error tracking
-  - User analytics
-  - Estimated effort: Medium
-
-### Final Features
-
-- [ ] **Feature Completeness Review**
-  - All planned features implemented
-  - Bug fixes and polish
-  - Migration guides for breaking changes
+  - Application performance monitoring
+  - Error tracking (Sentry production)
+  - Real-time dashboards
   - Estimated effort: Medium
 
 ---
 
-## Future Considerations (Post v2.0.0)
+## Future Considerations (Post v3.0.0)
 
 ### Potential Features (Unscheduled)
 
@@ -411,7 +350,25 @@ The following features originally planned for v1.5.0 have been deferred to futur
 
 ## Completed Features
 
-### Version 1.5.0 (Current Release - 2025-12-12)
+### Version 2.0.x (Current - 2025-12-13)
+
+- [x] Comprehensive testing infrastructure (Vitest, React Testing Library)
+- [x] 300+ token theme system with CSS custom properties
+- [x] Enhanced i18n with RTL support and locale-aware formatting
+- [x] Accessibility testing infrastructure (@axe-core/react)
+- [x] Image rendering bug fixes (useImageErrorHandling)
+- [x] Batch processing network error handling
+- [x] Adaptive polling optimization (5s → 10s → 30s)
+- [x] Documentation reorganization and enhancement
+- [x] CI/CD workflow improvements
+
+### Version 1.6.0 (Released 2025-12-12)
+
+- [x] AI design suggestions with style recommendations
+- [x] Custom palette generation with 5 color theory algorithms
+- [x] Theme context with comprehensive CSS custom properties
+
+### Version 1.5.0 (Released 2025-12-12)
 
 - [x] Keyboard shortcuts system (10 shortcuts for all common actions)
 - [x] Cross-platform keyboard support (Mac ⌘ vs Windows Ctrl)
