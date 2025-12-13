@@ -14,38 +14,41 @@
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Features](#features)
-  - [AI-Powered Generation](#ai-powered-generation)
-  - [Customization Options](#customization-options)
-  - [Input Flexibility](#input-flexibility)
-  - [Productivity Features](#productivity-features)
-  - [Accessibility & Internationalization](#accessibility--internationalization)
-- [Quick Start](#quick-start)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Google AI Studio Deployment](#google-ai-studio-deployment)
-- [Usage](#usage)
-  - [Basic Generation](#basic-generation)
-  - [Advanced Options](#advanced-options)
-- [Configuration](#configuration)
-  - [Environment Variables](#environment-variables)
-  - [API Key Requirements](#api-key-requirements)
-- [Architecture](#architecture)
-  - [Technical Implementation](#technical-implementation)
-  - [AI Pipeline](#ai-pipeline)
-- [Documentation](#documentation)
-- [Roadmap](#roadmap)
-  - [Version Timeline](#version-timeline)
-  - [Recent Updates](#recent-updates)
-  - [Upcoming Features by Theme](#upcoming-features-by-theme)
-- [Scripts](#scripts)
-- [Tech Stack](#tech-stack)
-- [Contributing](#contributing)
-- [Security](#security)
-- [License](#license)
-- [Changelog](#changelog)
-- [Acknowledgments](#acknowledgments)
+- [InfoGraphix AI](#infographix-ai)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Features](#features)
+    - [AI-Powered Generation](#ai-powered-generation)
+    - [Customization Options](#customization-options)
+    - [Input Flexibility](#input-flexibility)
+    - [Productivity Features](#productivity-features)
+    - [Accessibility \& Internationalization](#accessibility--internationalization)
+    - [Code Quality \& Testing](#code-quality--testing)
+  - [Quick Start](#quick-start)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+    - [Google AI Studio Deployment](#google-ai-studio-deployment)
+  - [Usage](#usage)
+    - [Basic Generation](#basic-generation)
+    - [Advanced Options](#advanced-options)
+  - [Configuration](#configuration)
+    - [Environment Variables](#environment-variables)
+    - [API Key Requirements](#api-key-requirements)
+  - [Architecture](#architecture)
+    - [Technical Implementation](#technical-implementation)
+    - [AI Pipeline](#ai-pipeline)
+  - [Documentation](#documentation)
+  - [Roadmap](#roadmap)
+    - [Version Timeline](#version-timeline)
+    - [Recent Updates](#recent-updates)
+    - [Upcoming Features by Theme](#upcoming-features-by-theme)
+  - [Scripts](#scripts)
+  - [Tech Stack](#tech-stack)
+  - [Contributing](#contributing)
+  - [Security](#security)
+  - [License](#license)
+  - [Changelog](#changelog)
+  - [Acknowledgments](#acknowledgments)
 
 ---
 
@@ -54,16 +57,19 @@
 InfoGraphix AI is a powerful web application that generates high-quality infographic images from topics, URLs, or GitHub repositories. Powered by Google's Gemini AI, it combines sophisticated AI analysis with extensive customization options and productivity features.
 
 **Core Pipeline:**
+
 1. **Analysis Phase** - Gemini 3 Pro with thinking mode deeply researches your topic using Google Search grounding
 2. **Generation Phase** - Nano Banana Pro creates stunning visual infographics in up to 4K resolution
 
 **Productivity Features:**
+
 - Batch process up to 50 topics in a single queue
 - Save and reuse custom style templates
 - Export in multiple formats (PNG, PDF, SVG, ZIP)
 - Advanced version history with search and filtering
 
 **Latest Updates (v2.0.0):**
+
 - Comprehensive Testing Infrastructure - Vitest with React Testing Library, 70% coverage targets
 - Theme System - Centralized design tokens with 300+ system variables
 - Enhanced i18n - RTL support, number/date/relative time formatting, pluralization
@@ -179,6 +185,7 @@ npm test
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 **Testing:**
+
 ```bash
 npm test              # Run tests in watch mode
 npm run test:ui       # Run tests with Vitest UI
@@ -206,6 +213,7 @@ This application is designed to run in [Google AI Studio](https://ai.google.dev/
 
 **AI Design Suggestions (v1.6.0):**
 Get intelligent recommendations based on your topic:
+
 - 3 style suggestions with detailed reasoning
 - 3 color palette suggestions with confidence scores
 - Topic-aware analysis using Google Search grounding
@@ -213,6 +221,7 @@ Get intelligent recommendations based on your topic:
 
 **Custom Palette Generator (v1.6.0):**
 Create custom color schemes from images:
+
 - Upload an image to extract dominant colors
 - Choose from 5 color scheme algorithms
 - Automatic WCAG accessibility checking (AA and AAA standards)
@@ -238,6 +247,7 @@ Save your favorite style configurations as reusable templates. The system includ
 
 **Export Options:**
 Download generated infographics in multiple formats:
+
 - PNG (default, lossless)
 - PDF (with metadata)
 - SVG (vector format)
@@ -352,6 +362,7 @@ InfoGraphix-GenAI/
 ### Technical Implementation
 
 **Code Splitting & Lazy Loading:**
+
 - Main application bundle: 533.72 kB (gzipped: 137.17 kB)
 - Export libraries (jsPDF, JSZip): 686.49 kB (lazy-loaded on demand)
 - BatchManager: 22.09 kB (lazy-loaded when accessed)
@@ -359,6 +370,7 @@ InfoGraphix-GenAI/
 - Dynamic imports for export utilities to reduce initial load time
 
 **React Architecture:**
+
 - Context API for state management (GenerationContext, ThemeContext)
 - Custom hooks for complex state logic (useModals, useSavedVersions)
 - React Portal for modals (TemplateBrowser)
@@ -366,6 +378,7 @@ InfoGraphix-GenAI/
 - Error boundaries for graceful error handling
 
 **State Management:**
+
 - React Context API eliminates prop drilling
 - IndexedDB for persistent storage (100MB+ capacity)
 - Image compression (50-80% size reduction)
@@ -373,6 +386,7 @@ InfoGraphix-GenAI/
 - Migration utilities from localStorage to IndexedDB
 
 **Testing Infrastructure (v2.0.0):**
+
 - Vitest testing framework with React Testing Library
 - Test setup with comprehensive mocks (IndexedDB, localStorage, window.matchMedia)
 - Custom render utilities with provider wrappers
@@ -381,6 +395,7 @@ InfoGraphix-GenAI/
 - Test categories: Unit, integration, accessibility
 
 **Theme System (v2.0.0):**
+
 - Centralized design tokens (300+ variables)
 - Color palette: background, surface, border, text, interactive, semantic
 - Spacing scale (xs to 4xl)
@@ -390,6 +405,7 @@ InfoGraphix-GenAI/
 - Helper functions for color manipulation
 
 **Internationalization (v2.0.0):**
+
 - RTL language support (Arabic, Hebrew, Persian, Urdu)
 - Automatic document direction setting
 - Number formatting with Intl.NumberFormat
@@ -399,6 +415,7 @@ InfoGraphix-GenAI/
 - Missing key warnings in development
 
 **Build Configuration:**
+
 - Vite 7 with optimized chunk splitting
 - 700KB chunk size warning limit for export libraries
 - TypeScript strict mode enabled
@@ -406,6 +423,7 @@ InfoGraphix-GenAI/
 - Bundle size analysis with rollup-plugin-visualizer
 
 **Developer Experience:**
+
 - Structured logging utility (environment-aware)
 - Client-side rate limiter for API calls
 - Type-safe storage helpers
@@ -446,6 +464,7 @@ Generated Infographic (PNG)
 ```
 
 **Optional: AI Design Suggestions (v1.6.0)**
+
 ```
 User Topic Input
     │
@@ -507,6 +526,7 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 ### Recent Updates
 
 **v2.0.0 - Testing & Advanced Features (2025-12-12):**
+
 - Comprehensive testing infrastructure with Vitest and React Testing Library
 - Test setup with comprehensive mocks for IndexedDB, localStorage, window.matchMedia
 - Custom render utilities with provider wrappers for all contexts
@@ -523,6 +543,7 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 - Structured logging utility for environment-aware debugging
 
 **v1.9.0-1.9.1 - Code Quality Improvements (2025-12-12):**
+
 - Named constants system (storage, performance, UI, validation, colors)
 - Storage helper utilities (type-safe localStorage/IndexedDB operations)
 - Comprehensive JSDoc documentation for all utilities and components
@@ -533,6 +554,7 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 - Sprint 3 completion: 5/7 tasks (71%)
 
 **v1.7.0-1.8.0 - Technical Debt & Architecture (2025-12-12):**
+
 - React Context API for state management (GenerationContext, ThemeContext)
 - IndexedDB migration with image compression (50-80% reduction)
 - Custom hooks for complex state (useModals, useSavedVersions)
@@ -544,6 +566,7 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 - Sprint 1-2 completion: 21/21 tasks (100%)
 
 **v1.6.0 - AI Intelligence & Creativity (2025-12-12):**
+
 - AI-powered style and palette suggestions using Gemini 3 Pro with thinking mode
 - Topic-aware analysis with Google Search grounding for context
 - Three intelligent style recommendations with detailed reasoning
@@ -562,6 +585,7 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 - New dependency: node-vibrant@4.0.3 for color extraction
 
 **v1.5.0 - Accessibility & Global Reach (2025-12-12):**
+
 - Keyboard shortcuts system with 10 power user shortcuts (Ctrl+Enter to generate, Ctrl+S to save, Shift+? for help)
 - Cross-platform keyboard support (Mac ⌘ vs Windows Ctrl detection)
 - WCAG 2.1 AA accessibility compliance with comprehensive screen reader support
@@ -579,6 +603,7 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 - Enhanced accessibility utilities in CSS (sr-only, focus-ring)
 
 **v1.4.5 - Build Optimization & Bug Fixes (2025-12-11):**
+
 - Fixed React Hooks violations in BatchManager, TemplateBrowser, and VersionHistory components
 - Resolved "Rendered more hooks than during previous render" error
 - Optimized production build with proper code splitting strategy
@@ -588,6 +613,7 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 - Build metrics: Main chunk 534KB, all lazy-loaded components load on demand
 
 **v1.4.0 - Productivity Enhancement (2025-12-11):**
+
 - Batch generation mode with queue management (up to 50 topics per batch)
 - Custom template system with save/load/import/export (10 default templates, expanded to 55 in v1.6.0)
 - Enhanced version history with advanced filtering and pagination
@@ -600,6 +626,7 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 ### Upcoming Features by Theme
 
 **v2.1.0 - Expanded Test Coverage (Q1 2026):**
+
 - 70-80% test coverage across all services, hooks, and components
 - Integration tests for multi-step workflows
 - Property-based testing for edge cases
@@ -607,24 +634,28 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 - Service worker for offline support
 
 **v2.2.0 - Platform & API (Q2 2026):**
+
 - REST API v1 with OpenAPI specification
 - JavaScript/TypeScript and Python SDKs
 - Webhook system with delivery tracking
 - Developer portal with usage analytics
 
 **v2.3.0 - Ecosystem Integrations (Q3 2026):**
+
 - Google Workspace Add-on (Slides, Docs, Drive)
 - Notion integration and Figma plugin
 - Slack and Discord bots
 - Zapier and Make automation support
 
 **v2.4.0 - Enterprise & Advanced (Q4 2026):**
+
 - SSO/SAML 2.0 authentication
 - Advanced RBAC with custom roles
 - Admin dashboard with organization analytics
 - Brand guidelines enforcement system
 
 **v3.0.0 - Stable Release (Q1 2027):**
+
 - 50% improvement in generation speed
 - Comprehensive monitoring and observability
 - Complete UI/UX overhaul with design system
@@ -633,6 +664,7 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 See [FEATURE-ROADMAP.md](to-dos/FEATURE-ROADMAP.md) for complete details and [version-plans/](to-dos/version-plans/) for sprint-level breakdowns.
 
 **Development Resources:**
+
 - [Technical Debt](to-dos/TECHNICAL-DEBT.md) - Sprint-by-sprint technical debt tracking
 - [Documentation Tasks](to-dos/DOCUMENTATION-TASKS.md) - Documentation improvement tasks
 - [Integration Ideas](to-dos/INTEGRATION-IDEAS.md) - Future integration opportunities
@@ -703,6 +735,7 @@ InfoGraphix AI uses a **client-side architecture** with intentional design choic
 - **Vulnerability Reporting** - Responsible disclosure process
 
 **Quick Security Guidelines:**
+
 - Never commit API keys to version control
 - Use `.env.local` for local development (gitignored)
 - Export important infographics regularly (localStorage has quota limits)

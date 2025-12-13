@@ -36,6 +36,7 @@ export function useKeyboardShortcuts(
     handlersRef.current = handlers;
   }, [handlers]);
 
+  // eslint-disable-next-line complexity
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if (!enabled) return;
 

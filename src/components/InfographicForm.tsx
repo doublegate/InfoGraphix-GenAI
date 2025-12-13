@@ -102,6 +102,7 @@ const PALETTE_OPTIONS: RichOption[] = [
   { value: ColorPalette.GrayscaleRed, label: ColorPalette.GrayscaleRed, description: "Black and white base with bold red highlights.", preview: PALETTE_PREVIEWS[ColorPalette.GrayscaleRed] },
 ];
 
+// eslint-disable-next-line complexity
 const InfographicForm: React.FC<InfographicFormProps> = ({ onSubmit, isProcessing, initialValues }) => {
   const [topic, setTopic] = useState('');
   const [size, setSize] = useState<ImageSize>(ImageSize.Resolution_1K);

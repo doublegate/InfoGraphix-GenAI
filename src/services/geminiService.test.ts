@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { analyzeTopic, generateInfographicImage, getRateLimiter } from './geminiService';
 import { InfographicStyle, ColorPalette, ImageSize, AspectRatio } from '../types';

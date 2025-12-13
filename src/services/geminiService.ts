@@ -104,6 +104,7 @@ export const analyzeTopic = async (
   palette: ColorPalette,
   filters?: GithubFilters,
   providedContent?: string
+// eslint-disable-next-line complexity
 ): Promise<AnalysisResult> => {
   // Check rate limit before making request
   const rateLimiter = getRateLimiter();

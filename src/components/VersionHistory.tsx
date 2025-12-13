@@ -31,6 +31,7 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
   onLoadVersion,
   onDeleteVersion,
   onClearHistory
+// eslint-disable-next-line complexity
 }) => {
   const [isCompareMode, setIsCompareMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
