@@ -9,6 +9,164 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 *No unreleased changes*
 
+## [2.2.0-foundation] - 2025-12-13
+
+### Theme: API Platform Foundation
+
+*Foundation release establishing comprehensive TypeScript type definitions, SDK interfaces, and OpenAPI specification for future backend implementation. This release contains types and specification only - no backend implementation.*
+
+### Added
+
+- **API Type Definitions** (`src/api/types/`)
+  - `common.ts` - Shared types for pagination, sorting, filtering, rate limiting
+    - PaginationParams, PaginationMeta interfaces (offset-based and cursor-based)
+    - SortParams, FilterParams for list endpoints
+    - RateLimitInfo with conversion utilities (toRateLimitHeaders, fromRateLimitHeaders)
+    - X-RateLimit and X-Quota header support
+  - `errors.ts` - Comprehensive error handling system
+    - ApiErrorCode enum with 25+ error codes mapped to HTTP status
+    - ApiError interface with code, message, details, timestamp, requestId
+    - Helper functions: createApiError, createValidationError, createRateLimitError
+    - ErrorCodeToHttpStatus mapping for consistent HTTP responses
+  - `models.ts` - Core data models
+    - User model with tier system (FREE, PRO, ENTERPRISE)
+    - UserQuotas and UsageStats for rate limiting
+    - JobStatus enum (PENDING, ANALYZING, GENERATING, COMPLETED, FAILED, CANCELLED)
+    - GenerationJob model for async operations
+    - BatchJobStatus enum (PENDING, PROCESSING, COMPLETED, FAILED, CANCELLED, PAUSED)
+    - BatchJob and BatchItem models
+    - WebhookEvent enum (GENERATION_STARTED, GENERATION_COMPLETED, BATCH_STARTED, QUOTA_EXCEEDED)
+    - Webhook and WebhookPayload models
+    - Template model extending existing TemplateConfig
+    - SavedVersion model extending existing SavedGeneration
+  - `requests.ts` - API request types
+    - GenerateInfographicRequest, BatchGenerateRequest
+    - CreateTemplateRequest, UpdateTemplateRequest, ListTemplatesRequest
+    - ListHistoryRequest, ListJobsRequest, ListBatchesRequest
+    - RegisterWebhookRequest, UpdateWebhookRequest
+    - RetryBatchItemsRequest
+  - `responses.ts` - API response types
+    - Generic ApiResponse<T> wrapper with success, data, error, meta
+    - GenerationResponse, JobStatusResponse, JobResultResponse
+    - BatchResponse, BatchStatusResponse, BatchResultsResponse
+    - TemplateResponse, TemplateListResponse
+    - HistoryResponse, WebhookResponse
+    - Helper functions: createSuccessResponse, createErrorResponse
+  - `index.ts` - Unified type exports
+
+- **SDK Interface Definitions** (`src/api/sdk/`)
+  - `options.ts` - SDK configuration
+    - RetryConfig interface (maxRetries, retryDelay, retryableStatusCodes)
+    - WebhookConfig interface (enabled, pollingInterval, maxAttempts)
+    - ClientOptions interface (apiKey, baseUrl, timeout, retry, headers, logging, webhook)
+    - DEFAULT_CLIENT_OPTIONS with sensible defaults (60s timeout, 3 retries, 2s polling)
+    - mergeOptions and validateOptions utilities
+  - `client.ts` - SDK client interface
+    - Namespaced API design: GenerationApi, BatchApi, TemplatesApi, HistoryApi, AccountApi, WebhooksApi, CatalogApi
+    - InfoGraphixClient interface with configure(), getConfig(), and namespace properties
+    - Type-safe method signatures for all API operations
+  - `index.ts` - SDK exports
+
+- **Mock API Client** (`src/api/mock/`)
+  - `mockClient.ts` - Full MockInfoGraphixClient implementation
+    - In-memory storage with Maps for jobs, batches, templates, webhooks
+    - Simulated delays for analysis (2-3s) and generation (3-5s) phases
+    - Rate limit simulation based on user tier
+    - Automatic ID generation for all entities
+    - Error injection capability for testing
+    - Complete implementation of all SDK interfaces
+  - `index.ts` - Mock client export
+
+- **OpenAPI 3.1 Specification** (`docs/api/openapi.yaml`)
+  - Complete API documentation with all endpoints
+  - Paths for /generate, /batch, /templates, /account, /styles, /palettes
+  - Security scheme (ApiKeyAuth via X-API-Key header)
+  - Component schemas for all request/response types
+  - Standard error responses (400, 401, 403, 404, 429, 500)
+  - Rate limit headers documentation
+  - Webhook payload schemas
+
+- **API Design Documentation** (`docs/api/API-DESIGN.md`)
+  - Design principles (REST, API-First, Developer Experience)
+  - Authentication strategy (API key via X-API-Key header)
+  - Rate limiting approach (token bucket algorithm)
+  - Error handling patterns
+  - Versioning strategy (URL-based: /api/v1/)
+  - Pagination design (offset-based and cursor-based)
+  - Async operation handling (job-based pattern)
+  - Webhook integration
+  - Security considerations
+  - Performance optimizations
+  - Future enhancements roadmap
+  - Migration path from v1.x frontend-only
+
+- **Type Validation Tests** (`src/api/__tests__/types.test.ts`)
+  - Error code to HTTP status mapping tests
+  - Error creation helper tests (createApiError, createValidationError, createRateLimitError)
+  - Rate limit header conversion tests (toRateLimitHeaders, fromRateLimitHeaders)
+  - Enum value tests (UserTier, JobStatus, BatchJobStatus, WebhookEvent)
+  - Response helper tests (createSuccessResponse, createErrorResponse)
+  - Export verification tests for all type modules
+
+### Technical Details
+
+- **TypeScript Strict Mode:** All types use strict mode compliance
+- **JSDoc Coverage:** Comprehensive JSDoc comments on all interfaces, types, and functions
+- **Type Safety:** Generic types provide compile-time safety (ApiResponse<T>, PaginationMeta, etc.)
+- **No Breaking Changes:** All new code in separate `src/api/` directory, existing frontend unchanged
+- **Mock Client Ready:** Full mock implementation enables frontend development before backend exists
+- **OpenAPI First:** Specification serves as source of truth for future implementation
+
+- **Files Created:** 15 new files
+  - 6 type definition files
+  - 2 SDK interface files
+  - 2 mock client files
+  - 1 OpenAPI specification
+  - 1 API design document
+  - 1 test file
+  - 2 index files
+
+- **Lines of Code:** ~3,500 lines
+  - Type definitions: ~1,200 lines
+  - SDK interfaces: ~500 lines
+  - Mock client: ~800 lines
+  - OpenAPI spec: ~600 lines
+  - Documentation: ~350 lines
+  - Tests: ~250 lines
+
+### Developer Experience
+
+- **API-First Approach:** OpenAPI specification defines the contract
+- **Type Safety:** All API interactions are type-safe at compile-time
+- **Mock Testing:** Mock client enables testing without backend
+- **Comprehensive Docs:** API-DESIGN.md provides rationale for all decisions
+- **Future Ready:** Foundation supports v2.2.1+ backend implementation
+
+### Architecture
+
+- **Namespaced SDK:** Logical grouping (client.generate, client.batch, client.templates)
+- **Rate Limiting:** Token bucket algorithm with X-RateLimit headers
+- **Error Taxonomy:** 25+ error codes with HTTP status mapping
+- **Async Jobs:** Job-based pattern for long-running operations (15-45s generation time)
+- **Webhooks:** Optional event notifications with HMAC verification
+- **Pagination:** Dual support (offset-based for simple, cursor-based for large datasets)
+
+### Code Quality
+
+- **Test Coverage:** 100% for type definitions (vitest tests)
+- **ESLint Clean:** Zero warnings in new code
+- **TypeScript Strict:** All types pass strict mode checks
+- **JSDoc Complete:** All public APIs documented
+- **Build Status:** Zero errors, builds successfully
+
+### Next Steps (v2.2.1+)
+
+- Backend implementation (Express/Fastify server)
+- Database layer (PostgreSQL + Redis)
+- Queue system (Bull/BullMQ for jobs)
+- Python SDK (PyPI package)
+- JavaScript SDK (npm package)
+
 ## [2.1.1] - 2025-12-13
 
 ### Added

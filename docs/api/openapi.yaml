@@ -1,0 +1,877 @@
+openapi: 3.1.0
+info:
+  title: InfoGraphix AI API
+  version: 2.2.0
+  description: |
+    AI-powered infographic generation API using Google Gemini AI.
+
+    Generate beautiful, customized infographics from topics, URLs, or GitHub repositories
+    with advanced AI analysis and a variety of visual styles and color palettes.
+
+    ## Features
+    - Single and batch infographic generation
+    - 23 visual styles and 10 color palettes
+    - Template management for reusable configurations
+    - Generation history tracking
+    - Webhook notifications for async workflows
+    - Comprehensive rate limiting and quota management
+
+    ## Authentication
+    All requests require an API key passed in the `X-API-Key` header.
+
+    ## Rate Limiting
+    Rate limits are tier-based and communicated via response headers:
+    - `X-RateLimit-Limit`: Requests per minute limit
+    - `X-RateLimit-Remaining`: Remaining requests in current window
+    - `X-RateLimit-Reset`: Unix timestamp when limit resets
+    - `X-Quota-Limit`: Daily generation quota (-1 for unlimited)
+    - `X-Quota-Remaining`: Remaining generations today
+    - `X-Quota-Reset`: Unix timestamp when quota resets
+  contact:
+    name: InfoGraphix AI Support
+    email: support@infographix.ai
+    url: https://infographix.ai/support
+  license:
+    name: Proprietary
+    url: https://infographix.ai/terms
+
+servers:
+  - url: https://api.infographix.ai/v1
+    description: Production
+  - url: https://api-staging.infographix.ai/v1
+    description: Staging
+
+security:
+  - ApiKeyAuth: []
+
+tags:
+  - name: Generation
+    description: Create and manage infographic generations
+  - name: Batch
+    description: Batch generation operations
+  - name: Templates
+    description: Manage style templates
+  - name: History
+    description: Generation history management
+  - name: Account
+    description: Account and usage information
+  - name: Webhooks
+    description: Webhook configuration and management
+  - name: Catalog
+    description: Available styles and palettes
+
+paths:
+  # Generation endpoints
+  /generate:
+    post:
+      tags: [Generation]
+      summary: Create infographic generation
+      description: Creates a new infographic generation job
+      operationId: createGeneration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateInfographicRequest'
+      responses:
+        '200':
+          description: Generation job created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /generate/{jobId}:
+    get:
+      tags: [Generation]
+      summary: Get generation status
+      description: Retrieves the current status of a generation job
+      operationId: getGenerationStatus
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: Job status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobStatusResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Generation]
+      summary: Cancel generation
+      description: Cancels a pending or running generation job
+      operationId: cancelGeneration
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: Job cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /generate/{jobId}/result:
+    get:
+      tags: [Generation]
+      summary: Get generation result
+      description: Retrieves the final result of a completed generation
+      operationId: getGenerationResult
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: Generation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobResultResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Job not yet completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Batch endpoints
+  /batch:
+    post:
+      tags: [Batch]
+      summary: Create batch generation
+      description: Creates a batch of infographic generation jobs
+      operationId: createBatch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchGenerateRequest'
+      responses:
+        '200':
+          description: Batch created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /batch/{batchId}:
+    get:
+      tags: [Batch]
+      summary: Get batch status
+      description: Retrieves the status of a batch job
+      operationId: getBatchStatus
+      parameters:
+        - $ref: '#/components/parameters/BatchId'
+      responses:
+        '200':
+          description: Batch status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchStatusResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /batch/{batchId}/results:
+    get:
+      tags: [Batch]
+      summary: Get batch results
+      description: Retrieves all results from a batch
+      operationId: getBatchResults
+      parameters:
+        - $ref: '#/components/parameters/BatchId'
+      responses:
+        '200':
+          description: Batch results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchResultsResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /batch/{batchId}/cancel:
+    post:
+      tags: [Batch]
+      summary: Cancel batch
+      description: Cancels a running batch job
+      operationId: cancelBatch
+      parameters:
+        - $ref: '#/components/parameters/BatchId'
+      responses:
+        '200':
+          description: Batch cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelResponse'
+
+  /batch/{batchId}/retry:
+    post:
+      tags: [Batch]
+      summary: Retry failed batch items
+      description: Retries failed items in a batch
+      operationId: retryBatchItems
+      parameters:
+        - $ref: '#/components/parameters/BatchId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RetryBatchItemsRequest'
+      responses:
+        '200':
+          description: Retry initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchResponse'
+
+  # Templates endpoints
+  /templates:
+    get:
+      tags: [Templates]
+      summary: List templates
+      description: Lists available templates with filtering and pagination
+      operationId: listTemplates
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Templates list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplatesListResponse'
+    post:
+      tags: [Templates]
+      summary: Create template
+      description: Creates a new template
+      operationId: createTemplate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTemplateRequest'
+      responses:
+        '200':
+          description: Template created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateResponse'
+
+  /templates/{templateId}:
+    get:
+      tags: [Templates]
+      summary: Get template
+      description: Retrieves a specific template
+      operationId: getTemplate
+      parameters:
+        - $ref: '#/components/parameters/TemplateId'
+      responses:
+        '200':
+          description: Template details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Templates]
+      summary: Update template
+      description: Updates an existing template
+      operationId: updateTemplate
+      parameters:
+        - $ref: '#/components/parameters/TemplateId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTemplateRequest'
+      responses:
+        '200':
+          description: Template updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateResponse'
+    delete:
+      tags: [Templates]
+      summary: Delete template
+      description: Deletes a template
+      operationId: deleteTemplate
+      parameters:
+        - $ref: '#/components/parameters/TemplateId'
+      responses:
+        '200':
+          description: Template deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  # Account endpoints
+  /account:
+    get:
+      tags: [Account]
+      summary: Get account information
+      description: Retrieves account details
+      operationId: getAccount
+      responses:
+        '200':
+          description: Account information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAccountResponse'
+
+  /account/usage:
+    get:
+      tags: [Account]
+      summary: Get usage statistics
+      description: Retrieves usage statistics
+      operationId: getUsage
+      responses:
+        '200':
+          description: Usage statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageStatsResponse'
+
+  /account/quota:
+    get:
+      tags: [Account]
+      summary: Get quota information
+      description: Retrieves current quota status
+      operationId: getQuota
+      responses:
+        '200':
+          description: Quota information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserQuotasResponse'
+
+  # Catalog endpoints
+  /styles:
+    get:
+      tags: [Catalog]
+      summary: List available styles
+      description: Lists all available infographic styles
+      operationId: listStyles
+      responses:
+        '200':
+          description: Styles list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StylesListResponse'
+
+  /palettes:
+    get:
+      tags: [Catalog]
+      summary: List available palettes
+      description: Lists all available color palettes
+      operationId: listPalettes
+      responses:
+        '200':
+          description: Palettes list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PalettesListResponse'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication
+
+  parameters:
+    JobId:
+      name: jobId
+      in: path
+      required: true
+      description: Generation job identifier
+      schema:
+        type: string
+
+    BatchId:
+      name: batchId
+      in: path
+      required: true
+      description: Batch job identifier
+      schema:
+        type: string
+
+    TemplateId:
+      name: templateId
+      in: path
+      required: true
+      description: Template identifier
+      schema:
+        type: string
+
+    Page:
+      name: page
+      in: query
+      description: Page number (1-indexed)
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    PageSize:
+      name: pageSize
+      in: query
+      description: Items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  schemas:
+    # Request schemas
+    GenerateInfographicRequest:
+      type: object
+      required: [topic]
+      properties:
+        topic:
+          type: string
+          description: Topic, URL, or GitHub repository to analyze
+        style:
+          type: string
+          description: Visual style
+        palette:
+          type: string
+          description: Color palette
+        size:
+          type: string
+          enum: ['1K', '2K', '4K']
+          default: '2K'
+        aspectRatio:
+          type: string
+          enum: ['1:1', '16:9', '9:16', '4:3', '3:4']
+          default: '16:9'
+        webhookUrl:
+          type: string
+          format: uri
+          description: Optional webhook for completion notification
+
+    BatchGenerateRequest:
+      type: object
+      required: [name, items]
+      properties:
+        name:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenerateInfographicRequest'
+        options:
+          type: object
+          properties:
+            delayBetweenItems:
+              type: integer
+              minimum: 0
+            stopOnError:
+              type: boolean
+            webhookUrl:
+              type: string
+              format: uri
+
+    CreateTemplateRequest:
+      type: object
+      required: [name, style, palette, size, aspectRatio]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        style:
+          type: string
+        palette:
+          type: string
+        size:
+          type: string
+          enum: ['1K', '2K', '4K']
+        aspectRatio:
+          type: string
+          enum: ['1:1', '16:9', '9:16', '4:3', '3:4']
+        tags:
+          type: array
+          items:
+            type: string
+        public:
+          type: boolean
+          default: false
+
+    UpdateTemplateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        style:
+          type: string
+        palette:
+          type: string
+        size:
+          type: string
+        aspectRatio:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        public:
+          type: boolean
+
+    RetryBatchItemsRequest:
+      type: object
+      properties:
+        itemIds:
+          type: array
+          items:
+            type: string
+
+    # Response schemas
+    GenerationResponse:
+      type: object
+      properties:
+        job:
+          $ref: '#/components/schemas/GenerationJob'
+        estimatedTime:
+          type: number
+          description: Estimated completion time in seconds
+
+    JobStatusResponse:
+      type: object
+      properties:
+        job:
+          $ref: '#/components/schemas/GenerationJob'
+
+    JobResultResponse:
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/GeneratedInfographic'
+        downloadUrl:
+          type: string
+          format: uri
+
+    BatchResponse:
+      type: object
+      properties:
+        batch:
+          $ref: '#/components/schemas/BatchJob'
+        estimatedTime:
+          type: number
+
+    BatchStatusResponse:
+      type: object
+      properties:
+        batch:
+          $ref: '#/components/schemas/BatchJob'
+
+    BatchResultsResponse:
+      type: object
+      properties:
+        batch:
+          $ref: '#/components/schemas/BatchJob'
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              itemId:
+                type: string
+              status:
+                type: string
+              result:
+                $ref: '#/components/schemas/GeneratedInfographic'
+              error:
+                type: string
+
+    TemplateResponse:
+      type: object
+      properties:
+        template:
+          $ref: '#/components/schemas/Template'
+
+    TemplatesListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Template'
+        pagination:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    UserAccountResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+
+    UsageStatsResponse:
+      type: object
+      properties:
+        stats:
+          $ref: '#/components/schemas/UsageStats'
+
+    UserQuotasResponse:
+      type: object
+      properties:
+        quotas:
+          $ref: '#/components/schemas/UserQuotas'
+
+    StylesListResponse:
+      type: object
+      properties:
+        styles:
+          type: array
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+              name:
+                type: string
+              description:
+                type: string
+
+    PalettesListResponse:
+      type: object
+      properties:
+        palettes:
+          type: array
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+              name:
+                type: string
+              description:
+                type: string
+              colors:
+                type: array
+                items:
+                  type: string
+
+    DeleteResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        deletedId:
+          type: string
+
+    CancelResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        jobId:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+
+    # Model schemas
+    GenerationJob:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [pending, analyzing, generating, completed, failed, cancelled]
+        request:
+          type: object
+        result:
+          $ref: '#/components/schemas/GeneratedInfographic'
+        error:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+
+    BatchJob:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+        items:
+          type: array
+        progress:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+
+    GeneratedInfographic:
+      type: object
+      properties:
+        imageUrl:
+          type: string
+        analysis:
+          type: object
+
+    Template:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        style:
+          type: string
+        palette:
+          type: string
+        createdAt:
+          type: number
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        tier:
+          type: string
+          enum: [free, pro, enterprise]
+
+    UserQuotas:
+      type: object
+      properties:
+        tier:
+          type: string
+        requestsPerMinute:
+          type: object
+        generationsPerDay:
+          type: object
+        maxBatchSize:
+          type: integer
+
+    UsageStats:
+      type: object
+      properties:
+        currentPeriod:
+          type: object
+        allTime:
+          type: object
+
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+        totalItems:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+        Retry-After:
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

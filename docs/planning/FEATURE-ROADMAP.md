@@ -15,8 +15,9 @@ Planned features and enhancements for InfoGraphix AI.
 | v2.0.0 | Released | 2025-12-12 | Stability & Quality |
 | v2.0.3 | Released | 2025-12-13 | Stability & Quality (Patch) |
 | v2.1.0 | Released | 2025-12-13 | Expanded Test Coverage |
-| v2.1.1 | **CURRENT** | 2025-12-13 | Project Organization |
-| v2.2.0 | Planned | Q2 2026 | Platform & API |
+| v2.1.1 | Released | 2025-12-13 | Project Organization |
+| v2.2.0-foundation | **CURRENT** | 2025-12-13 | API Platform Foundation |
+| v2.2.0 | Planned | Q2 2026 | Platform & API (Full Implementation) |
 | v2.3.0 | Planned | Q3 2026 | Ecosystem Integrations |
 | v2.4.0 | Planned | Q4 2026 | Enterprise & Advanced |
 | v3.0.0 | Planned | Q1 2027 | Stable Release |
@@ -166,16 +167,78 @@ The following features originally planned for v1.5.0 have been deferred to futur
 
 ---
 
-## Version 2.2.0 - Platform & API (Q2 2026)
+## Version 2.2.0-foundation - API Platform Foundation (Released 2025-12-13)
 
 **Detailed Plan:** [v2.2.0-PLAN.md](./version-plans/v2.2.0-PLAN.md)
 
-### API Foundation
+### Foundation Work Completed
 
-- [ ] **REST API v1**
-  - OpenAPI 3.0 specification
+- [x] **TypeScript Type Definitions**
+  - Complete API type system (`src/api/types/`)
+  - Common types (pagination, sorting, filtering, rate limiting)
+  - Error types (25+ error codes with HTTP status mapping)
+  - Data models (User, Job, Batch, Webhook, Template)
+  - Request/Response types for all endpoints
+  - Implemented: High effort
+
+- [x] **SDK Interface Definitions**
+  - SDK client interface (`src/api/sdk/`)
+  - Configuration options with defaults
+  - Namespaced API design (generate, batch, templates, etc.)
+  - Type-safe method signatures
+  - Implemented: Medium effort
+
+- [x] **Mock API Client**
+  - Full mock implementation (`src/api/mock/`)
+  - In-memory storage simulation
+  - Rate limit simulation
+  - Async operation delays
+  - Implemented: High effort
+
+- [x] **OpenAPI 3.1 Specification**
+  - Complete API documentation (`docs/api/openapi.yaml`)
+  - All endpoints defined
+  - Request/Response schemas
+  - Security schemes
+  - Error responses
+  - Implemented: High effort
+
+- [x] **API Design Documentation**
+  - Design principles and rationale (`docs/api/API-DESIGN.md`)
+  - Authentication strategy
+  - Rate limiting approach
+  - Error handling patterns
+  - Versioning strategy
+  - Implemented: Medium effort
+
+- [x] **Type Validation Tests**
+  - Comprehensive test suite (`src/api/__tests__/types.test.ts`)
+  - Error handling tests
+  - Header conversion tests
+  - Enum validation tests
+  - Export verification tests
+  - Implemented: Low effort
+
+### Next Steps for v2.2.0 Full Implementation
+
+The foundation is complete. The following items remain for v2.2.0 full release (Q2 2026):
+
+---
+
+## Version 2.2.0 - Platform & API Full Implementation (Q2 2026)
+
+**Detailed Plan:** [v2.2.0-PLAN.md](./version-plans/v2.2.0-PLAN.md)
+
+**Note:** Foundation work (types, SDK interfaces, OpenAPI spec, mock client) completed in v2.2.0-foundation.
+
+### Backend Implementation
+
+- [ ] **REST API v1 Backend**
+  - Express/Fastify server implementation
+  - Database layer (PostgreSQL + Redis)
+  - Queue system (Bull/BullMQ)
   - JWT authentication
-  - Rate limiting and quotas
+  - Rate limiting middleware
   - Estimated effort: Very High
 
 - [ ] **Python SDK**
@@ -186,7 +249,7 @@ The following features originally planned for v1.5.0 have been deferred to futur
 
 - [ ] **JavaScript/TypeScript SDK**
   - npm package publication
-  - Full TypeScript types
+  - Full TypeScript types (using existing foundation)
   - Browser and Node.js support
   - Estimated effort: High
 
@@ -194,6 +257,7 @@ The following features originally planned for v1.5.0 have been deferred to futur
   - Event-driven notifications
   - Retry logic with exponential backoff
   - Webhook management dashboard
+  - HMAC signature verification
   - Estimated effort: Medium
 
 ---
@@ -351,7 +415,30 @@ The following features originally planned for v1.5.0 have been deferred to futur
 
 ## Completed Features
 
-### Version 2.0.x (Current - 2025-12-13)
+### Version 2.2.0-foundation (Released 2025-12-13)
+
+- [x] Complete TypeScript type definitions for REST API
+- [x] SDK interface definitions with namespaced design
+- [x] Mock API client for testing without backend
+- [x] OpenAPI 3.1 specification with full documentation
+- [x] API design documentation with rationale
+- [x] Type validation test suite
+- [x] Foundation for v2.2.0 full implementation
+
+### Version 2.1.1 (Released 2025-12-13)
+
+- [x] Project structure reorganization
+- [x] Documentation consolidated in subdirectories
+- [x] TypeScript error fixes in test files
+- [x] ESLint violation fixes
+
+### Version 2.1.0 (Released 2025-12-13)
+
+- [x] Expanded test coverage to 81.29% (exceeding 70% target)
+- [x] 299 comprehensive tests across all code categories
+- [x] Codecov integration for analytics
+
+### Version 2.0.x (Released 2025-12-12)
 
 - [x] Comprehensive testing infrastructure (Vitest, React Testing Library)
 - [x] 300+ token theme system with CSS custom properties
