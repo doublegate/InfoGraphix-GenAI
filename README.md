@@ -6,7 +6,7 @@
   <img src="images/Infographix-GenAI_sketch.jpg" alt="InfoGraphix AI Concept Sketch" width="800">
 </p>
 
-[![Version](https://img.shields.io/badge/version-2.0.2-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.0.3-blue.svg)](CHANGELOG.md)
 [![CI](https://github.com/doublegate/InfoGraphix-GenAI/actions/workflows/ci.yml/badge.svg)](https://github.com/doublegate/InfoGraphix-GenAI/actions/workflows/ci.yml)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -32,13 +32,13 @@ InfoGraphix AI is a powerful web application that generates high-quality infogra
 - Export in multiple formats (PNG, PDF, SVG, ZIP)
 - Advanced version history with search and filtering
 
-**Latest Updates (v2.0.2):**
+**Latest Updates (v2.0.3):**
 
-- README Enhancement - Added concept sketch and architecture blueprint images
-- Documentation Reorganization - Technical docs, guides, and planning in organized subdirectories
-- Bug Fix - Resolved image rendering issue with React state synchronization
-- Bug Fix - Fixed history save functionality (migrated from localStorage to IndexedDB)
-- CI/CD - Fixed ESLint complexity warnings and improved workflow reliability
+- Batch Processing - Resolved network errors and optimized adaptive polling (5s -> 10s -> 30s)
+- Bug Fixes - Fixed 6 application issues including batch processing, i18n, and UX improvements
+- UI Polish - Updated filter button text and improved batch processing error handling
+- Code Quality - Resolved 12 ESLint errors causing CI failures (no-console, react-hooks/exhaustive-deps)
+- CI/CD - All workflows passing with improved lint compliance
 
 ---
 
@@ -489,7 +489,8 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 | v1.9.0 | Code Quality | 2025-12-12 | Named constants, storage helpers, JSDoc, rate limiting |
 | v2.0.0 | Testing & Advanced Features | 2025-12-12 | Vitest infrastructure, theme system, enhanced i18n |
 | v2.0.1 | Bug Fixes | 2025-12-13 | Image rendering fix, storage hook migration |
-| v2.0.2 | Documentation & Polish | 2025-12-13 (Current) | README images, docs reorganization, CI fixes |
+| v2.0.2 | Documentation & Polish | 2025-12-13 | README images, docs reorganization, CI fixes |
+| v2.0.3 | Stability & Quality | 2025-12-13 (Current) | Batch processing fixes, ESLint compliance, polling optimization |
 | v2.1.0 | Expanded Test Coverage | Q1 2026 | 70% test coverage, integration tests, property-based tests |
 | v2.2.0 | Platform & API | Q2 2026 | REST API, Python/JS SDKs, webhooks |
 | v2.3.0 | Ecosystem Integrations | Q3 2026 | Google Workspace, Notion, Figma, Slack |
@@ -497,6 +498,18 @@ InfoGraphix AI follows a structured development roadmap with quarterly releases 
 | v3.0.0 | Stable Release | Q1 2027 | Performance optimization, UI/UX polish |
 
 ### Recent Updates
+
+**v2.0.3 - Stability & Quality (2025-12-13):**
+
+- Fixed batch processing network errors with robust retry and error recovery mechanisms
+- Optimized adaptive polling intervals (5s -> 10s -> 30s) for reduced API load during queue processing
+- Resolved 12 ESLint errors including no-console violations, react-hooks/exhaustive-deps warnings
+- Fixed useCallback memoization for refreshQueues function in BatchManager component
+- Wrapped async Promise-returning callbacks with void-returning wrappers to satisfy TypeScript
+- Updated filter button text and improved batch processing error handling UX
+- Fixed 6 application issues across batch processing, i18n, and general UX
+- Removed debug console.log statements from geminiService for production compliance
+- All CI workflows passing with full ESLint compliance
 
 **v2.0.2 - Documentation & Polish (2025-12-13):**
 

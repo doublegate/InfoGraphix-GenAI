@@ -93,7 +93,7 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
         {/* Footer */}
         <div className="bg-slate-900 p-4 border-t border-slate-700 flex justify-between items-center">
           <p className="text-xs text-slate-500">
-            {t('about.version')} 2.0.2 • {t('about.footer')}
+            {t('about.version')} 2.0.3 • {t('about.footer')}
           </p>
           <a
             href="https://ai.google.dev/gemini-api/docs"
