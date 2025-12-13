@@ -529,7 +529,7 @@ function App() {
               closeBatchManager();
               setActiveMode('single');
             }}
-            onStartQueue={handleStartBatchQueue}
+            onStartQueue={(queue) => { void handleStartBatchQueue(queue); }}
           />
         </Suspense>
       </ErrorBoundary>

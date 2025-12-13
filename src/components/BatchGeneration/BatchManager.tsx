@@ -3,7 +3,7 @@
  * v1.4.0 Feature: Batch Generation Mode
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Download, RefreshCw, X } from 'lucide-react';
 import {
   BatchQueue,
@@ -39,36 +39,8 @@ const BatchManager: React.FC<BatchManagerProps> = ({ isOpen, onClose, onStartQue
   const [runningQueueId, setRunningQueueId] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Initial load when panel opens
-  useEffect(() => {
-    if (isOpen) {
-      void refreshQueues();
-    }
-  }, [isOpen]);
-
-  // Auto-refresh polling when a queue is running (adaptive intervals)
-  useEffect(() => {
-    if (!isOpen || !runningQueueId) return;
-
-    let pollCount = 0;
-    const getInterval = () => {
-      // Fast polling for first few checks (likely to see progress)
-      if (pollCount < 5) return 5000;  // 5 seconds
-      if (pollCount < 10) return 10000; // 10 seconds
-      return 30000; // 30 seconds after that
-    };
-
-    const poll = () => {
-      void refreshQueues(true);
-      pollCount++;
-      timeoutId = setTimeout(poll, getInterval());
-    };
-
-    let timeoutId = setTimeout(poll, getInterval());
-    return () => clearTimeout(timeoutId);
-  }, [isOpen, runningQueueId]);
-
-  const refreshQueues = async (silent = false) => {
+  // Memoized refresh function to satisfy useEffect dependencies
+  const refreshQueues = useCallback(async (silent = false) => {
     if (!silent) setIsRefreshing(true);
     try {
       const loaded = await loadQueues();
@@ -97,7 +69,36 @@ const BatchManager: React.FC<BatchManagerProps> = ({ isOpen, onClose, onStartQue
     } finally {
       if (!silent) setIsRefreshing(false);
     }
-  };
+  }, [selectedQueue, runningQueueId]);
+
+  // Initial load when panel opens
+  useEffect(() => {
+    if (isOpen) {
+      void refreshQueues();
+    }
+  }, [isOpen, refreshQueues]);
+
+  // Auto-refresh polling when a queue is running (adaptive intervals)
+  useEffect(() => {
+    if (!isOpen || !runningQueueId) return;
+
+    let pollCount = 0;
+    const getInterval = () => {
+      // Fast polling for first few checks (likely to see progress)
+      if (pollCount < 5) return 5000;  // 5 seconds
+      if (pollCount < 10) return 10000; // 10 seconds
+      return 30000; // 30 seconds after that
+    };
+
+    const poll = () => {
+      void refreshQueues(true);
+      pollCount++;
+      timeoutId = setTimeout(poll, getInterval());
+    };
+
+    let timeoutId = setTimeout(poll, getInterval());
+    return () => clearTimeout(timeoutId);
+  }, [isOpen, runningQueueId, refreshQueues]);
 
   const handleCreate = (
     name: string,

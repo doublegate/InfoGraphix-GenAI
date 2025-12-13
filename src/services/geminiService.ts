@@ -151,22 +151,7 @@ export const analyzeTopic = async (
   // Record the request
   rateLimiter.recordRequest();
 
-  console.log('[analyzeTopic] Starting with params:', {
-    topic: topic?.substring(0, 50),
-    style,
-    palette,
-    hasFilters: !!filters,
-    hasProvidedContent: !!providedContent
-  });
-
-  let ai;
-  try {
-    ai = getAI();
-    console.log('[analyzeTopic] GoogleGenAI client created successfully');
-  } catch (initError) {
-    console.error('[analyzeTopic] Failed to create GoogleGenAI client:', initError);
-    throw initError;
-  }
+  const ai = getAI();
 
   let filterContext = "";
   if (filters) {
@@ -329,7 +314,6 @@ export const analyzeTopic = async (
   }
 
   try {
-    console.log('[analyzeTopic] About to call generateContent on model gemini-3-pro-preview');
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
       contents: prompt,
@@ -339,7 +323,6 @@ export const analyzeTopic = async (
         // Note: responseMimeType cannot be used with googleSearch tool per guidelines
       },
     });
-    console.log('[analyzeTopic] generateContent call successful');
 
     let text = response.text;
     if (!text) throw new Error("No analysis generated.");
@@ -532,23 +515,6 @@ export const generateInfographicImage = async (
   size: ImageSize,
   aspectRatio: AspectRatio
 ): Promise<string> => {
-  console.log('[generateInfographicImage] Called with:', {
-    visualPlanLength: visualPlan?.length,
-    size,
-    aspectRatio,
-    sizeType: typeof size,
-    aspectRatioType: typeof aspectRatio,
-    sizeValue: JSON.stringify(size),
-    aspectRatioValue: JSON.stringify(aspectRatio)
-  });
-  log.info("generateInfographicImage called with:", {
-    visualPlanLength: visualPlan?.length,
-    size,
-    aspectRatio,
-    sizeType: typeof size,
-    aspectRatioType: typeof aspectRatio
-  });
-
   // Check rate limit before making request
   const rateLimiter = getRateLimiter();
   if (!rateLimiter.canMakeRequest()) {
@@ -559,20 +525,10 @@ export const generateInfographicImage = async (
   // Record the request
   rateLimiter.recordRequest();
 
-  let ai;
-  try {
-    ai = getAI();
-    console.log('[generateInfographicImage] GoogleGenAI client created successfully');
-  } catch (initError) {
-    console.error('[generateInfographicImage] Failed to create GoogleGenAI client:', initError);
-    throw initError;
-  }
-
+  const ai = getAI();
   const model = 'gemini-3-pro-image-preview';
 
   try {
-    console.log('[generateInfographicImage] About to call generateContent on model:', model);
-    log.info("Making image generation request to Gemini API...");
     const response = await ai.models.generateContent({
       model: model,
       contents: {
@@ -588,20 +544,15 @@ export const generateInfographicImage = async (
       }
     });
 
-    console.log('[generateInfographicImage] generateContent call successful');
-    log.info("Image generation response received");
-
     // Extract image
     for (const part of response.candidates?.[0]?.content?.parts || []) {
       if (part.inlineData && part.inlineData.data) {
-        console.log('[generateInfographicImage] Image data extracted successfully');
         return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
       }
     }
 
     throw new Error("No image data found in response.");
   } catch (error: unknown) {
-    console.error('[generateInfographicImage] FAILED with error:', error);
     log.error("Image generation failed:", {
       errorName: error instanceof Error ? error.name : 'unknown',
       errorMessage: error instanceof Error ? error.message : String(error),
