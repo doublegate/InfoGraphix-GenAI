@@ -2,6 +2,7 @@ import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { codecovVitePlugin } from '@codecov/vite-plugin';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
@@ -19,6 +20,16 @@ export default defineConfig(({ mode }) => {
           brotliSize: true,
           template: 'treemap', // 'treemap' | 'sunburst' | 'network'
         }) as any,
+        // Codecov Bundle Analysis plugin
+        // Uploads bundle stats to Codecov for PR bundle size tracking
+        // Only enabled when CODECOV_TOKEN is available (CI environment)
+        codecovVitePlugin({
+          enableBundleAnalysis: process.env.CODECOV_TOKEN !== undefined,
+          bundleName: 'infographix-genai',
+          uploadToken: process.env.CODECOV_TOKEN,
+          // For public repos using GitHub Actions OIDC (tokenless)
+          gitService: 'github',
+        }),
       ],
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
@@ -50,9 +61,15 @@ export default defineConfig(({ mode }) => {
         globals: true,
         environment: 'jsdom',
         setupFiles: './src/test/setup.ts',
+        // Output JUnit XML for Codecov Test Analytics
+        reporters: ['default', 'junit'],
+        outputFile: {
+          junit: './coverage/junit.xml',
+        },
         coverage: {
           provider: 'v8',
-          reporter: ['text', 'json', 'html', 'lcov'],
+          reporter: ['text', 'json', 'html', 'lcov', 'cobertura'],
+          reportsDirectory: './coverage',
           exclude: [
             'node_modules/**',
             'src/test/**',

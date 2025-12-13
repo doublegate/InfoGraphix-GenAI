@@ -108,6 +108,65 @@ jobs:
       - name: TypeScript Check
         run: npx tsc --noEmit
 
+  # Job 3.5: Unit Tests with Coverage
+  test:
+    name: Tests & Coverage
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Restore node_modules cache
+        uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          fail-on-cache-miss: true
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+        continue-on-error: true
+        id: test
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info,./coverage/cobertura-coverage.xml
+          flags: unit
+          name: codecov-infographix
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/junit.xml
+          flags: unit
+          name: test-results-infographix
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ github.sha }}
+          path: coverage/
+          retention-days: 7
+
+      - name: Check test results
+        if: steps.test.outcome == 'failure'
+        run: |
+          echo "::warning::Some tests failed. Check the test output above for details."
+
   # Job 4: Security audit
   security:
     name: Security Audit
@@ -138,14 +197,16 @@ jobs:
         run: |
           echo "::warning::Security vulnerabilities detected. Run 'npm audit' locally for details."
 
-  # Job 5: Production build with Vite caching
+  # Job 5: Production build with Vite caching and Codecov Bundle Analysis
   build:
     name: Build Production
-    needs: [lint, typecheck, security]
+    needs: [lint, typecheck, test, security]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for Codecov bundle analysis
 
       - name: Setup Node.js 22 LTS
         uses: actions/setup-node@v4
@@ -170,8 +231,10 @@ jobs:
             vite-build-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
             vite-build-${{ runner.os }}-
 
-      - name: Build
+      - name: Build with Codecov Bundle Analysis
         run: npm run build
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4

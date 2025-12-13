@@ -8,6 +8,7 @@
 
 [![Version](https://img.shields.io/badge/version-2.0.3-blue.svg)](CHANGELOG.md)
 [![CI](https://github.com/doublegate/InfoGraphix-GenAI/actions/workflows/ci.yml/badge.svg)](https://github.com/doublegate/InfoGraphix-GenAI/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/doublegate/InfoGraphix-GenAI/branch/main/graph/badge.svg)](https://codecov.io/gh/doublegate/InfoGraphix-GenAI)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)

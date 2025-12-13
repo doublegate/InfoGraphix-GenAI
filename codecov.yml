@@ -1,0 +1,178 @@
+# Codecov Configuration for InfoGraphix AI
+# Documentation: https://docs.codecov.com/docs/codecov-yaml
+#
+# This configuration enables:
+# - Coverage Analytics with quality gates
+# - Bundle Analysis for JavaScript bundles
+# - Test Analytics for test health monitoring
+
+# =============================================================================
+# COVERAGE SETTINGS
+# =============================================================================
+
+coverage:
+  # Target coverage thresholds
+  precision: 2
+  round: down
+  range: "50...100"
+
+  status:
+    # Project-level coverage requirements
+    project:
+      default:
+        target: 70%           # Target 70% coverage (aligned with v2.1.0 goals)
+        threshold: 2%         # Allow 2% drop before failing
+        if_ci_failed: error   # Fail if CI fails
+        only_pulls: false     # Check on all commits
+
+    # Per-commit coverage requirements
+    patch:
+      default:
+        target: 80%           # New code should have higher coverage
+        threshold: 1%         # Stricter threshold for new code
+        if_ci_failed: error
+        only_pulls: true
+
+# =============================================================================
+# COMMENT SETTINGS
+# =============================================================================
+
+comment:
+  layout: "reach,diff,flags,files"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+
+  # Show coverage diff in PR comments
+  show_carryforward_flags: true
+
+# =============================================================================
+# PULL REQUEST SETTINGS
+# =============================================================================
+
+github_checks:
+  annotations: true
+
+# =============================================================================
+# FLAG MANAGEMENT
+# =============================================================================
+
+flag_management:
+  default_rules:
+    carryforward: true
+    statuses:
+      - type: project
+        target: auto
+      - type: patch
+        target: 80%
+
+flags:
+  # Unit tests coverage
+  unit:
+    paths:
+      - src/
+    carryforward: true
+
+  # Integration tests coverage
+  integration:
+    paths:
+      - src/
+    carryforward: true
+
+# =============================================================================
+# IGNORE PATTERNS
+# =============================================================================
+
+ignore:
+  - "node_modules/**"
+  - "dist/**"
+  - "**/*.d.ts"
+  - "**/*.config.*"
+  - "src/test/**"
+  - "**/mockData/**"
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/*.spec.ts"
+  - "**/*.spec.tsx"
+
+# =============================================================================
+# COMPONENT MANAGEMENT
+# =============================================================================
+
+component_management:
+  default_rules:
+    statuses:
+      - type: project
+        target: auto
+  individual_components:
+    - component_id: services
+      name: Services
+      paths:
+        - src/services/**
+    - component_id: components
+      name: Components
+      paths:
+        - src/components/**
+    - component_id: hooks
+      name: Hooks
+      paths:
+        - src/hooks/**
+    - component_id: utils
+      name: Utilities
+      paths:
+        - src/utils/**
+
+# =============================================================================
+# BUNDLE ANALYSIS SETTINGS
+# =============================================================================
+
+bundle_analysis:
+  # Fail PR if bundle size increases significantly
+  status: informational  # Options: informational, pass, fail
+
+  # Warning thresholds for bundle size changes
+  warning_threshold: 5%   # Warn if bundle grows by more than 5%
+
+  # Core bundle size limits (in bytes)
+  # These can be adjusted based on your performance budget
+  bundle_size_limits:
+    - name: "main"
+      max_size: 600000     # 600KB max for main bundle
+    - name: "export-libs"
+      max_size: 800000     # 800KB max for lazy-loaded export libs
+
+# =============================================================================
+# TEST ANALYTICS SETTINGS
+# =============================================================================
+
+test_analytics:
+  # Enable flaky test detection
+  flaky_test_detection: true
+
+  # Number of runs to consider for flaky detection
+  flaky_detection_window: 30
+
+# =============================================================================
+# PARSERS
+# =============================================================================
+
+parsers:
+  gcov:
+    branch_detection:
+      conditional: true
+      loop: true
+      method: false
+      macro: false
+
+# =============================================================================
+# NOTIFICATIONS (Optional)
+# =============================================================================
+
+# Uncomment to enable Slack notifications
+# notify:
+#   slack:
+#     default:
+#       url: "https://hooks.slack.com/services/..."
+#       threshold: "1%"
+#       only_pulls: false
