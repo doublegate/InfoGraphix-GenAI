@@ -193,6 +193,20 @@ function App() {
   const handleStartBatchQueue = useCallback(async (queue: BatchQueue) => {
     if (!queue || !isQueueActive(queue)) return;
 
+    // Verify API key is ready before starting batch processing
+    if (!isApiKeyReady) {
+      console.error('Batch processing: API key not ready');
+      const firstItem = getNextPendingItem(queue);
+      if (firstItem) {
+        await updateQueueItem(queue.id, firstItem.id, {
+          status: BatchStatus.Failed,
+          completedAt: Date.now(),
+          error: 'API key not configured. Please select an API key first.'
+        });
+      }
+      return;
+    }
+
     let currentQueue = queue;
     let nextItem = getNextPendingItem(currentQueue);
 
@@ -230,8 +244,14 @@ function App() {
           currentQueue = updatedQueue;
         }
       } catch (err) {
-        // Mark item as failed
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        // Mark item as failed with detailed error
+        let errorMessage = 'Unknown error';
+        if (err instanceof Error) {
+          errorMessage = err.message;
+          // Log full error for debugging
+          console.error('Batch processing error:', err.name, err.message, err.stack);
+        }
+
         const updatedQueue = await updateQueueItem(queue.id, nextItem.id, {
           status: BatchStatus.Failed,
           completedAt: Date.now(),
@@ -257,7 +277,7 @@ function App() {
       // Get next pending item
       nextItem = getNextPendingItem(currentQueue);
     }
-  }, []);
+  }, [isApiKeyReady]);
 
   // Handle keyboard shortcut to trigger new generation
   const handleKeyboardGenerate = useCallback(() => {

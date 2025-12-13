@@ -91,6 +91,16 @@ const handleGeminiError = (error: unknown): never => {
   if (msg.includes("candidate")) {
     throw new Error("The model could not generate a valid response for this prompt. Please try again.");
   }
+  // Network-related errors
+  if (msg.includes("networkerror") || msg.includes("network error") || msg.includes("fetch")) {
+    throw new Error("Network error: Unable to connect to the Gemini API. Please check your internet connection and try again.");
+  }
+  if (msg.includes("timeout") || msg.includes("timed out")) {
+    throw new Error("Request timed out. The server took too long to respond. Please try again.");
+  }
+  if (msg.includes("failed to fetch") || msg.includes("load failed")) {
+    throw new Error("Failed to connect to the API server. Please check your network connection.");
+  }
 
   throw new Error(`An error occurred: ${errorMessage || "Unknown error"}`);
 };

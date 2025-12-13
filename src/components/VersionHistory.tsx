@@ -290,7 +290,7 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
                   }`}
                 >
                   <Filter className="w-4 h-4" />
-                  {showFilters ? 'Hide Filters' : 'Adv Filters'}
+                  {showFilters ? 'Hide Filters' : 'Filters'}
                 </button>
               )}
             </div>
