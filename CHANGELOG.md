@@ -7,16 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+*No unreleased changes*
+
+## [2.2.0-foundation] - 2025-12-14
+
+### Theme: API Platform Foundation
+
+*Foundation release establishing comprehensive TypeScript type definitions, SDK interfaces, OpenAPI specification, and service integration layer for future backend implementation. Includes 3,042+ lines of API infrastructure code with full mock client implementation.*
+
 ### Added
 
 - **Service Integration Layer** (`src/services/`)
-  - `infographixService.ts` - Wrapper service for MockInfoGraphixClient
+  - `infographixService.ts` (365 lines) - Wrapper service for MockInfoGraphixClient
     - InfoGraphixService class with simplified interface
     - UnifiedGenerationRequest and GenerationResult types
     - Methods: createGeneration, getGenerationStatus, waitForGeneration, cancelGeneration
     - History, templates, quota, styles, and palettes endpoints
     - Singleton pattern with getInfoGraphixService() and resetInfoGraphixService()
-  - `apiService.ts` - Dual-mode API abstraction layer
+  - `apiService.ts` (430 lines) - Dual-mode API abstraction layer
     - ApiMode type: 'gemini' | 'infographix' | 'auto'
     - ApiService class with configure(), getConfig(), getEffectiveMode()
     - Rate limit status checking
@@ -41,14 +49,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Mock client options: `VITE_MOCK_ANALYSIS_DELAY`, `VITE_MOCK_GENERATION_DELAY`, `VITE_MOCK_ERROR_RATE`
   - Updated `vite-env.d.ts` with TypeScript types for all new env vars
   - Updated `.env.example` with comprehensive documentation
-
-## [2.2.0-foundation] - 2025-12-13
-
-### Theme: API Platform Foundation
-
-*Foundation release establishing comprehensive TypeScript type definitions, SDK interfaces, and OpenAPI specification for future backend implementation. This release contains types and specification only - no backend implementation.*
-
-### Added
 
 - **API Type Definitions** (`src/api/types/`)
   - `common.ts` - Shared types for pagination, sorting, filtering, rate limiting
