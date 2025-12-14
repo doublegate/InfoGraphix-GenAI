@@ -258,7 +258,7 @@ describe('getInfoGraphixService singleton', () => {
   });
 
   it('should create new instance when options provided again', () => {
-    const instance1 = getInfoGraphixService(testOptions);
+    const _instance1 = getInfoGraphixService(testOptions);
     const instance2 = getInfoGraphixService({
       ...testOptions,
       apiKey: 'different-key',

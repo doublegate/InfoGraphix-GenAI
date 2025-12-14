@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { apiService, type ApiServiceConfig } from '../apiService';
+import { apiService } from '../apiService';
 import { resetInfoGraphixService } from '../infographixService';
 import { ImageSize, AspectRatio, InfographicStyle, ColorPalette } from '../../types';
 
