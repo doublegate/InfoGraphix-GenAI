@@ -7,7 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-*No unreleased changes*
+### Added
+
+- **Service Integration Layer** (`src/services/`)
+  - `infographixService.ts` - Wrapper service for MockInfoGraphixClient
+    - InfoGraphixService class with simplified interface
+    - UnifiedGenerationRequest and GenerationResult types
+    - Methods: createGeneration, getGenerationStatus, waitForGeneration, cancelGeneration
+    - History, templates, quota, styles, and palettes endpoints
+    - Singleton pattern with getInfoGraphixService() and resetInfoGraphixService()
+  - `apiService.ts` - Dual-mode API abstraction layer
+    - ApiMode type: 'gemini' | 'infographix' | 'auto'
+    - ApiService class with configure(), getConfig(), getEffectiveMode()
+    - Rate limit status checking
+    - Unified generateInfographic() method for both modes
+    - Async generation support for InfoGraphix mode
+    - Mode detection based on environment variables
+  - `__tests__/infographixService.test.ts` - Contract tests (18 tests)
+    - Constructor and initialization tests
+    - Generation lifecycle tests (create, status, wait, cancel)
+    - History, templates, quota endpoints tests
+    - Singleton pattern tests
+  - `__tests__/apiService.test.ts` - Abstraction layer tests (18 tests)
+    - Configuration and mode switching tests
+    - Rate limit status tests
+    - Gemini and InfoGraphix mode generation tests
+    - Async generation tests
+
+- **Environment Configuration**
+  - `VITE_API_MODE` - API mode selection ('gemini' | 'infographix' | 'auto')
+  - `VITE_INFOGRAPHIX_API_KEY` - InfoGraphix API key for future backend
+  - `VITE_INFOGRAPHIX_BASE_URL` - Custom API base URL
+  - Mock client options: `VITE_MOCK_ANALYSIS_DELAY`, `VITE_MOCK_GENERATION_DELAY`, `VITE_MOCK_ERROR_RATE`
+  - Updated `vite-env.d.ts` with TypeScript types for all new env vars
+  - Updated `.env.example` with comprehensive documentation
 
 ## [2.2.0-foundation] - 2025-12-13
 
