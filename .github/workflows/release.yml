@@ -48,7 +48,7 @@ jobs:
           echo "Releasing version: ${VERSION}"
 
       - name: Setup Node.js 22 LTS
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '22'
           cache: 'npm'
