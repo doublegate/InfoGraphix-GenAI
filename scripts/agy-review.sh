@@ -1056,14 +1056,18 @@ if [ -n "$prior_id" ] && [ -s "$prior_body_file" ]; then
   done
 
   {
-    printf '\n%s\n' "$AGY_ARCHIVE_START"
+    # Order matters. The `<details>` wrapper and the dropped-round note sit OUTSIDE the
+    # start/end sentinels, so `agy_body_archive` extracts only the rounds themselves. With
+    # the wrapper inside, every run re-captured it and nested another layer around it.
+    printf '\n%s\n' "$AGY_ARCHIVE_SECTION"
     if [ "$dropped" -gt 0 ]; then
       printf '<sub>%d earlier round(s) dropped to stay under GitHub'"'"'s comment size limit.</sub>\n\n' "$dropped"
     fi
     printf '<details>\n<summary><b>Earlier review rounds</b> (newest first)</summary>\n\n'
+    printf '%s\n' "$AGY_ARCHIVE_START"
     cat "$archived_file"
-    printf '\n</details>\n'
     printf '%s\n' "$AGY_ARCHIVE_END"
+    printf '\n</details>\n'
   } >> "$body_file"
   rm -f "$archived_file"
 
