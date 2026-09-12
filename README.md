@@ -411,7 +411,7 @@ InfoGraphix-GenAI/
 
 **Build Configuration:**
 
-- Vite 7 with optimized chunk splitting
+- Vite 8 (rolldown) with optimized chunk splitting
 - 700KB chunk size warning limit for export libraries
 - TypeScript strict mode enabled
 - ESLint with strict rules (no-explicit-any, no-unused-vars)
@@ -736,19 +736,19 @@ See [FEATURE-ROADMAP.md](docs/planning/FEATURE-ROADMAP.md) for complete details 
 |------------|---------|---------|
 | [React](https://react.dev/) | 19.2.3 | UI framework with hooks and portals |
 | [TypeScript](https://www.typescriptlang.org/) | 5.9.3 | Type safety and development tooling |
-| [Vite](https://vitejs.dev/) | 7.2.7 | Build tool with optimized code splitting |
-| [TailwindCSS](https://tailwindcss.com/) | 4.1.18 (build-time) | Utility-first styling framework |
-| [Lucide React](https://lucide.dev/) | 0.560.0 | Icon library |
-| [@google/genai](https://www.npmjs.com/package/@google/genai) | 1.30.0 | Gemini API SDK for AI integration |
-| [react-i18next](https://react.i18next.com/) | 16.4.1 | React integration for i18next |
-| [i18next](https://www.i18next.com/) | 25.7.2 | Internationalization framework |
-| [i18next-browser-languagedetector](https://github.com/i18next/i18next-browser-languageDetector) | 8.2.0 | Browser language detection plugin |
-| [node-vibrant](https://www.npmjs.com/package/node-vibrant) | 4.0.3 | Color extraction from images |
-| [jsPDF](https://www.npmjs.com/package/jspdf) | 3.0.4 | PDF generation (lazy-loaded) |
-| [JSZip](https://www.npmjs.com/package/jszip) | 3.10.1 | ZIP archive creation (lazy-loaded) |
-| [Vitest](https://vitest.dev/) | 4.0.15 | Testing framework with React Testing Library |
-| [@testing-library/react](https://testing-library.com/react) | 16.3.0 | React component testing utilities |
-| [@axe-core/react](https://github.com/dequelabs/axe-core-npm) | 4.11.0 | Accessibility testing |
+| [Vite](https://vitejs.dev/) | 8.3.0 | Build tool with optimized code splitting |
+| [TailwindCSS](https://tailwindcss.com/) | 4.3.3 (build-time) | Utility-first styling framework |
+| [Lucide React](https://lucide.dev/) | 1.45.0 | Icon library |
+| [@google/genai](https://www.npmjs.com/package/@google/genai) | 2.22.0 | Gemini API SDK for AI integration |
+| [react-i18next](https://react.i18next.com/) | 17.0.13 | React integration for i18next |
+| [i18next](https://www.i18next.com/) | 26.4.2 | Internationalization framework |
+| [i18next-browser-languagedetector](https://github.com/i18next/i18next-browser-languageDetector) | 8.2.1 | Browser language detection plugin |
+| [node-vibrant](https://www.npmjs.com/package/node-vibrant) | 4.0.4 | Color extraction from images |
+| [jsPDF](https://www.npmjs.com/package/jspdf) | 4.2.1 | PDF generation (lazy-loaded) |
+| [JSZip](https://www.npmjs.com/package/jszip) | 3.10.2 | ZIP archive creation (lazy-loaded) |
+| [Vitest](https://vitest.dev/) | 5.0.0 | Testing framework with React Testing Library |
+| [@testing-library/react](https://testing-library.com/react) | 16.3.3 | React component testing utilities |
+| [@axe-core/react](https://github.com/dequelabs/axe-core-npm) | 4.13.0 | Accessibility testing |
 
 ---
 
