@@ -98,19 +98,6 @@ void i18next
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false, // React already escapes values
-      // Enable formatting functions
-      format: (value, format, lng) => {
-        if (format === 'number' && typeof value === 'number') {
-          return formatNumber(value, lng);
-        }
-        if (format === 'date' && (value instanceof Date || typeof value === 'number')) {
-          return formatDate(value, lng);
-        }
-        if (format === 'relative' && (value instanceof Date || typeof value === 'number')) {
-          return formatRelativeTime(value, lng);
-        }
-        return value as string;
-      },
     },
     detection: {
       order: ['localStorage', 'navigator'],
@@ -126,6 +113,27 @@ void i18next
         console.warn(`Missing translation key: ${key} for languages: ${lngs.join(', ')}`);
       }
     },
+  })
+  // i18next v26 removed the legacy `interpolation.format` callback. Named
+  // formatters are registered on the formatter service instead, which is only
+  // available once init() has resolved. Usage in translations is unchanged:
+  // "{{count,number}}", "{{when,date}}", "{{when,relative}}".
+  .then(() => {
+    const formatter = i18next.services.formatter;
+    if (!formatter) return;
+    formatter.add('number', (value, lng) =>
+      typeof value === 'number' ? formatNumber(value, lng) : String(value)
+    );
+    formatter.add('date', (value, lng) =>
+      value instanceof Date || typeof value === 'number'
+        ? formatDate(value, lng)
+        : String(value)
+    );
+    formatter.add('relative', (value, lng) =>
+      value instanceof Date || typeof value === 'number'
+        ? formatRelativeTime(value, lng)
+        : String(value)
+    );
   });
 
 // Set initial document direction

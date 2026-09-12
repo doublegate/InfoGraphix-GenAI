@@ -81,8 +81,8 @@ For local development without AI Studio, the app falls back to `process.env.API_
 
 ## Tech Stack
 
-- React 19 with TypeScript
-- Vite 6 for bundling
+- React 19 with TypeScript 5.9
+- Vite 8 for bundling (rolldown-based)
 - TailwindCSS (via CDN in index.html)
 - Lucide React for icons
 - `@google/genai` SDK for Gemini APIs

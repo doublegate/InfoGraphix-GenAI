@@ -28,7 +28,7 @@ jobs:
       version: ${{ steps.version.outputs.version }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0 # Full history for changelog generation
 
@@ -48,14 +48,14 @@ jobs:
           echo "Releasing version: ${VERSION}"
 
       - name: Setup Node.js 22 LTS
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: 'npm'
 
       - name: Cache node_modules
         id: cache-node-modules
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: node_modules
           key: node-modules-release-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
@@ -93,7 +93,7 @@ jobs:
           cat checksums.txt
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-assets-${{ github.sha }}
           path: |
@@ -110,12 +110,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Download release artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: release-assets-${{ github.sha }}
           path: ./release-assets
@@ -226,7 +226,7 @@ jobs:
 
       - name: Create GitHub Release
         if: steps.check-release.outputs.exists != 'true'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.build.outputs.version }}
           name: Release ${{ needs.build.outputs.version }}
@@ -264,7 +264,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Verify release exists
         env:

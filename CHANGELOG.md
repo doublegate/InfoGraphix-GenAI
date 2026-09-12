@@ -7,7 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-*No unreleased changes*
+### Changed
+
+- **Dependencies brought current**, consolidating 26 open Dependabot PRs into one
+  change. Majors taken: Vite 7 → 8 (rolldown), Vitest 4 → 5, ESLint 9 → 10,
+  `@google/genai` 1 → 2, i18next 25 → 26, react-i18next 16 → 17, jsPDF 3 → 4
+  (also fixes a advisory present in 3.0.4), jsdom 27 → 30, lucide-react 0.x → 1.x,
+  `@vitejs/plugin-react` 5 → 6, `@testing-library/jest-dom` 6 → 7,
+  `rollup-plugin-visualizer` 6 → 7, `@codecov/vite-plugin` 1 → 2, plus every
+  available patch and minor.
+- **GitHub Actions updated to current majors** — `checkout` v4 → v7,
+  `setup-node` v4 → v7, `cache` v4 → v6, `upload-artifact` v4 → v7,
+  `download-artifact` v4 → v8, `dependency-review-action` v4 → v5,
+  `action-gh-release` v2 → v3, `codecov-action` v5 → v7 (39 references).
+
+### Removed
+
+- `@types/jspdf`. It is a deprecated stub package — jsPDF has shipped its own
+  type definitions since v2, and npm's own metadata says it should not be
+  installed. Dependabot proposed bumping it to 2.0.0; removing it is correct.
+
+### Fixed
+
+- Test setup assigned `localStorage` and `navigator` directly on `globalThis`,
+  which newer jsdom exposes as getter-only accessors. Both are now installed
+  with `Object.defineProperty`, so the whole suite runs again.
+- `@testing-library/jest-dom` is imported from its `/vitest` entry point, which
+  v7 requires for the matchers to augment Vitest's `Assertion` types.
+- Custom i18next interpolation formats (`number`, `date`, `relative`) migrated
+  to the formatter service; v26 removed the legacy `interpolation.format`
+  callback.
+- Three `throw` sites now attach `{ cause }` to the error they wrap, and a dead
+  initialiser was removed — both newly enforced as errors by ESLint 10
+  (`preserve-caught-error`, `no-useless-assignment`).
+- `vite.config.ts` uses `import.meta.dirname` instead of `__dirname`, which
+  Vite 8 warns about under the native config loader.
+
+### Notes
+
+- **TypeScript stays on 5.9.** 7.0 is released and stable, but
+  `@typescript-eslint` declares `typescript: >=4.8.4 <6.1.0`, so adopting it
+  would break the lint gate. TypeScript 7's stable programmatic API — which
+  typescript-eslint depends on — is not expected before 7.1.
 
 ## [2.2.0-foundation] - 2025-12-14
 

@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import '@testing-library/jest-dom';
+// jest-dom v7: the bare entry point registers the matchers at runtime but no
+// longer augments vitest's `Assertion` types. The /vitest subpath does both, so
+// `expect(...).toBeInTheDocument()` type-checks as well as runs.
+import '@testing-library/jest-dom/vitest';
 import { afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 
@@ -59,7 +62,25 @@ const localStorageMock = {
   key: vi.fn(),
 };
 
-(globalThis as any).localStorage = localStorageMock;
+// jsdom >= 28 defines `localStorage` on Window as an accessor with only a
+// getter, so a plain assignment throws "Cannot set property localStorage of
+// [object Window] which has only a getter". Define the property instead, which
+// works on both the old data property and the new accessor.
+Object.defineProperty(globalThis, 'localStorage', {
+  value: localStorageMock,
+  writable: true,
+  configurable: true,
+});
+
+// Same accessor problem as localStorage above: newer jsdom exposes `navigator`
+// as a getter-only property, which breaks tests that swap it out to fake the
+// Storage API. Re-declare it once as a writable data property so plain
+// assignment keeps working at the call sites.
+Object.defineProperty(globalThis, 'navigator', {
+  value: globalThis.navigator,
+  writable: true,
+  configurable: true,
+});
 
 // Mock AI Studio window.aistudio object
 (globalThis as any).aistudio = {
