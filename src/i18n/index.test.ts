@@ -80,7 +80,10 @@ describe('i18n', () => {
 
     it('accepts a timestamp as well as a Date', () => {
       const ts = Date.UTC(2026, 0, 15, 12);
-      expect(formatDate(ts, 'en')).toBe(formatDate(new Date(ts), 'en'));
+      // Assert the actual rendered string, not just that the two inputs agree -
+      // an equivalence-only check would still pass if both returned "".
+      expect(formatDate(ts, 'en')).toBe('Jan 15, 2026');
+      expect(formatDate(new Date(ts), 'en')).toBe('Jan 15, 2026');
     });
   });
 
