@@ -313,6 +313,10 @@ export const analyzeTopic = async (
   `;
   }
 
+  // Held outside the try so the catch can log what the model actually
+  // returned: logging error.message under a "Raw text:" label prints the
+  // SyntaxError, which is the one thing already known at that point.
+  let rawText: string | undefined;
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
@@ -325,6 +329,7 @@ export const analyzeTopic = async (
     });
 
     let text = response.text;
+    rawText = text;
     if (!text) throw new Error("No analysis generated.");
 
     // Robust JSON Extraction: Find the first { and the last }
@@ -358,7 +363,7 @@ export const analyzeTopic = async (
 
   } catch (error: unknown) {
     if (error instanceof SyntaxError) {
-      log.error("JSON Parse Error. Raw text:", error.message);
+      log.error("JSON Parse Error. Raw text:", rawText);
       throw new Error("Failed to parse the AI's response. The model output was not valid JSON. Please try again.", { cause: error });
     }
     return handleGeminiError(error);
@@ -472,6 +477,10 @@ export const suggestStyleAndPalette = async (topic: string): Promise<StyleSugges
   Confidence scores should be between 0 and 1, where 1 is highest confidence.
   `;
 
+  // Held outside the try so the catch can log what the model actually
+  // returned: logging error.message under a "Raw text:" label prints the
+  // SyntaxError, which is the one thing already known at that point.
+  let rawText: string | undefined;
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
@@ -483,6 +492,7 @@ export const suggestStyleAndPalette = async (topic: string): Promise<StyleSugges
     });
 
     let text = response.text;
+    rawText = text;
     if (!text) throw new Error("No suggestions generated.");
 
     // Extract JSON
@@ -500,7 +510,7 @@ export const suggestStyleAndPalette = async (topic: string): Promise<StyleSugges
 
   } catch (error: unknown) {
     if (error instanceof SyntaxError) {
-      log.error("JSON Parse Error for suggestions. Raw text:", error.message);
+      log.error("JSON Parse Error for suggestions. Raw text:", rawText);
       throw new Error("Failed to parse AI suggestions. Please try again.", { cause: error });
     }
     return handleGeminiError(error);

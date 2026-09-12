@@ -62,25 +62,17 @@ const localStorageMock = {
   key: vi.fn(),
 };
 
-// jsdom >= 28 defines `localStorage` on Window as an accessor with only a
-// getter, so a plain assignment throws "Cannot set property localStorage of
-// [object Window] which has only a getter". Define the property instead, which
-// works on both the old data property and the new accessor.
-Object.defineProperty(globalThis, 'localStorage', {
-  value: localStorageMock,
-  writable: true,
-  configurable: true,
-});
-
-// Same accessor problem as localStorage above: newer jsdom exposes `navigator`
-// as a getter-only property, which breaks tests that swap it out to fake the
-// Storage API. Re-declare it once as a writable data property so plain
-// assignment keeps working at the call sites.
-Object.defineProperty(globalThis, 'navigator', {
-  value: globalThis.navigator,
-  writable: true,
-  configurable: true,
-});
+// jsdom >= 28 defines `localStorage` and `navigator` on Window as accessors
+// with only a getter, so a plain `globalThis.x = ...` throws "Cannot set
+// property x of [object Window] which has only a getter".
+//
+// vi.stubGlobal redefines them as configurable, writable properties, which
+// fixes two things at once: the assignment above works, and the four places in
+// storageService.test.ts that swap `navigator` out per-test keep working
+// unchanged. It also registers the stub with Vitest, so vi.unstubAllGlobals()
+// can restore them if per-test isolation is ever needed.
+vi.stubGlobal('localStorage', localStorageMock);
+vi.stubGlobal('navigator', globalThis.navigator);
 
 // Mock AI Studio window.aistudio object
 (globalThis as any).aistudio = {
