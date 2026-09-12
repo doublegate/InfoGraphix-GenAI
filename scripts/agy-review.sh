@@ -200,9 +200,15 @@ MAX_PROMPT_BYTES="${MAX_PROMPT_BYTES:-125000}" # hard ceiling on the INLINED pro
                                            # Linux). Over it, execve fails with E2BIG before agy even
                                            # starts. In `auto` mode this is the inline/file threshold;
                                            # it also backstops the assembled prompt in every mode.
-ARG_SIZE_CEILING=128000                     # hard cap: a configured MAX_PROMPT_BYTES above the
+ARG_SIZE_CEILING=120000                     # hard cap: a configured MAX_PROMPT_BYTES above the
                                            # MAX_ARG_STRLEN-derived safe bound would defeat the guard
                                            # and re-expose E2BIG, so clamp any override down to it.
+                                           # 120000, not 128000: MAX_ARG_STRLEN is 131072, and the
+                                           # prompt is not the only thing execve must fit - argv[0],
+                                           # the other flags and the whole environment count against
+                                           # the limit too. A ceiling 3 KB under it left no room for
+                                           # them, so a large environment could still hit E2BIG on a
+                                           # prompt the guard had just declared safe.
 # Require a POSITIVE integer at or below the ceiling. The `-gt 0` half is load-bearing, not
 # cosmetic: a negative override (e.g. MAX_PROMPT_BYTES=-1) satisfies `-le "$ARG_SIZE_CEILING"`,
 # so without it the clamp is skipped and the `head -c "$MAX_PROMPT_BYTES"` prompt cap below runs

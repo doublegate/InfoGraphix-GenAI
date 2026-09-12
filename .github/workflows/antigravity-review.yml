@@ -197,10 +197,16 @@ jobs:
           # chmods a file the default branch does not have yet. Observed exactly
           # once, on the PR that introduced `_agy_comment_body.sh`.
           #
-          # Only the two files that are EXECUTED need the bit. `_agy_comment_body.sh` is
-          # sourced, never executed, so it never needed chmod -- it was carried along by a
-          # loop that also had only one item to iterate. Both are now gone. A genuinely
-          # missing required file still fails loudly: `agy-review.sh` sources it and dies,
-          # rather than being papered over here.
+          # Only the two files that are EXECUTED need the bit, and both are listed below:
+          # `agy-review.sh` runs directly, and `_agy_print.sh` is exec'd through
+          # `script -qfec` as the PTY fallback.
+          #
+          # `_agy_comment_body.sh` is deliberately NOT listed: it is sourced, never
+          # executed, so it never needed the bit. It used to be chmod'ed anyway, by a loop
+          # that iterated a single item -- the loop and that redundant entry are what were
+          # removed here, not the scripts themselves.
+          #
+          # A genuinely missing required file still fails loudly: `agy-review.sh` sources
+          # it and dies, rather than being papered over here.
           chmod +x scripts/agy-review.sh scripts/_agy_print.sh
           scripts/agy-review.sh
