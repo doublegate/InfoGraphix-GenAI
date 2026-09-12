@@ -363,7 +363,7 @@ export const analyzeTopic = async (
 
   } catch (error: unknown) {
     if (error instanceof SyntaxError) {
-      log.error("JSON Parse Error. Raw text:", rawText);
+      log.error("JSON Parse Error. Raw text (truncated):", rawText?.slice(0, 2000));
       throw new Error("Failed to parse the AI's response. The model output was not valid JSON. Please try again.", { cause: error });
     }
     return handleGeminiError(error);
@@ -510,7 +510,7 @@ export const suggestStyleAndPalette = async (topic: string): Promise<StyleSugges
 
   } catch (error: unknown) {
     if (error instanceof SyntaxError) {
-      log.error("JSON Parse Error for suggestions. Raw text:", rawText);
+      log.error("JSON Parse Error for suggestions. Raw text (truncated):", rawText?.slice(0, 2000));
       throw new Error("Failed to parse AI suggestions. Please try again.", { cause: error });
     }
     return handleGeminiError(error);
