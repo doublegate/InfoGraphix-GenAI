@@ -29,6 +29,14 @@ jobs:
         with:
           fail-on-severity: moderate
           deny-licenses: GPL-2.0, GPL-3.0
+          # jszip is dual-licensed "(MIT OR GPL-3.0-or-later)", so a consumer is
+          # free to take it under MIT and it is not a GPL dependency here. The
+          # action matches the literal SPDX expression rather than evaluating
+          # the OR, so the deny rule above trips on it. Allow it explicitly.
+          # This is not new to any particular version - 3.10.1 carries the same
+          # expression; it only surfaces now because dependency-review inspects
+          # changed dependencies, and jszip had not changed before.
+          allow-dependencies-licenses: pkg:npm/jszip
           comment-summary-in-pr: on-failure
 
   audit:
