@@ -98,19 +98,6 @@ void i18next
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false, // React already escapes values
-      // Enable formatting functions
-      format: (value, format, lng) => {
-        if (format === 'number' && typeof value === 'number') {
-          return formatNumber(value, lng);
-        }
-        if (format === 'date' && (value instanceof Date || typeof value === 'number')) {
-          return formatDate(value, lng);
-        }
-        if (format === 'relative' && (value instanceof Date || typeof value === 'number')) {
-          return formatRelativeTime(value, lng);
-        }
-        return value as string;
-      },
     },
     detection: {
       order: ['localStorage', 'navigator'],
@@ -127,6 +114,33 @@ void i18next
       }
     },
   });
+
+// i18next v26 removed the legacy `interpolation.format` callback; named
+// formatters are registered on the formatter service instead. Usage in
+// translations is unchanged: "{{count,number}}", "{{when,date}}",
+// "{{when,relative}}".
+//
+// Registered SYNCHRONOUSLY, immediately after init() returns, rather than off
+// its promise. init() builds the service container synchronously and only the
+// resource loading is async, so the formatter exists here - and doing it this
+// way closes the window in which a component could render a translation before
+// the promise settled and get an unformatted value.
+const formatter = i18next.services.formatter;
+if (formatter) {
+  formatter.add('number', (value, lng) =>
+    typeof value === 'number' ? formatNumber(value, lng) : String(value)
+  );
+  formatter.add('date', (value, lng) =>
+    value instanceof Date || typeof value === 'number'
+      ? formatDate(value, lng)
+      : String(value)
+  );
+  formatter.add('relative', (value, lng) =>
+    value instanceof Date || typeof value === 'number'
+      ? formatRelativeTime(value, lng)
+      : String(value)
+  );
+}
 
 // Set initial document direction
 i18next.on('languageChanged', (lng) => {

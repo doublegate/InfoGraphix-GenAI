@@ -1071,6 +1071,6 @@ export const resetToDefaults = async (): Promise<void> => {
     log.info('Templates reset to defaults');
   } catch (error) {
     log.error('Failed to reset templates:', error);
-    throw new Error('Failed to reset templates to defaults');
+    throw new Error('Failed to reset templates to defaults', { cause: error });
   }
 };

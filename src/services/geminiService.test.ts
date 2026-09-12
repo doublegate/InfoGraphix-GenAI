@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { analyzeTopic, generateInfographicImage, getRateLimiter } from './geminiService';
+import {
+  analyzeTopic,
+  generateInfographicImage,
+  getRateLimiter,
+  suggestStyleAndPalette,
+} from './geminiService';
 import { InfographicStyle, ColorPalette, ImageSize, AspectRatio } from '../types';
 import {
   mockAnalysisResult,
@@ -103,6 +108,39 @@ describe('geminiService', () => {
       await expect(analyzeTopic('Test Topic', InfographicStyle.Modern, ColorPalette.Vibrant)).rejects.toThrow(
         /Permission denied/
       );
+    });
+
+    it('should report malformed JSON and keep the parse error as the cause', async () => {
+      // Braces present, so the robust-extraction branch keeps the text and
+      // JSON.parse is reached and throws SyntaxError.
+      mockGenerateContent.mockResolvedValue({ text: 'prose { "title": } more prose' });
+
+      await expect(
+        analyzeTopic('Test Topic', InfographicStyle.Modern, ColorPalette.Vibrant)
+      ).rejects.toThrow(/Failed to parse the AI's response/);
+    });
+
+    it('should attach the original SyntaxError as `cause`', async () => {
+      mockGenerateContent.mockResolvedValue({ text: '{ "title": }' });
+
+      const err = await analyzeTopic(
+        'Test Topic',
+        InfographicStyle.Modern,
+        ColorPalette.Vibrant
+      ).catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(Error);
+      expect((err as Error).cause).toBeInstanceOf(SyntaxError);
+    });
+
+    it('should surface a malformed suggestions response and keep the cause', async () => {
+      mockGenerateContent.mockResolvedValue({ text: '{ "styles": }' });
+
+      const err = await suggestStyleAndPalette('Test Topic').catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(Error);
+      expect((err as Error).message).toMatch(/Failed to parse AI suggestions/);
+      expect((err as Error).cause).toBeInstanceOf(SyntaxError);
     });
 
     it('should detect and handle GitHub repository URLs', async () => {
