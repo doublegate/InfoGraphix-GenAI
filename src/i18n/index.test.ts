@@ -17,13 +17,12 @@ import i18next, {
  */
 describe('i18n', () => {
   beforeAll(async () => {
-    // The module starts init() at import time. Wait for it to settle so the
-    // formatter service (and the formatters registered off the promise) exist.
+    // The formatters are registered synchronously at import time, so they do
+    // not need waiting for. This waits only for resource loading, which the
+    // t() assertions below do need.
     if (!i18next.isInitialized) {
       await new Promise<void>((resolve) => i18next.on('initialized', () => resolve()));
     }
-    // Let the .then() that registers the formatters run.
-    await Promise.resolve();
   });
 
   describe('custom interpolation formatters', () => {
