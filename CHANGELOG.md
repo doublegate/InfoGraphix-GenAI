@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dependencies brought current**, consolidating 26 open Dependabot PRs into one
   change. Majors taken: Vite 7 → 8 (rolldown), Vitest 4 → 5, ESLint 9 → 10,
   `@google/genai` 1 → 2, i18next 25 → 26, react-i18next 16 → 17, jsPDF 3 → 4
-  (also fixes a advisory present in 3.0.4), jsdom 27 → 30, lucide-react 0.x → 1.x,
+  (also fixes an advisory present in 3.0.4), jsdom 27 → 30, lucide-react 0.x → 1.x,
   `@vitejs/plugin-react` 5 → 6, `@testing-library/jest-dom` 6 → 7,
   `rollup-plugin-visualizer` 6 → 7, `@codecov/vite-plugin` 1 → 2, plus every
   available patch and minor.
