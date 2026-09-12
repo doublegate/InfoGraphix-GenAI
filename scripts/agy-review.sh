@@ -290,7 +290,14 @@ agy_has_write_access() {
   _login="${1:-}"
   [ -n "$_login" ] || { log "no login to check for write access"; return 1; }
   _perm_err="$(mktemp)"
-  if _perm="$(gh api "repos/${REPO}/collaborators/${_login}/permission" \
+  # URL-encode the login before it becomes a path segment, the same way
+  # base_ref is handled below. GitHub logins are restricted in practice, but
+  # this value arrives from event payload rather than from us, and an unexpected
+  # character would corrupt the path and fail into the error branch as if the
+  # user simply had no write access - a silent wrong answer on a permission
+  # check, which is the worst place to have one.
+  _login_enc="$(jq -rn --arg v "$_login" '$v|@uri')"
+  if _perm="$(gh api "repos/${REPO}/collaborators/${_login_enc}/permission" \
                 --jq '.permission // empty' 2>"$_perm_err")"; then
     rm -f "$_perm_err"
   else
