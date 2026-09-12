@@ -105,6 +105,29 @@ describe('geminiService', () => {
       );
     });
 
+    it('should report malformed JSON and keep the parse error as the cause', async () => {
+      // Braces present, so the robust-extraction branch keeps the text and
+      // JSON.parse is reached and throws SyntaxError.
+      mockGenerateContent.mockResolvedValue({ text: 'prose { "title": } more prose' });
+
+      await expect(
+        analyzeTopic('Test Topic', InfographicStyle.Modern, ColorPalette.Vibrant)
+      ).rejects.toThrow(/Failed to parse the AI's response/);
+    });
+
+    it('should attach the original SyntaxError as `cause`', async () => {
+      mockGenerateContent.mockResolvedValue({ text: '{ "title": }' });
+
+      const err = await analyzeTopic(
+        'Test Topic',
+        InfographicStyle.Modern,
+        ColorPalette.Vibrant
+      ).catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(Error);
+      expect((err as Error).cause).toBeInstanceOf(SyntaxError);
+    });
+
     it('should detect and handle GitHub repository URLs', async () => {
       mockGenerateContent.mockResolvedValue(mockGeminiAnalysisResponse);
 
