@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { analyzeTopic, generateInfographicImage, getRateLimiter } from './geminiService';
+import {
+  analyzeTopic,
+  generateInfographicImage,
+  getRateLimiter,
+  suggestStyleAndPalette,
+} from './geminiService';
 import { InfographicStyle, ColorPalette, ImageSize, AspectRatio } from '../types';
 import {
   mockAnalysisResult,
@@ -125,6 +130,16 @@ describe('geminiService', () => {
       ).catch((e: unknown) => e);
 
       expect(err).toBeInstanceOf(Error);
+      expect((err as Error).cause).toBeInstanceOf(SyntaxError);
+    });
+
+    it('should surface a malformed suggestions response and keep the cause', async () => {
+      mockGenerateContent.mockResolvedValue({ text: '{ "styles": }' });
+
+      const err = await suggestStyleAndPalette('Test Topic').catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(Error);
+      expect((err as Error).message).toMatch(/Failed to parse AI suggestions/);
       expect((err as Error).cause).toBeInstanceOf(SyntaxError);
     });
 
