@@ -16,16 +16,16 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@google/genai": "^2.22.0",
+    "@google/genai": "^2.23.0",
     "i18next": "^26.4.2",
     "i18next-browser-languagedetector": "^8.2.1",
     "jspdf": "^4.2.1",
     "jszip": "^3.10.2",
-    "lucide-react": "^1.45.0",
+    "lucide-react": "^1.47.0",
     "node-vibrant": "^4.0.4",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "react-i18next": "^17.0.13"
+    "react-i18next": "^17.0.14"
   },
   "devDependencies": {
     "@axe-core/react": "^4.13.0",
