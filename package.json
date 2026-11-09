@@ -17,15 +17,15 @@
   },
   "dependencies": {
     "@google/genai": "^2.31.0",
-    "i18next": "^26.5.11",
-    "i18next-browser-languagedetector": "^8.2.3",
+    "i18next": "^26.7.2",
+    "i18next-browser-languagedetector": "^8.3.0",
     "jspdf": "^4.2.1",
     "jszip": "^3.10.2",
-    "lucide-react": "^1.61.0",
+    "lucide-react": "^1.70.0",
     "node-vibrant": "^4.0.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-i18next": "^17.1.9"
+    "react-i18next": "^17.1.13"
   },
   "devDependencies": {
     "@axe-core/react": "^4.14.0",
