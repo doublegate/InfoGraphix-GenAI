@@ -76,25 +76,82 @@ agy_body_archive() {
       # emit it verbatim -- dropping it would silently destroy the review history, which is
       # a worse failure than the nesting this guards against.
       start = (first >= 0) ? first : 0
+      # Trim a trailing wrapper close (plus blank lines before it) ONLY when an older wrapper
+      # was actually skipped above (first > 0): that is the one case with a stray close to
+      # remove. The trim used to run on every archive, guarded by a whole-archive count of
+      # `^<details>` opens against `</details>` closes, and a CLEAN archive whose round quotes
+      # a standalone `</details>` or uses `<details open>` tipped that count and lost a
+      # legitimate closing tag (agy reviews of SLAC #24 and Rusty2600 #53).
+      if (first > 0) {
+        while (n > start && buf[n-1] == "") n--
+        if (n > start && buf[n-1] == "</details>") n--
+      }
       for (i = start; i < n; i++) print buf[i]
-    }' \
-  | awk 'BEGIN { n = 0 }
-         { line[n++] = $0 }
-         END {
-           # Trim a trailing wrapper close (plus any blank lines before it) left by a
-           # pre-migration body. A legitimate round always ends with its own </details>
-           # followed by nothing, so only ONE trailing close is ever removed here.
-           while (n > 0 && line[n-1] == "") n--
-           if (n > 0 && line[n-1] == "</details>") {
-             closes = 0; opens = 0
-             for (i = 0; i < n; i++) {
-               if (line[i] ~ /^<details>/) opens++
-               if (line[i] == "</details>") closes++
-             }
-             if (closes > opens) n--
-           }
-           for (i = 0; i < n; i++) print line[i]
-         }' || true
+    }' || true
+}
+
+# How many rounds earlier runs dropped to fit GitHub's comment limit, from the
+# "<sub>N earlier round(s) dropped" note; 0 when there is none.
+#
+# The note sits between the SECTION and START sentinels, outside both regions the next run reads
+# back (agy_body_head stops at the section, agy_body_archive starts after START), and the caller's
+# count restarted at 0 every run -- so a later round that dropped nothing erased the disclosure
+# (agy review of Rusty2600 #53). Only that one region is searched, so a note quoted inside a
+# round's review text is never mistaken for the real one.
+agy_body_dropped_count() {
+  awk -v sec="$AGY_ARCHIVE_SECTION" -v s="$AGY_ARCHIVE_START" '
+    $0 == sec { between = 1; next }
+    $0 == s   { exit }
+    between && match($0, /^<sub>[0-9]+ earlier round\(s\) dropped/) {
+      n = substr($0, 6); sub(/[^0-9].*$/, "", n); print n + 0; found = 1; exit
+    }
+    END { if (!found) print 0 }'
+}
+
+# Prefix of the hidden line that records when a review was posted. The comment head carries
+# it so that, when the round is archived on the next run, the summary can say when it was
+# REVIEWED; the time of archiving says nothing useful.
+AGY_REVIEWED_AT_PREFIX='<!-- agy-reviewed-at: '
+
+# Assemble the archive for the next comment: the previous head becomes the newest round,
+# ahead of the rounds already archived.
+#
+# Args: $1 previous head, $2 previous archive (may be empty), $3 time to show when the head
+# carries no reviewed-at line (labeled "archived at", because that is all it is).
+#
+# A previous archive with no round marker predates markers. It is wrapped as ONE round behind
+# its own marker; emitted bare, the only marker would be the new round's, and trimming the
+# "oldest round" cut at it and discarded the new round together with the whole legacy history.
+agy_assemble_archive() {
+  local head="$1" archive="$2" fallback="$3" when label
+  # The line sits right under the marker, so only the first lines are read. Here-strings, not
+  # `printf | ...`: the caller runs under `set -o pipefail`, and a reader that stops early makes
+  # printf die of SIGPIPE on a head larger than the pipe buffer, which failed the substitution
+  # and aborted the script (agy review of #6).
+  when="$(awk -v p="$AGY_REVIEWED_AT_PREFIX" '
+    NR > 5 { exit }
+    index($0, p) == 1 { s = substr($0, length(p) + 1); sub(/ -->$/, "", s); print s; exit }' \
+    <<< "$head")"
+  if [ -n "$when" ]; then
+    label="Round reviewed at $when"
+  else
+    label="Round archived at $fallback"
+  fi
+  printf '%s\n' "$AGY_ROUND_MARK"
+  printf '<details>\n<summary>%s</summary>\n\n' "$label"
+  printf '%s\n' "$head"
+  printf '\n</details>\n'
+  [ -n "$archive" ] || return 0
+  # Here-string for the same reason: `grep -q` stops at the first match, and the resulting
+  # SIGPIPE would make the test false for a large archive and wrap it again on every run.
+  if grep -qxF -- "$AGY_ROUND_MARK" <<< "$archive"; then
+    printf '%s\n' "$archive"
+  else
+    printf '%s\n' "$AGY_ROUND_MARK"
+    printf '<details>\n<summary>Earlier rounds (archived before round markers)</summary>\n\n'
+    printf '%s\n' "$archive"
+    printf '\n</details>\n'
+  fi
 }
 
 # Delimits one archived round. Emitted by the caller ahead of each round's `<details>`.
